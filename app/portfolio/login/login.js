@@ -185,7 +185,7 @@ const LoginContent = () => {
 
           <div className="mt-6 text-center">
             <button
-              onClick={() => router.push("/Register")}
+              onClick={() => router.push("/portfolio/Register")}
               className="text-cyan-400 hover:text-cyan-300 text-sm font-semibold transition-colors duration-200 cursor-pointer"
             >
               Don&apos;t have an account? Register now

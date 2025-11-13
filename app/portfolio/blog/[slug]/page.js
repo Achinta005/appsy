@@ -13,7 +13,7 @@ async function getBlogPost(slug) {
 }
 
 export default async function BlogPostPage({ params }) {
-  const { slug } = await params; // <--- this line fixes the error
+  const { slug } = await params;
 
   if (!slug) {
     return (

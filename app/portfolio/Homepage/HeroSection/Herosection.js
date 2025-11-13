@@ -205,7 +205,7 @@ export default function HeroSection() {
                 </motion.button>
 
                 <Link
-                  href="/contact"
+                  href="/portfolio/contact"
                   className="px-6 xl:px-8 py-3 xl:py-4 border-2 border-emerald-500/50 text-emerald-400 font-semibold rounded-xl hover:bg-emerald-500/10 hover:border-emerald-400 transition-all duration-200 text-center text-sm xl:text-base"
                 >
                   <span className="flex items-center justify-center gap-2">

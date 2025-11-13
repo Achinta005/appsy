@@ -26,7 +26,7 @@ const AdminPage = () => {
   const router = useRouter();
 
   const handleClick = () => {
-    router.push("/anime-list");
+    router.push("/portfolio/anime-list");
   };
 
   useEffect(() => {
@@ -34,7 +34,7 @@ const AdminPage = () => {
     if (userData) {
       setUser(userData);
     } else {
-      router.push("/login");
+      router.push("/portfolio/login");
     }
     setLoading(false);
   }, [router]);
@@ -51,7 +51,7 @@ const AdminPage = () => {
 
   const handleLogout = () => {
     removeAuthToken();
-    router.push("/login");
+    router.push("/portfolio/login");
   };
 
   const handleNewDocument = (newDoc) => {

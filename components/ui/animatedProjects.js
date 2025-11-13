@@ -169,32 +169,32 @@ export const AnimatedTestimonials = ({ testimonials, autoplay = false }) => {
 
               {/* ML Buttons - Only show when description is expanded */}
               {showFullDescription && currentTestimonial.showAllButtons && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.1 }}
                   className="flex flex-wrap gap-4 mt-4 pt-3 border-t border-purple-400/30"
                 >
                   {currentTestimonial.accuracy && (
-                    <a
-                      className="flex items-center text-amber-400 transition-colors group"
-                    >
+                    <a className="flex items-center text-amber-400 transition-colors group">
                       <div className="w-4 h-4 flex items-center justify-center mr-2 group-hover:scale-110 transition-transform">
                         <span className="text-sm">📊</span>
                       </div>
-                      <span className="text-sm font-medium">Accuracy :&nbsp;</span>
+                      <span className="text-sm font-medium">
+                        Accuracy :&nbsp;
+                      </span>
                       <span> {currentTestimonial.accuracy} %</span>
                     </a>
                   )}
 
                   {currentTestimonial.features && (
-                    <a
-                      className="flex items-center text-amber-400 transition-colors group"
-                    >
+                    <a className="flex items-center text-amber-400 transition-colors group">
                       <div className="w-4 h-4 flex items-center justify-center mr-2 group-hover:scale-110 transition-transform">
                         <span className="text-sm">⚡</span>
                       </div>
-                      <span className="text-sm font-medium">No of Features :&nbsp;</span>
+                      <span className="text-sm font-medium">
+                        No of Features :&nbsp;
+                      </span>
                       <span> {currentTestimonial.features}</span>
                     </a>
                   )}
@@ -214,17 +214,25 @@ export const AnimatedTestimonials = ({ testimonials, autoplay = false }) => {
             {/* Project Links - Live Demo and View Code */}
             <div className="flex flex-row flex-wrap gap-4 pt-2">
               {currentTestimonial.liveUrl && (
-                <LinkPreview
-                  url={currentTestimonial.liveUrl}
-                  className="font-bold"
+                <a
+                  href={
+                    currentTestimonial.liveUrl.startsWith(
+                      "https://deploy-ten-orcin.vercel.app"
+                    )
+                      ? currentTestimonial.liveUrl.replace(
+                          "https://deploy-ten-orcin.vercel.app",
+                          "/ml_model"
+                        )
+                      : currentTestimonial.liveUrl
+                  }
+                  target="_self"
+                  className="flex items-center font-semibold text-green-500 hover:text-blue-400 transition-colors cursor-pointer group"
                 >
-                  <div className="flex items-center font-semibold text-green-500 hover:text-blue-400 transition-colors cursor-pointer group">
-                    <div className="w-4 h-4 flex items-center justify-center mr-2 group-hover:scale-110 transition-transform">
-                      <span className="text-sm">🔗</span>
-                    </div>
-                    <span className="text-sm">Live Demo</span>
+                  <div className="w-4 h-4 flex items-center justify-center mr-2 group-hover:scale-110 transition-transform">
+                    <span className="text-sm">🔗</span>
                   </div>
-                </LinkPreview>
+                  <span className="text-sm">Live Demo</span>
+                </a>
               )}
 
               {currentTestimonial.githubUrl && (

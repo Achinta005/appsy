@@ -45,7 +45,7 @@ const RegisterPage = () => {
       console.error("Registration error:", err);
     } finally {
       setLoading(false);
-      router.push('/login')
+      router.push('/portfolio/login')
     }
   };
 
@@ -244,7 +244,7 @@ const RegisterPage = () => {
 
         <div className="text-center">
           <button
-            onClick={() => router.push("/login")}
+            onClick={() => router.push("/portfolio/login")}
             className="text-blue-600 hover:text-blue-800 text-sm font-medium cursor-pointer"
           >
             Already have an account? Sign in

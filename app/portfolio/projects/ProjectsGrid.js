@@ -55,12 +55,19 @@ export default function ProjectsGrid({ projectsData }) {
 
     const isMachineLearning = project.category === "Machine Learning";
 
+    let liveUrl = project.live_url;
+    if (liveUrl && liveUrl.startsWith("https://deploy-ten-orcin.vercel.app")) {
+      liveUrl = liveUrl.replace(
+        "https://deploy-ten-orcin.vercel.app",
+        "/ml_model"
+      );
+    }
     return {
       quote: project.description || "No description available",
       name: project.title || "Untitled Project",
       src: project.image || "/placeholder-image.jpg",
       githubUrl: project.github_url,
-      liveUrl: project.live_url,
+      liveUrl: liveUrl,
       designation: techList,
       category: project.category,
       accuracy: isMachineLearning ? project.model_accuracy : undefined,
