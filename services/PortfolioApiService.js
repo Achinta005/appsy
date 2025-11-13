@@ -55,29 +55,20 @@ export const PortfolioApiService = {
 
   // About 
   fetchSkill: async () => {
-    return apiCall(`${process.env.NEXT_PUBLIC_PYTHON_API_URL}/about/Skilldata`, {
-      next: { revalidate: 86400 },
-    });
+    return apiCall(`${process.env.NEXT_PUBLIC_PYTHON_API_URL}/about/Skilldata`);
   },
 
   fetchEducation: async () => {
-    return apiCall(`${process.env.NEXT_PUBLIC_PYTHON_API_URL}/about/Educationdata`, {
-      next: { revalidate: 86400 },
-    });
+    return apiCall(`${process.env.NEXT_PUBLIC_PYTHON_API_URL}/about/Educationdata`);
   },
 
   fetchCertificates: async () => {
     return apiCall(
-      `${process.env.NEXT_PUBLIC_PYTHON_API_URL}/about/Certificatesdata`,
-      { next: { revalidate: 86400 } }
-    );
+      `${process.env.NEXT_PUBLIC_PYTHON_API_URL}/about/Certificatesdata`);
   },
 
   fetchProjects: async () => {
-    return apiCall(`${process.env.NEXT_PUBLIC_PYTHON_API_URL}/project/projects_data`, {
-      cache: "no-store",
-      next: { revalidate: 0 },
-    });
+    return apiCall(`${process.env.NEXT_PUBLIC_PYTHON_API_URL}/project/projects_data`);
   },
 
   UplaodProject: async (formData) => {
@@ -88,18 +79,12 @@ export const PortfolioApiService = {
   },
 
   fetchBlog: async () => {
-    return apiCall(`${process.env.NEXT_PUBLIC_PYTHON_API_URL}/blog/blog_data`, {
-      next: { revalidate: 86400 },
-    });
+    return apiCall(`${process.env.NEXT_PUBLIC_PYTHON_API_URL}/blog/blog_data`);
   },
 
   fetchBlogBySlug: async (slug) => {
     return apiCall(
-      `${process.env.NEXT_PUBLIC_PYTHON_API_URL}/blog/blog_data/${slug}`,
-      {
-        next: { revalidate: 86400 },
-      }
-    );
+      `${process.env.NEXT_PUBLIC_PYTHON_API_URL}/blog/blog_data/${slug}`);
   },
 
   //Download Resume

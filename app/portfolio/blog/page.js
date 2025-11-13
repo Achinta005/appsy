@@ -2,20 +2,24 @@ import React from "react";
 import BlogPage from "./Blog";
 import { PortfolioApiService } from "@/services/PortfolioApiService";
 
-export const revalidate = 86400;
-
 export default async function BlogPostPage() {
+  let blogPostData = null;
+  let error = null;
 
   try {
-    const blogPostData = await PortfolioApiService.fetchBlog();
+    blogPostData = await PortfolioApiService.fetchBlog();
+  } catch (err) {
+    console.error("Error fetching blog data:", err);
+    error = err;
+  }
 
-    return <BlogPage blogPostData={blogPostData} />;
-  } catch (error) {
-    console.error("Error fetching blog data:", error);
+  if (error) {
     return (
       <div className="text-center text-red-400 mt-20">
         Failed to load blog posts.
       </div>
     );
   }
+
+  return <BlogPage blogPostData={blogPostData} />;
 }
