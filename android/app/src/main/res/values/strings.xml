@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">achinta</string>
+    <string name="title_activity_main">achinta</string>
+    <string name="package_name">com.appsy.achinta</string>
+    <string name="custom_url_scheme">com.appsy.achinta</string>
+</resources>
