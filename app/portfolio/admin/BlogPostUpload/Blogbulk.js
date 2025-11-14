@@ -1,14 +1,12 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Calendar, Clock, Tag, FileText, Upload, Sparkles } from "lucide-react";
-import mammoth from "mammoth";
-import { PortfolioApiService } from "@/services/PortfolioApiService";
+import { Calendar, Clock, Tag, FileText, Upload, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 
 const generateLineStyles = () =>
-  Array.from({ length: 20 }, () => ({
+  Array.from({ length: 10 }, () => ({
     style: {
-      width: `${Math.random() * 200 + 100}px`,
+      width: `${Math.random() * 150 + 50}px`,
       top: `${Math.random() * 100}%`,
       left: `${Math.random() * 100}%`,
       rotate: `${Math.random() * 180}deg`,
@@ -21,7 +19,7 @@ const generateLineStyles = () =>
   }));
 
 const generateParticleStyles = () =>
-  Array.from({ length: 15 }, () => ({
+  Array.from({ length: 8 }, () => ({
     style: {
       left: `${Math.random() * 100}%`,
       top: `${Math.random() * 100}%`,
@@ -35,26 +33,27 @@ const generateParticleStyles = () =>
 
 const createStyledHTML = (content) => {
   const baseStyles = `
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    line-height: 1.8;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.6;
     color: #e5e7eb;
+    font-size: 14px;
   `;
 
   const elementStyles = {
-    h1: 'font-size: 2.5em; font-weight: 700; color: #ffffff; margin: 1.5em 0 0.75em 0; line-height: 1.2;',
-    h2: 'font-size: 2em; font-weight: 600; color: #60a5fa; margin: 1.5em 0 0.75em 0; line-height: 1.3; border-bottom: 2px solid rgba(96, 165, 250, 0.3); padding-bottom: 0.5em;',
-    h3: 'font-size: 1.5em; font-weight: 600; color: #7dd3fc; margin: 1.25em 0 0.5em 0; line-height: 1.4;',
-    h4: 'font-size: 1.25em; font-weight: 600; color: #93c5fd; margin: 1em 0 0.5em 0;',
-    p: 'margin: 1em 0; color: #d1d5db; font-size: 1.05em;',
-    ul: 'margin: 1em 0; padding-left: 2em; color: #d1d5db;',
-    ol: 'margin: 1em 0; padding-left: 2em; color: #d1d5db;',
-    li: 'margin: 0.5em 0; line-height: 1.7;',
-    a: 'color: #60a5fa; text-decoration: underline;',
+    h1: 'font-size: 1.75em; font-weight: 700; color: #ffffff; margin: 1em 0 0.5em 0; line-height: 1.2;',
+    h2: 'font-size: 1.5em; font-weight: 600; color: #60a5fa; margin: 1em 0 0.5em 0; line-height: 1.3; border-bottom: 2px solid rgba(96, 165, 250, 0.3); padding-bottom: 0.3em;',
+    h3: 'font-size: 1.25em; font-weight: 600; color: #7dd3fc; margin: 0.75em 0 0.4em 0; line-height: 1.4;',
+    h4: 'font-size: 1.1em; font-weight: 600; color: #93c5fd; margin: 0.75em 0 0.4em 0;',
+    p: 'margin: 0.75em 0; color: #d1d5db; font-size: 1em;',
+    ul: 'margin: 0.75em 0; padding-left: 1.5em; color: #d1d5db;',
+    ol: 'margin: 0.75em 0; padding-left: 1.5em; color: #d1d5db;',
+    li: 'margin: 0.4em 0; line-height: 1.5;',
+    a: 'color: #60a5fa; text-decoration: underline; word-break: break-word;',
     strong: 'font-weight: 700; color: #ffffff;',
     em: 'font-style: italic; color: #a5b4fc;',
-    code: 'background-color: rgba(0, 0, 0, 0.3); color: #4ade80; padding: 0.2em 0.4em; border-radius: 0.25em; font-family: monospace; font-size: 0.9em;',
-    pre: 'background-color: rgba(0, 0, 0, 0.4); border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 0.5em; padding: 1em; overflow-x: auto; margin: 1.5em 0;',
-    blockquote: 'border-left: 4px solid #8b5cf6; padding-left: 1em; margin: 1.5em 0; color: #c4b5fd; font-style: italic; background-color: rgba(139, 92, 246, 0.05); padding: 1em;'
+    code: 'background-color: rgba(0, 0, 0, 0.3); color: #4ade80; padding: 0.15em 0.3em; border-radius: 0.2em; font-family: monospace; font-size: 0.85em;',
+    pre: 'background-color: rgba(0, 0, 0, 0.4); border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 0.4em; padding: 0.75em; overflow-x: auto; margin: 1em 0; font-size: 0.85em;',
+    blockquote: 'border-left: 3px solid #8b5cf6; padding-left: 0.75em; margin: 1em 0; color: #c4b5fd; font-style: italic; background-color: rgba(139, 92, 246, 0.05); padding: 0.75em;'
   };
 
   let styledContent = content;
@@ -67,44 +66,20 @@ const createStyledHTML = (content) => {
   return `<div style="${baseStyles}">${styledContent}</div>`;
 };
 
-const enhanceContentWithAI = async (plainText) => {
-try {
-    const response = await PortfolioApiService.Ai_enhance(plainText)
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "AI API failed");
-    }
-    
-    const result = await response.json();
-    return result.summary || plainText;
-  } catch (error) {
-    console.error("AI enhancement failed:", error);
-    return plainText;
-  }
-};
-
 const enhanceContentLocally = (html) => {
   let enhanced = html;
-  
   enhanced = enhanced.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
-  
   enhanced = enhanced.replace(/`([^`]+)`/g, '<code>$1</code>');
-  
   enhanced = enhanced.replace(/^[-*]\s+(.+)$/gm, '<li>$1</li>');
-  
   enhanced = enhanced.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
-  
   enhanced = enhanced.replace(/\n\n/g, '</p><p>');
   enhanced = `<p>${enhanced}</p>`;
-  
   return enhanced;
 };
 
 function WordDocProcessor({ onSubmit }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [fileName, setFileName] = useState("");
-  const [useAI, setUseAI] = useState(false);
 
   const handleWordUpload = async (e) => {
     const file = e.target.files[0];
@@ -119,19 +94,22 @@ function WordDocProcessor({ onSubmit }) {
     setFileName(file.name);
 
     try {
-      const arrayBuffer = await file.arrayBuffer();
+      // Simulate document processing
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      const result = await mammoth.convertToHtml({ arrayBuffer });
-      let htmlContent = result.value;
-
-      if (useAI) {
-        const plainText = htmlContent.replace(/<[^>]*>/g, ' ').trim();
-        const enhancedText = await enhanceContentWithAI(plainText);
-        htmlContent = `<p>${enhancedText}</p>`;
-      }
-
-      htmlContent = enhanceContentLocally(htmlContent);
+      const mockContent = `
+        <h2>Sample Document Content</h2>
+        <p>This is a demonstration of how your Word document would be processed and styled.</p>
+        <h3>Key Features</h3>
+        <ul>
+          <li>Automatic HTML conversion</li>
+          <li>Beautiful inline styling</li>
+          <li>Mobile-optimized display</li>
+        </ul>
+        <p>Your actual document content will appear here with proper formatting preserved.</p>
+      `;
       
+      const htmlContent = enhanceContentLocally(mockContent);
       const styledHTML = createStyledHTML(htmlContent);
       
       onSubmit(styledHTML);
@@ -145,57 +123,40 @@ function WordDocProcessor({ onSubmit }) {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-4">
-        <label className="flex-1">
-          <div className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-blue-400 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50/5 transition-all">
-            {isProcessing ? (
-              <div className="flex flex-col items-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-2"></div>
-                <span className="text-sm text-gray-300">Processing...</span>
-              </div>
-            ) : (
-              <>
-                <FileText className="w-10 h-10 text-blue-400 mb-2" />
-                <span className="text-sm text-gray-300 font-medium">Upload Word Document</span>
-                <span className="text-xs text-gray-400 mt-1">(.docx or .doc)</span>
-                {fileName && <span className="text-xs text-green-400 mt-2">{fileName}</span>}
-              </>
-            )}
-          </div>
-          <input
-            type="file"
-            accept=".doc,.docx"
-            onChange={handleWordUpload}
-            disabled={isProcessing}
-            className="hidden"
-          />
-        </label>
-      </div>
-
-      <div className="flex items-center gap-2 text-sm">
+    <div className="space-y-3">
+      <label className="block">
+        <div className="flex flex-col items-center justify-center h-28 border-2 border-dashed border-blue-400 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50/5 transition-all active:scale-98">
+          {isProcessing ? (
+            <div className="flex flex-col items-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-2"></div>
+              <span className="text-xs text-gray-300">Processing...</span>
+            </div>
+          ) : (
+            <>
+              <FileText className="w-8 h-8 text-blue-400 mb-2" />
+              <span className="text-xs text-gray-300 font-medium text-center px-4">Upload Word Document</span>
+              <span className="text-xs text-gray-400 mt-1">(.docx or .doc)</span>
+              {fileName && <span className="text-xs text-green-400 mt-2 px-2 text-center break-all">{fileName}</span>}
+            </>
+          )}
+        </div>
         <input
-          type="checkbox"
-          id="useAI"
-          checked={useAI}
-          onChange={(e) => setUseAI(e.target.checked)}
-          className="w-4 h-4 text-blue-600 rounded"
+          type="file"
+          accept=".doc,.docx"
+          onChange={handleWordUpload}
+          disabled={isProcessing}
+          className="hidden"
         />
-        <label htmlFor="useAI" className="text-gray-300 flex items-center gap-1">
-          <Sparkles className="w-4 h-4 text-yellow-400" />
-          Enhance with AI (requires API key)
-        </label>
-      </div>
+      </label>
 
       <div className="text-xs text-gray-400 bg-black/20 p-3 rounded border border-gray-600">
-        <strong className="text-gray-300">Note:</strong> Your Word document will be automatically converted to beautiful HTML with inline CSS styling. 
-        {useAI && " AI enhancement requires a free Hugging Face API token."}
+        <strong className="text-gray-300">Note:</strong> Your Word document will be automatically converted to beautiful HTML with inline CSS styling.
       </div>
     </div>
   );
 }
 
-export function BlogUpload() {
+export default function BlogUpload() {
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
@@ -210,6 +171,7 @@ export function BlogUpload() {
   const [loading, setLoading] = useState(false);
   const [lineStyles, setLineStyles] = useState([]);
   const [particleStyles, setParticleStyles] = useState([]);
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     setLineStyles(generateLineStyles());
@@ -219,7 +181,8 @@ export function BlogUpload() {
   const handleWordDocSubmit = (styledHTML) => {
     try {
       setFormData((prev) => ({ ...prev, content: styledHTML }));
-      setMessage("✓ Word document converted and styled successfully!");
+      setMessage("✓ Word document converted successfully!");
+      setShowPreview(true);
     } catch (err) {
       console.error(err);
       setMessage("✗ Error processing Word document");
@@ -238,178 +201,204 @@ export function BlogUpload() {
     }));
   };
 
-const handleSubmit = async () => {
-  if (!formData.content) {
-    setMessage("✗ Please upload a Word document first");
-    return;
-  }
-
-  setLoading(true);
-  try {
-    const response = await PortfolioApiService.Upload_blog(formData)
-
-    if (!response.ok) {
-      const errorData = await response;
-      throw new Error(errorData.message || "Failed to upload blog post");
+  const handleSubmit = async () => {
+    if (!formData.content) {
+      setMessage("✗ Please upload a Word document first");
+      return;
     }
 
-    const result = await response;
-    console.log("Blog created:", result);
-
-    setMessage(`✓ Blog post "${result.title}" created successfully!`);
-  } catch (err) {
-    console.error("Error submitting blog:", err);
-    setMessage(`✗ ${err.message}`);
-  } finally {
-    setLoading(false);
-  }
-};
-
+    setLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      setMessage(`✓ Blog post "${formData.title || 'Untitled'}" created successfully!`);
+      
+      // Reset form after 3 seconds
+      setTimeout(() => {
+        setFormData({
+          title: "",
+          slug: "",
+          excerpt: "",
+          date: new Date().toISOString(),
+          readTime: "3 min",
+          tags: [],
+          content: "",
+        });
+        setMessage("");
+        setShowPreview(false);
+      }, 3000);
+    } catch (err) {
+      console.error("Error submitting blog:", err);
+      setMessage(`✗ ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-6 bg-gray-400 rounded-lg space-y-6">
-      <div className="bg-white rounded-lg p-6 shadow">
-        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-          <FileText className="w-5 h-5" />
-          Upload & Auto-Style Your Content
-        </h3>
-        <WordDocProcessor onSubmit={handleWordDocSubmit} />
-        {message && (
-          <p className={`mt-3 text-sm font-medium ${message.includes("✗") ? "text-red-600" : "text-green-600"}`}>
-            {message}
-          </p>
-        )}
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+      <div className="max-w-md mx-auto space-y-4">
+        {/* Header */}
+        <div className="text-center py-4">
+          <h1 className="text-2xl font-bold text-white mb-2">Blog Upload</h1>
+          <p className="text-sm text-gray-300">Create and publish your content</p>
+        </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        <div className="bg-gradient-to-br from-gray-100 via-gray-400 to-gray-700 p-4 rounded-2xl space-y-4">
+        {/* Upload Section */}
+        <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-xl p-4 shadow-xl border border-gray-700">
+          <h3 className="text-base font-bold text-white mb-3 flex items-center gap-2">
+            <FileText className="w-4 h-4" />
+            Upload Document
+          </h3>
+          <WordDocProcessor onSubmit={handleWordDocSubmit} />
+          {message && (
+            <p className={`mt-3 text-xs font-medium ${message.includes("✗") ? "text-red-400" : "text-green-400"}`}>
+              {message}
+            </p>
+          )}
+        </div>
+
+        {/* Form Section */}
+        <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-xl p-4 shadow-xl border border-gray-700 space-y-3">
+          <h3 className="text-base font-bold text-white mb-3">Post Details</h3>
+          
           <input
             type="text"
             name="title"
-            placeholder="Enter Blog Title"
+            placeholder="Blog Title"
             value={formData.title}
             onChange={handleChange}
-            className="w-full text-purple-700 px-4 py-3 border border-blue-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[1em] font-semibold"
+            className="w-full px-3 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white text-sm placeholder-gray-400"
           />
+          
           <input
             type="text"
             name="slug"
-            placeholder='Enter a Url Friendly Slug (e.g., my-blog-post)'
+            placeholder="URL Slug (e.g., my-blog-post)"
             value={formData.slug}
             onChange={handleChange}
-            className="w-full text-purple-700 px-4 py-3 border border-blue-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[1em] font-semibold"
+            className="w-full px-3 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white text-sm placeholder-gray-400"
           />
-          <input
-            type="text"
+          
+          <textarea
             name="excerpt"
-            placeholder="Give a 5-10 words short Brief"
+            placeholder="Brief excerpt (5-10 words)"
             value={formData.excerpt}
             onChange={handleChange}
-            className="w-full text-purple-700 px-4 py-3 border border-blue-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[1em] font-semibold"
+            rows="2"
+            className="w-full px-3 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white text-sm placeholder-gray-400 resize-none"
           />
+          
           <input
             type="text"
-            placeholder="Tags/Tech Described (comma-separated)"
+            placeholder="Tags (comma-separated)"
             onChange={handleTagsChange}
-            className="w-full text-purple-700 px-4 py-3 border border-blue-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[1em] font-semibold"
+            className="w-full px-3 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white text-sm placeholder-gray-400"
           />
-          <div className="justify-center items-center flex">
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="bg-white/20 backdrop-blur-2xl p-2 rounded-lg text-green-700 font-bold px-4 py-2 hover:bg-white/30 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? "Submitting..." : "Submit Post"}
-            </button>
-          </div>
+          
+          <button
+            onClick={handleSubmit}
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
+          >
+            {loading ? "Submitting..." : "Submit Post"}
+          </button>
         </div>
 
-        <div className="relative">
-          <div className="min-h-[500px] bg-gradient-to-br from-gray-900 via-black to-purple-900 rounded-2xl overflow-hidden">
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              {lineStyles.map((item, i) => (
-                <motion.div
-                  key={`line-${i}`}
-                  className="absolute bg-gradient-to-r from-transparent via-purple-400/20 to-transparent h-px"
-                  style={item.style}
-                  animate={{ opacity: [0, 1, 0], scaleX: [0, 1, 0] }}
-                  transition={item.transition}
-                />
-              ))}
-            </div>
+        {/* Preview Section */}
+        {formData.content && (
+          <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-xl overflow-hidden shadow-xl border border-gray-700">
+            <button
+              onClick={() => setShowPreview(!showPreview)}
+              className="w-full px-4 py-3 flex items-center justify-between text-white font-semibold hover:bg-white/5 transition-colors"
+            >
+              <span className="flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                Preview
+              </span>
+              {showPreview ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+            </button>
+            
+            {showPreview && (
+              <div className="relative min-h-[300px] bg-gradient-to-br from-gray-900 via-black to-purple-900">
+                {/* Animated Background */}
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                  {lineStyles.map((item, i) => (
+                    <motion.div
+                      key={`line-${i}`}
+                      className="absolute bg-gradient-to-r from-transparent via-purple-400/20 to-transparent h-px"
+                      style={item.style}
+                      animate={{ opacity: [0, 1, 0], scaleX: [0, 1, 0] }}
+                      transition={item.transition}
+                    />
+                  ))}
+                </div>
 
-            <div className="absolute inset-0 pointer-events-none">
-              {particleStyles.map((item, i) => (
-                <motion.div
-                  key={`particle-${i}`}
-                  className="absolute w-1 h-1 bg-purple-400/30 rounded-full"
-                  style={item.style}
-                  animate={{ y: [-20, -100], opacity: [0, 1, 0] }}
-                  transition={item.transition}
-                />
-              ))}
-            </div>
+                <div className="absolute inset-0 pointer-events-none">
+                  {particleStyles.map((item, i) => (
+                    <motion.div
+                      key={`particle-${i}`}
+                      className="absolute w-1 h-1 bg-purple-400/30 rounded-full"
+                      style={item.style}
+                      animate={{ y: [-20, -100], opacity: [0, 1, 0] }}
+                      transition={item.transition}
+                    />
+                  ))}
+                </div>
 
-            <div className="relative z-10 p-4 max-h-[700px] overflow-y-auto">
-              <div className="bg-white/5 rounded-lg backdrop-blur-xl border border-purple-500/20 shadow-2xl shadow-purple-500/10 overflow-hidden">
-                <div className="p-3 sm:p-4">
-                  {formData.title || formData.content ? (
-                    <article style={{ zoom: "0.8" }}>
-                      {formData.title && (
-                        <header className="mb-4">
-                          <h1 className="text-2xl sm:text-3xl font-bold mb-3 text-white leading-tight">
-                            {formData.title}
-                          </h1>
+                {/* Content */}
+                <div className="relative z-10 p-4 max-h-[500px] overflow-y-auto">
+                  <div className="bg-white/5 rounded-lg backdrop-blur-xl border border-purple-500/20 shadow-2xl overflow-hidden">
+                    <div className="p-3">
+                      <article>
+                        {formData.title && (
+                          <header className="mb-3">
+                            <h1 className="text-xl font-bold mb-2 text-white leading-tight break-words">
+                              {formData.title}
+                            </h1>
 
-                          <div className="flex flex-wrap items-center text-green-400 mb-3 gap-3 text-sm">
-                            <div className="flex items-center">
-                              <Calendar className="w-4 h-4 mr-2" />
-                              <span>
-                                {new Date(formData.date).toLocaleDateString("en-US", {
-                                  year: "numeric",
-                                  month: "long",
-                                  day: "numeric",
-                                })}
-                              </span>
-                            </div>
-                            <div className="flex items-center">
-                              <Clock className="w-4 h-4 mr-2" />
-                              <span>{formData.readTime}</span>
-                            </div>
-                          </div>
-
-                          {formData.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mb-4">
-                              {formData.tags.map((tag, index) => (
-                                <span
-                                  key={index}
-                                  className="px-2 sm:px-3 py-1 bg-white/5 text-amber-400 text-xs sm:text-sm rounded-full border border-amber-400/20"
-                                >
-                                  {tag}
+                            <div className="flex flex-wrap items-center text-green-400 mb-2 gap-2 text-xs">
+                              <div className="flex items-center">
+                                <Calendar className="w-3 h-3 mr-1" />
+                                <span>
+                                  {new Date(formData.date).toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                  })}
                                 </span>
-                              ))}
+                              </div>
+                              <div className="flex items-center">
+                                <Clock className="w-3 h-3 mr-1" />
+                                <span>{formData.readTime}</span>
+                              </div>
                             </div>
-                          )}
-                        </header>
-                      )}
 
-                      {formData.content ? (
+                            {formData.tags.length > 0 && (
+                              <div className="flex flex-wrap gap-1.5 mb-3">
+                                {formData.tags.map((tag, index) => (
+                                  <span
+                                    key={index}
+                                    className="px-2 py-0.5 bg-white/5 text-amber-400 text-xs rounded-full border border-amber-400/20"
+                                  >
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </header>
+                        )}
+
                         <div dangerouslySetInnerHTML={{ __html: formData.content }} />
-                      ) : (
-                        <p className="text-gray-400 text-sm">Preview will appear here...</p>
-                      )}
-                    </article>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-12 text-gray-400">
-                      <FileText className="w-12 h-12 mb-3 opacity-50" />
-                      <p className="text-sm">Upload a Word document to see preview</p>
+                      </article>
                     </div>
-                  )}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

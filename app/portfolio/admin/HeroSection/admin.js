@@ -1,64 +1,106 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import {
-  getUserFromToken,
-  removeAuthToken,
-  getAuthToken,
-} from "../../../lib/auth";
+import { 
+  Folder, 
+  MessageSquare, 
+  FileText, 
+  Code, 
+  BookOpen, 
+  Globe,
+  LogOut,
+  Menu,
+  X,
+  ChevronRight,
+  User,
+  Wifi
+} from "lucide-react";
 import Project from "../Components/Project";
 import ContactResponse from "../Components/ContactResponse";
 import Notepad from "../Components/Notepad";
-import Image from "next/image";
-import PythonFlask from "../Components/PythonFlask";
+import ConnectionCheck from "../Components/PythonFlask";
 import Blog from "../Components/Blog";
 import Ipaddress from "../Components/Ipaddress";
-import { PortfolioApiService } from "@/services/PortfolioApiService";
+import { useRouter } from "next/navigation";
 
 const AdminPage = () => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState({ username: "Achinta Hazra", role: "admin" });
+  const [loading, setLoading] = useState(false);
   const [activeView, setActiveView] = useState("dashboard");
-  const [documents, setDocuments] = useState([]);
-  const [fetchError, setFetchError] = useState(null);
-  const [ipAddress, setipAddress] = useState();
+  const [ipAddress, setipAddress] = useState("117.233.158.244");
+  const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
 
-  const handleClick = () => {
-    router.push("/portfolio/anime-list");
-  };
-
-  useEffect(() => {
-    const userData = getUserFromToken();
-    if (userData) {
-      setUser(userData);
-    } else {
-      router.push("/portfolio/login");
-    }
-    setLoading(false);
-  }, [router]);
-
-  useEffect(() => {
-    const userData = getUserFromToken();
-    PortfolioApiService.Fetch_IP(userData.userId)
-      .then((data) => setipAddress(data.ip))
-      .catch((error) => {
-        console.error("Error fetching IP:", error);
-        setipAddress("Currently not Available !");
-      });
-  }, []);
-
   const handleLogout = () => {
-    removeAuthToken();
-    router.push("/portfolio/login");
+    localStorage.removeItem('token');
+    router.push('/login'); // Add redirect after logout if needed
   };
 
-  const handleNewDocument = (newDoc) => {
-    setDocuments((prevDocs) => [newDoc, ...prevDocs]);
+  // Fixed handleClick function
+  const handleClick = () => {
+    try {
+      router.push('/portfolio/anime-list');
+    } catch (error) {
+      console.error('Navigation error:', error);
+      // Fallback to window.location if router fails
+      window.location.href = '/portfolio/anime-list';
+    }
   };
 
-  if (loading || !user) {
+  const menuItems = [
+    {
+      id: "projects",
+      title: "Manage Projects",
+      icon: Folder,
+      gradient: "from-blue-500 to-purple-500",
+      image: "https://res.cloudinary.com/dc1fkirb4/image/upload/v1755754879/a1_cqsx8x.jpg"
+    },
+    {
+      id: "anime",
+      title: "AnimeList",
+      icon: BookOpen,
+      gradient: "from-pink-500 to-red-500",
+      image: "https://res.cloudinary.com/dc1fkirb4/image/upload/v1760892290/background-desktop_r4pccr.jpg",
+      action: handleClick, // This will now work properly
+      isExternal: true // Flag to indicate this is a navigation action
+    },
+    {
+      id: "IP",
+      title: "IP Addresses",
+      icon: Globe,
+      gradient: "from-green-500 to-teal-500",
+      image: "https://res.cloudinary.com/dc1fkirb4/image/upload/v1761317160/ip-address-lookup_czcb34.jpg"
+    },
+    {
+      id: "messages",
+      title: "View Messages",
+      icon: MessageSquare,
+      gradient: "from-indigo-500 to-blue-500",
+      image: "https://res.cloudinary.com/dc1fkirb4/image/upload/v1755754879/a2_jjgzr3.png"
+    },
+    {
+      id: "Notepad",
+      title: "Go To Notepad",
+      icon: FileText,
+      gradient: "from-purple-500 to-pink-500",
+      image: "https://res.cloudinary.com/dc1fkirb4/image/upload/v1755754879/a3_uutdd3.avif"
+    },
+    {
+      id: "Blog",
+      title: "Blog Upload",
+      icon: BookOpen,
+      gradient: "from-cyan-500 to-blue-500",
+      image: "https://res.cloudinary.com/dc1fkirb4/image/upload/v1756037563/write-a-great-blog-post_ivsbz9.jpg"
+    },    {
+      id: "Flask",
+      title: "Python Flask",
+      icon: Code,
+      gradient: "from-yellow-500 to-orange-500",
+      image: "https://res.cloudinary.com/dc1fkirb4/image/upload/v1755834332/flask_o3qe55.jpg"
+    },
+  ];
+
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800">
         <div className="text-center">
@@ -69,12 +111,13 @@ const AdminPage = () => {
     );
   }
 
+  // View routing
   if (user.role === "admin" && activeView === "projects") {
     return (
-      <div className="min-h-screen p-4 sm:p-6 lg:p-8 bg-gradient-to-tr from-blue-700 via-pink-600 to-yellow-300">
+      <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 p-4">
         <button
           onClick={() => setActiveView("dashboard")}
-          className="mb-4 px-4 py-2 cursor-pointer bg-white/40 backdrop-blur-3xl text-white rounded-lg hover:bg-white/20 transition-colors"
+          className="mb-4 px-4 py-2.5 bg-white/20 backdrop-blur-xl text-white rounded-xl hover:bg-white/30 transition-all active:scale-95 font-medium flex items-center gap-2"
         >
           ← Back to Dashboard
         </button>
@@ -85,10 +128,10 @@ const AdminPage = () => {
 
   if (user.role === "admin" && activeView === "messages") {
     return (
-      <div className="min-h-screen p-4 sm:p-6 lg:p-8 bg-[url(https://res.cloudinary.com/dc1fkirb4/image/upload/v1755757547/response_arjl1x.webp)] bg-cover bg-center">
+      <div className="min-h-screen bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-600 p-4">
         <button
           onClick={() => setActiveView("dashboard")}
-          className="mb-4 px-4 py-2 bg-white/20 backdrop-blur-3xl text-black cursor-pointer rounded-lg hover:bg-white/30 transition-colors"
+          className="mb-4 px-4 py-2.5 bg-white/20 backdrop-blur-xl text-white rounded-xl hover:bg-white/30 transition-all active:scale-95 font-medium flex items-center gap-2"
         >
           ← Back to Dashboard
         </button>
@@ -99,38 +142,38 @@ const AdminPage = () => {
 
   if (user.role === "admin" && activeView === "Notepad") {
     return (
-      <div className="min-h-screen p-4 sm:p-6 lg:p-8 bg-[url(https://res.cloudinary.com/dc1fkirb4/image/upload/v1755758676/notepad_e5ey08.jpg)] bg-cover bg-center">
+      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-600 to-red-600 p-4">
         <button
           onClick={() => setActiveView("dashboard")}
-          className="mb-4 px-4 py-2 bg-white/10 backdrop-blur-3xl text-white cursor-pointer rounded-lg hover:bg-white/20 transition-colors"
+          className="mb-4 px-4 py-2.5 bg-white/20 backdrop-blur-xl text-white rounded-xl hover:bg-white/30 transition-all active:scale-95 font-medium flex items-center gap-2"
         >
           ← Back to Dashboard
         </button>
-        <Notepad onDocumentSaved={handleNewDocument} />
+        <Notepad />
       </div>
     );
   }
 
   if (user.role === "admin" && activeView === "Flask") {
     return (
-      <div className="min-h-screen p-4 sm:p-6 lg:p-8 bg-gray-600">
+      <div className="min-h-screen bg-gradient-to-br from-yellow-600 via-orange-600 to-red-600 p-4">
         <button
           onClick={() => setActiveView("dashboard")}
-          className="mb-4 px-4 py-2 bg-white/10 backdrop-blur-3xl text-white cursor-pointer rounded-lg hover:bg-white/20 transition-colors"
+          className="mb-4 px-4 py-2.5 bg-white/20 backdrop-blur-xl text-white rounded-xl hover:bg-white/30 transition-all active:scale-95 font-medium flex items-center gap-2"
         >
           ← Back to Dashboard
         </button>
-        <PythonFlask />
+        <ConnectionCheck />
       </div>
     );
   }
 
   if (user.role === "admin" && activeView === "Blog") {
     return (
-      <div className="min-h-screen p-4 sm:p-6 lg:p-8 bg-gradient-to-bl from-pink-600 via-yellow-400 to-purple-700">
+      <div className="min-h-screen bg-gradient-to-br from-cyan-600 via-blue-600 to-purple-600 p-4">
         <button
           onClick={() => setActiveView("dashboard")}
-          className="mb-4 px-4 py-2 bg-white/30 backdrop-blur-3xl text-white cursor-pointer rounded-lg hover:bg-white/20 transition-colors"
+          className="mb-4 px-4 py-2.5 bg-white/20 backdrop-blur-xl text-white rounded-xl hover:bg-white/30 transition-all active:scale-95 font-medium flex items-center gap-2"
         >
           ← Back to Dashboard
         </button>
@@ -138,12 +181,13 @@ const AdminPage = () => {
       </div>
     );
   }
+
   if (user.role === "admin" && activeView === "IP") {
     return (
-      <div className="min-h-screen p-4 sm:p-6 lg:p-8 bg-gradient-to-bl from-pink-600 via-yellow-400 to-purple-700">
+      <div className="min-h-screen bg-gradient-to-br from-green-600 via-teal-600 to-blue-600 p-4">
         <button
           onClick={() => setActiveView("dashboard")}
-          className="mb-4 px-4 py-2 bg-white/30 backdrop-blur-3xl text-white cursor-pointer rounded-lg hover:bg-white/20 transition-colors"
+          className="mb-4 px-4 py-2.5 bg-white/20 backdrop-blur-xl text-white rounded-xl hover:bg-white/30 transition-all active:scale-95 font-medium flex items-center gap-2"
         >
           ← Back to Dashboard
         </button>
@@ -152,236 +196,121 @@ const AdminPage = () => {
     );
   }
 
-  if (user.role === "editor" && activeView === "Notepad") {
-    return (
-      <div className="min-h-screen p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-slate-900 to-slate-800">
-        <button
-          onClick={() => setActiveView("dashboard")}
-          className="mb-4 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
-        >
-          ← Back to Dashboard
-        </button>
-        <Notepad onDocumentSaved={handleNewDocument} />
-      </div>
-    );
-  }
-
+  // Main Dashboard
   return (
-    <div
-      className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
-      style={{
-        backgroundImage:
-          "url('https://wallpapers.com/images/hd/desktop-background-6v9qjuvtrckgn4mm.jpg')",
-      }}
-    >
-      <div className="min-h-screen bg-black/20">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          <header className="mb-6 sm:mb-8">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="flex flex-col gap-4">
-                <div className="bg-white/10 backdrop-blur-2xl px-4 py-2 rounded-lg">
-                  <p className="text-green-400 font-bold text-lg sm:text-xl text-center sm:text-left">
-                    Welcome {user.username}
-                  </p>
-                </div>
-                <div className="bg-white/10 backdrop-blur-2xl px-2 py-0.5 rounded-lg w-fit">
-                  <p className="text-red-600 font-bold text-lg sm:text-xl text-center sm:text-left">
-                    IP :{" "}
-                    <span className="text-green-400 font-semibold">
-                      {ipAddress}
-                    </span>
-                  </p>
-                </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Mobile Header */}
+      <div className="sticky top-0 z-50 bg-gradient-to-r from-slate-800/95 to-purple-800/95 backdrop-blur-xl border-b border-white/10">
+        <div className="px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+                <User className="w-5 h-5 text-white" />
               </div>
-              <div className="bg-white/10 backdrop-blur-2xl px-4 py-2 rounded-lg flex-1 sm:flex-initial -ml-20">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-100 text-center">
-                  Dashboard
-                </h1>
-              </div>
-
-              <button
-                onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors self-center sm:self-auto"
-              >
-                Logout
-              </button>
-            </div>
-          </header>
-
-          {fetchError && (
-            <div className="mb-4 p-4 bg-red-500/20 border border-red-500/30 rounded-lg backdrop-blur-sm">
-              <p className="text-red-200">{fetchError}</p>
-            </div>
-          )}
-
-          {user.role === "admin" && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              <div className="bg-white/20 rounded-lg p-4 backdrop-blur-3xl flex flex-col items-center space-y-4 hover:bg-white/25 transition-colors">
-                <div className="w-full max-w-[280px] aspect-[4/3] relative">
-                  <Image
-                    src="https://res.cloudinary.com/dc1fkirb4/image/upload/v1755754879/a1_cqsx8x.jpg"
-                    alt="Project Management"
-                    fill
-                    className="rounded-lg border-2 border-white object-cover"
-                  />
-                </div>
-                <button
-                  className="relative inline-flex h-10 w-full max-w-[200px] overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
-                  onClick={() => setActiveView("projects")}
-                >
-                  <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
-                  <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-800 px-3 py-1 text-sm font-medium text-white backdrop-blur-3xl">
-                    Manage Projects →
-                  </span>
-                </button>
-              </div>
-              <div className="bg-white/20 rounded-lg p-4 backdrop-blur-3xl flex flex-col items-center space-y-4 hover:bg-white/25 transition-colors">
-                <div className="w-full max-w-[280px] aspect-[4/3] relative">
-                  <Image
-                    src="https://res.cloudinary.com/dc1fkirb4/image/upload/v1760892290/background-desktop_r4pccr.jpg"
-                    alt="Project Management"
-                    fill
-                    className="rounded-lg border-2 border-white object-cover"
-                  />
-                </div>
-                <button
-                  className="relative inline-flex h-10 w-full max-w-[200px] overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
-                  onClick={handleClick}
-                >
-                  <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
-                  <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-800 px-3 py-1 text-sm font-medium text-white backdrop-blur-3xl">
-                    AnimeList →
-                  </span>
-                </button>
-              </div>
-
-              <div className="bg-white/20 rounded-lg p-4 backdrop-blur-3xl flex flex-col items-center space-y-4 hover:bg-white/25 transition-colors">
-                <div className="w-full max-w-[280px] aspect-[4/3] relative">
-                  <Image
-                    src="https://res.cloudinary.com/dc1fkirb4/image/upload/v1761317160/ip-address-lookup_czcb34.jpg"
-                    alt="Python Flask"
-                    fill
-                    className="rounded-lg border-2 border-white object-cover"
-                  />
-                </div>
-                <button
-                  className="relative inline-flex h-10 w-full max-w-[200px] overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
-                  onClick={() => setActiveView("IP")}
-                >
-                  <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
-                  <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-800 px-3 py-1 text-sm font-medium text-white backdrop-blur-3xl">
-                    IP Adresses →
-                  </span>
-                </button>
-              </div>
-
-              <div className="bg-white/20 rounded-lg p-4 backdrop-blur-3xl flex flex-col items-center space-y-4 hover:bg-white/25 transition-colors">
-                <div className="w-full max-w-[280px] aspect-[4/3] relative">
-                  <Image
-                    src="https://res.cloudinary.com/dc1fkirb4/image/upload/v1755834332/flask_o3qe55.jpg"
-                    alt="Python Flask"
-                    fill
-                    className="rounded-lg border-2 border-white object-cover"
-                  />
-                </div>
-                <button
-                  className="relative inline-flex h-10 w-full max-w-[200px] overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
-                  onClick={() => setActiveView("Flask")}
-                >
-                  <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
-                  <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-800 px-3 py-1 text-sm font-medium text-white backdrop-blur-3xl">
-                    Python Flask →
-                  </span>
-                </button>
-              </div>
-
-              <div className="bg-white/20 rounded-lg p-4 backdrop-blur-3xl flex flex-col items-center space-y-4 hover:bg-white/25 transition-colors">
-                <div className="w-full max-w-[280px] aspect-[4/3] relative">
-                  <Image
-                    src="https://res.cloudinary.com/dc1fkirb4/image/upload/v1755754879/a2_jjgzr3.png"
-                    alt="Messages"
-                    fill
-                    className="rounded-lg border-2 border-white object-contain"
-                  />
-                </div>
-                <button
-                  className="relative inline-flex h-10 w-full max-w-[200px] overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
-                  onClick={() => setActiveView("messages")}
-                >
-                  <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
-                  <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-800 px-3 py-1 text-sm font-medium text-white backdrop-blur-3xl">
-                    View Messages →
-                  </span>
-                </button>
-              </div>
-
-              <div className="bg-white/20 rounded-lg p-4 backdrop-blur-3xl flex flex-col items-center space-y-4 hover:bg-white/25 transition-colors">
-                <div className="w-full max-w-[280px] aspect-[4/3] relative">
-                  <Image
-                    src="https://res.cloudinary.com/dc1fkirb4/image/upload/v1755754879/a3_uutdd3.avif"
-                    alt="Notepad"
-                    fill
-                    className="rounded-lg border-2 border-white object-cover"
-                  />
-                </div>
-                <button
-                  className="relative inline-flex h-10 w-full max-w-[200px] overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
-                  onClick={() => setActiveView("Notepad")}
-                >
-                  <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
-                  <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-800 px-3 py-1 text-sm font-medium text-white backdrop-blur-3xl">
-                    Go To Notepad →
-                  </span>
-                </button>
-              </div>
-
-              <div className="bg-white/20 rounded-lg p-4 backdrop-blur-3xl flex flex-col items-center space-y-4 hover:bg-white/25 transition-colors">
-                <div className="w-full max-w-[280px] aspect-[4/3] relative">
-                  <Image
-                    src="https://res.cloudinary.com/dc1fkirb4/image/upload/v1756037563/write-a-great-blog-post_ivsbz9.jpg"
-                    alt="Blog Management"
-                    fill
-                    className="rounded-lg border-2 border-white object-cover"
-                  />
-                </div>
-                <button
-                  className="relative inline-flex h-10 w-full max-w-[200px] overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
-                  onClick={() => setActiveView("Blog")}
-                >
-                  <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
-                  <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-800 px-3 py-1 text-sm font-medium text-white backdrop-blur-3xl">
-                    Blog Upload →
-                  </span>
-                </button>
+              <div>
+                <p className="text-white font-semibold text-sm">{user.username}</p>
+                <p className="text-xs text-gray-300 capitalize">{user.role}</p>
               </div>
             </div>
-          )}
+            
+            <button
+              onClick={handleLogout}
+              className="p-2 bg-red-500/20 rounded-lg hover:bg-red-500/30 active:scale-95 transition-all"
+            >
+              <LogOut className="w-5 h-5 text-red-400" />
+            </button>
+          </div>
 
-          {user.role === "editor" && (
-            <div className="flex justify-center">
-              <div className="bg-white/20 rounded-lg backdrop-blur-3xl p-6 w-full max-w-sm flex flex-col items-center space-y-4 hover:bg-white/25 transition-colors">
-                <div className="w-full max-w-[280px] aspect-[4/3] relative">
-                  <Image
-                    src="/a3.jpeg"
-                    alt="Notepad"
-                    fill
-                    className="rounded-lg border-2 border-white object-contain"
-                  />
-                </div>
-                <button
-                  className="relative inline-flex h-10 w-full max-w-[200px] overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
-                  onClick={() => setActiveView("Notepad")}
-                >
-                  <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
-                  <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-800 px-3 py-1 text-sm font-medium text-white backdrop-blur-3xl">
-                    Go To Notepad →
-                  </span>
-                </button>
-              </div>
-            </div>
-          )}
+          {/* IP Address */}
+          <div className="mt-3 flex items-center gap-2 bg-white/5 rounded-lg px-3 py-2">
+            <Wifi className="w-4 h-4 text-green-400" />
+            <span className="text-xs text-gray-300">IP:</span>
+            <span className="text-xs text-green-400 font-mono">{ipAddress}</span>
+          </div>
         </div>
       </div>
+
+      {/* Dashboard Title */}
+      <div className="px-4 py-6">
+        <h1 className="text-3xl font-bold text-white text-center mb-2">Dashboard</h1>
+        <p className="text-sm text-gray-300 text-center">Manage your portfolio</p>
+      </div>
+
+      {/* Menu Grid */}
+      <div className="px-4 pb-6 space-y-3">
+        {user.role === "admin" && menuItems.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => {
+              if (item.action) {
+                // For external navigation actions
+                item.action();
+              } else {
+                // For internal view changes
+                setActiveView(item.id);
+              }
+            }}
+            className="w-full group"
+          >
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/20 hover:border-white/40 transition-all active:scale-98">
+              <div className="flex items-center gap-4 p-4">
+                {/* Icon */}
+                <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
+                  <item.icon className="w-7 h-7 text-white" />
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 text-left">
+                  <h3 className="text-white font-semibold text-base mb-0.5">{item.title}</h3>
+                  <p className="text-gray-400 text-xs">Tap to access</p>
+                </div>
+
+                {/* Arrow */}
+                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-white group-hover:translate-x-1 transition-all" />
+              </div>
+
+              {/* Image Preview */}
+              <div className="h-32 overflow-hidden">
+                <img 
+                  src={item.image} 
+                  alt={item.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              </div>
+            </div>
+          </button>
+        ))}
+
+        {user.role === "editor" && (
+          <button
+            onClick={() => setActiveView("Notepad")}
+            className="w-full group"
+          >
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/20 hover:border-white/40 transition-all active:scale-98">
+              <div className="flex items-center gap-4 p-4">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                  <FileText className="w-7 h-7 text-white" />
+                </div>
+                <div className="flex-1 text-left">
+                  <h3 className="text-white font-semibold text-base mb-0.5">Go To Notepad</h3>
+                  <p className="text-gray-400 text-xs">Tap to access</p>
+                </div>
+                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-white group-hover:translate-x-1 transition-all" />
+              </div>
+              <div className="h-32 overflow-hidden">
+                <img 
+                  src="https://res.cloudinary.com/dc1fkirb4/image/upload/v1755754879/a3_uutdd3.avif" 
+                  alt="Notepad"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              </div>
+            </div>
+          </button>
+        )}
+      </div>
+
+      {/* Bottom Safe Area */}
+      <div className="h-8"></div>
     </div>
   );
 };

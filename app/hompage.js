@@ -3,12 +3,7 @@ import React, { useState } from "react";
 import {
   Home,
   Users,
-  ShoppingBag,
-  Settings,
-  FileText,
-  MessageCircle,
-  Calendar,
-  TrendingUp,
+  BrainCircuit 
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -23,15 +18,15 @@ export default function MobileHomepage() {
       description: "My Portfolio",
       icon: Users,
       link: "/portfolio",
-      gradient: "from-purple-500 to-purple-600",
+      gradient: "from-purple-500 to-pink-400",
     },
     {
       id: 2,
       title: "Machine Learning",
       description: "Multple machine learning models",
-      icon: Users,
+      icon: BrainCircuit,
       link: "/ml_model",
-      gradient: "from-purple-600 to-purple-700",
+      gradient: "from-yellow-400 to-pink-400",
     },
   ];
 
@@ -44,49 +39,8 @@ export default function MobileHomepage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
-      {/* Header */}
-      <header className="px-6 pt-8 pb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-white">Welcome</h1>
-            <p className="text-purple-200 text-sm mt-1">
-              Choose your destination
-            </p>
-          </div>
-          <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
-            A
-          </div>
-        </div>
-      </header>
-
-      {/* Search Bar */}
-      <div className="px-6 mb-6">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search pages..."
-            className="w-full bg-white/10 backdrop-blur-sm text-white placeholder-purple-300 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-purple-400"
-          />
-          <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
-            <svg
-              className="w-5 h-5 text-purple-300"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
-
       {/* Navigation Grid */}
-      <div className="px-6 pb-6 mb-5">
+      <div className="px-6 mb-5 pt-24 pb-6">
         <div className="grid grid-cols-2 gap-4 mb-24">
           {navigationCards.map((card) => {
             const Icon = card.icon;

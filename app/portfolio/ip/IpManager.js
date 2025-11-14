@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Plus, Trash2, AlertCircle, Loader2, MapPinPlus } from "lucide-react";
+import { Plus, Trash2, AlertCircle, Loader2, MapPin, Home } from "lucide-react";
 
 export default function IPManagement() {
   const [ips, setIps] = useState([]);
@@ -92,6 +92,7 @@ export default function IPManagement() {
       setNewIp(data.IP);
     } catch (error) {}
   };
+
   useEffect(() => {
     if (!newIp || ips.length === 0) {
       setexistIp(false);
@@ -102,152 +103,153 @@ export default function IPManagement() {
   }, [newIp, ips]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">
-      <div className="max-w-5xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-8 py-6 rounded-b-2xl shadow-md flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-white tracking-wide drop-shadow-sm">
-                IP Address Management
-              </h1>
-              <p className="text-blue-100 mt-2 text-sm">
-                Manage and authorize IP addresses securely
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 pb-6">
+      {/* Mobile Header with Home Button */}
+      <div className="sticky top-0 z-50 bg-gradient-to-r from-blue-600 to-indigo-700 shadow-lg rounded-b-3xl">
+        <div className="flex items-center justify-between px-4 py-4">
+          <button
+            onClick={() => window.location.href = '/portfolio'}
+            className="flex items-center gap-2 text-white hover:bg-white/10 rounded-lg px-3 py-2 transition-all active:scale-95"
+          >
+            <Home size={20} />
+            <span className="text-sm font-medium">Home</span>
+          </button>
+          <h1 className="text-lg font-bold text-white">IP Management</h1>
+          <div className="w-20"></div>
+        </div>
+      </div>
+
+      <div className="p-4 space-y-4 mt-2">
+        {/* Current IP Card */}
+        <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl shadow-lg p-5">
+          <p className="text-blue-100 text-xs mb-3 font-medium">Your Current IP</p>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex-1 bg-white/20 backdrop-blur-md rounded-xl px-4 py-3 border border-white/30">
+              <p className="text-lime-300 font-mono text-sm font-bold">
+                {newIp || "Detecting..."}
               </p>
             </div>
-
-            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md rounded-2xl px-4 py-2 border border-white/20 shadow-inner">
-              <div className="bg-white/20 backdrop-blur-lg border border-green-300 rounded-xl px-4 py-2">
-                <p className="text-white font-semibold text-sm">
-                  Your IP:{" "}
-                  <span className="text-lime-300 font-bold tracking-wide">
-                    {newIp || "Detecting..."}
-                  </span>
-                </p>
-              </div>
-
-              {!existIp ? (
-                <button
-                  onClick={() => {
-                    if (!newIp) return;
-                    addIP();
-                  }}
-                  title="Click to add your current IP"
-                  className="flex items-center justify-center bg-green-500 hover:bg-green-600 text-white rounded-full p-2.5 transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
-                >
-                  <MapPinPlus size={22} />
-                </button>
-              ) : (
-                <div
-                  title="This IP is already authorized"
-                  className="flex items-center justify-center bg-green-600/30 rounded-full p-2 cursor-default"
-                >
-                  <MapPinPlus size={22} className="text-green-300" />
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="p-8 border-b border-slate-200 bg-slate-50">
-            <div className="flex gap-4">
-              <input
-                type="text"
-                value={newIp}
-                onChange={(e) => setNewIp(e.target.value)}
-                placeholder="Enter IP address (e.g., 192.168.1.1)"
-                onKeyPress={(e) => e.key === "Enter" && addIP(e)}
-                className="flex-1 px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+            {!existIp ? (
               <button
-                onClick={addIP}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-md hover:shadow-lg"
+                onClick={() => {
+                  if (!newIp) return;
+                  addIP();
+                }}
+                title="Add your current IP"
+                className="flex items-center justify-center bg-green-500 hover:bg-green-600 text-white rounded-xl p-3 transition-all shadow-md active:scale-95"
               >
-                <Plus size={20} />
-                Add IP
+                <Plus size={20} strokeWidth={2.5} />
               </button>
-            </div>
-          </div>
-
-          {error && (
-            <div className="mx-8 mt-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-              <AlertCircle className="text-red-600 flex-shrink-0" size={20} />
-              <p className="text-red-800">{error}</p>
-            </div>
-          )}
-
-          {success && (
-            <div className="mx-8 mt-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
-              <AlertCircle className="text-green-600 flex-shrink-0" size={20} />
-              <p className="text-green-800">{success}</p>
-            </div>
-          )}
-
-          <div className="p-8">
-            {loading ? (
-              <div className="flex justify-center items-center py-12">
-                <Loader2 className="animate-spin text-blue-600" size={40} />
-              </div>
-            ) : ips.length === 0 ? (
-              <div className="text-center py-12 text-slate-500">
-                <p className="text-lg">No IP addresses found</p>
-                <p className="text-sm mt-2">
-                  Add your first IP address to get started
-                </p>
-              </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b-2 border-slate-200">
-                      <th className="text-left py-4 px-4 font-semibold text-slate-700">
-                        ID
-                      </th>
-                      <th className="text-left py-4 px-4 font-semibold text-slate-700">
-                        IP Address
-                      </th>
-                      <th className="text-left py-4 px-4 font-semibold text-slate-700">
-                        Created At
-                      </th>
-                      <th className="text-right py-4 px-4 font-semibold text-slate-700">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ips.map((ip, index) => (
-                      <tr
-                        key={ip.id}
-                        className={`border-b border-slate-100 hover:bg-slate-50 transition-colors ${
-                          index % 2 === 0 ? "bg-white" : "bg-slate-50/50"
-                        }`}
-                      >
-                        <td className="py-4 px-4 text-slate-600">{ip.id}</td>
-                        <td className="py-4 px-4">
-                          <span className="font-mono bg-blue-50 text-blue-700 px-3 py-1 rounded-md">
-                            {ip.ipaddress}
-                          </span>
-                        </td>
-                        <td className="py-4 px-4 text-slate-600">
-                          {new Date(ip.created_at).toLocaleString()}
-                        </td>
-                        <td className="py-4 px-4 text-right">
-                          <button
-                            onClick={() => deleteIP(ip.id)}
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium"
-                          >
-                            <Trash2 size={16} />
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div 
+                title="IP already authorized"
+                className="flex items-center justify-center bg-green-600/30 rounded-xl p-3"
+              >
+                <MapPin size={20} className="text-green-300" />
               </div>
             )}
           </div>
+        </div>
 
-          <div className="px-8 py-4 bg-slate-50 border-t border-slate-200">
-            <p className="text-sm text-slate-600 text-center">
+        {/* Add IP Card */}
+        <div className="bg-white rounded-2xl shadow-md p-4">
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
+            Add New IP Address
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={newIp}
+              onChange={(e) => setNewIp(e.target.value)}
+              placeholder="e.g., 192.168.1.1"
+              onKeyPress={(e) => e.key === "Enter" && addIP(e)}
+              className="flex-1 px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            />
+            <button
+              onClick={addIP}
+              className="px-5 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors shadow-md active:scale-95 flex items-center gap-2"
+            >
+              <Plus size={18} />
+              <span className="text-sm">Add</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Alert Messages */}
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 animate-pulse">
+            <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={18} />
+            <p className="text-red-800 text-sm">{error}</p>
+          </div>
+        )}
+
+        {success && (
+          <div className="p-4 bg-green-50 border border-green-200 rounded-xl flex items-start gap-3">
+            <AlertCircle className="text-green-600 flex-shrink-0 mt-0.5" size={18} />
+            <p className="text-green-800 text-sm font-medium">{success}</p>
+          </div>
+        )}
+
+        {/* IP List Card */}
+        <div className="bg-white rounded-2xl shadow-md overflow-hidden">
+          <div className="bg-slate-50 px-4 py-3 border-b border-slate-200">
+            <h2 className="text-sm font-semibold text-slate-700">Authorized IP Addresses</h2>
+          </div>
+
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="animate-spin text-blue-600" size={32} />
+            </div>
+          ) : ips.length === 0 ? (
+            <div className="text-center py-12 px-4">
+              <p className="text-slate-500 text-sm">No IP addresses found</p>
+              <p className="text-slate-400 text-xs mt-1">
+                Add your first IP address to get started
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {ips.map((ip, index) => (
+                <div
+                  key={ip.id}
+                  className="p-4 hover:bg-slate-50 transition-colors active:bg-slate-100"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded">
+                          ID: {ip.id}
+                        </span>
+                      </div>
+                      <div className="font-mono text-blue-700 text-sm bg-blue-50 px-3 py-2 rounded-lg inline-block mb-2">
+                        {ip.ipaddress}
+                      </div>
+                      <p className="text-xs text-slate-500">
+                        Added: {new Date(ip.created_at).toLocaleString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => deleteIP(ip.id)}
+                      className="flex items-center gap-1.5 px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium active:scale-95 shrink-0"
+                    >
+                      <Trash2 size={14} />
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Footer */}
+          <div className="px-4 py-3 bg-slate-50 border-t border-slate-200">
+            <p className="text-xs text-slate-600 text-center">
               Total IP Addresses:{" "}
               <span className="font-semibold text-slate-800">{ips.length}</span>
             </p>

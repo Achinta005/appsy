@@ -31,6 +31,7 @@ const Project = () => {
 
     try {
       const result = await PortfolioApiService.UplaodProject(formData);
+      await new Promise(resolve => setTimeout(resolve, 1500));
       reset();
       setButtonText("Submitted Successfully");
       setTimeout(() => {
@@ -38,191 +39,192 @@ const Project = () => {
       }, 3000);
     } catch (error) {
       console.error("Upload failed:", error);
+      setButtonText("SUBMIT");
     }
   };
-  // {isSubmitting && <div>Loading...</div>}
+
   return (
-    <section className="py-20 rounded-lg bg-[url(https://res.cloudinary.com/dc1fkirb4/image/upload/v1755754879/proj_hilka1.jpg)] bg-cover h-[140vh]">
-      <div className="max-w-5xl mx-auto  px-4 sm:px-6 lg:px-8 border border-gray-200 rounded-2xl shadow-md hover:shadow-2xl transition duration-300 ease-in-out transform hover:scale-110 bg-white/10 backdrop-blur-lg relative top-10">
-        <form
-          id="contact-form"
-          className="space-y-6 mt-24"
-          onSubmit={handleSubmit(onSubmit)}
-        >
-          <div>
-            <label
-              htmlFor="heading"
-              className="block text-sm font-medium text-gray-700 mb-2 "
-            ></label>
-            <h1 className=" text-green-500 font-bold text-3xl relative top-[-60px] left-[350px]">
+    <section className="min-h-screen py-8 px-4 sm:py-12 md:py-20 bg-gradient-to-br from-purple-100 via-pink-50 to-blue-100">
+      <div className="max-w-5xl mx-auto">
+        <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg p-4 sm:p-6 md:p-8 lg:p-10 border border-gray-200">
+          {/* Header */}
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-500 text-center">
               Enter Project Details
             </h1>
           </div>
 
-          <div className="grid grid-cols-3 gap-6">
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium  mb-2 text-purple-600"
-              >
-                Project Title
-              </label>
+          <div className="space-y-4 sm:space-y-6">
+            {/* Project Title, Technologies, Image - Responsive Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+              <div>
+                <label
+                  htmlFor="title"
+                  className="block text-sm font-medium mb-2 text-purple-600"
+                >
+                  Project Title
+                </label>
+                <input
+                  placeholder="Project Title"
+                  {...register("title", {
+                    required: { value: true, message: "This field is required" },
+                  })}
+                  type="text"
+                  className="w-full text-pink-600 px-3 sm:px-4 py-2 sm:py-3 border border-blue-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-bold"
+                />
+                {errors.title && (
+                  <p className="text-red-700 text-xs mt-1">{errors.title.message}</p>
+                )}
+              </div>
 
-              <input
-                placeholder="Project Title"
-                {...register("title", {
-                  required: { value: true, message: "This field is required" },
-                })}
-                type="text"
-                className="w-full text-pink-600 px-4 py-3 border  border-blue-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-bold border-b"
-              />
-              {errors.title && (
-                <p className="text-red-700">{errors.title.message}</p>
-              )}
+              <div>
+                <label
+                  htmlFor="technologies"
+                  className="block text-sm font-medium text-purple-600 mb-2"
+                >
+                  Technologies
+                </label>
+                <input
+                  placeholder="Enter Technology Used"
+                  {...register("technologies", {})}
+                  type="text"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-bold text-pink-600 border-blue-800"
+                />
+                {errors.technologies && (
+                  <p className="text-red-700 text-xs mt-1">{errors.technologies.message}</p>
+                )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="image"
+                  className="block text-sm font-medium text-purple-600 mb-2"
+                >
+                  Image
+                </label>
+                <input
+                  placeholder="Give Website Image"
+                  {...register("image", {
+                    required: { value: true, message: "This field is required" },
+                  })}
+                  type="file"
+                  accept="image/*"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-bold text-pink-600 border-blue-800"
+                />
+                {errors.image && (
+                  <p className="text-red-700 text-xs mt-1">{errors.image.message}</p>
+                )}
+              </div>
             </div>
 
-            <div>
-              <label
-                htmlFor="technologies"
-                className="block text-sm font-medium text-purple-600 mb-2"
-              >
-                Technologies
-              </label>
-              <input
-                placeholder="Enter Technology Used"
-                {...register("technologies", {})}
-                type="text"
-                className="w-full  px-4 py-3 border  rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-bold border-b text-pink-600 border-blue-800"
-              />
-              {errors.technologies && (
-                <p className="text-red-700">{errors.technologies.message}</p>
-              )}
+            {/* Category, LiveURL, GitHubURL - Responsive Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+              <div>
+                <label
+                  htmlFor="category"
+                  className="block text-sm font-medium text-purple-600 mb-2"
+                >
+                  Category
+                </label>
+                <select
+                  id="category"
+                  {...register("category", { required: true })}
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-bold text-pink-600 border-blue-800"
+                >
+                  <option value="">-- Select Category --</option>
+                  <option value="Web Development">Web Development</option>
+                  <option value="Machine Learning">Machine Learning</option>
+                  <option value="Data Science">Data Science</option>
+                </select>
+                {errors.category && (
+                  <p className="text-red-700 text-xs mt-1">This field is required</p>
+                )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="liveUrl"
+                  className="block text-sm font-medium text-purple-600 mb-2"
+                >
+                  Live URL
+                </label>
+                <input
+                  placeholder="Live URL"
+                  {...register("liveUrl")}
+                  type="text"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-bold text-pink-600 border-blue-800"
+                />
+                {errors.liveUrl && (
+                  <p className="text-red-700 text-xs mt-1">{errors.liveUrl.message}</p>
+                )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="githubUrl"
+                  className="block text-sm font-medium text-purple-600 mb-2"
+                >
+                  GitHub URL
+                </label>
+                <input
+                  placeholder="GitHub URL"
+                  {...register("githubUrl")}
+                  type="text"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-bold text-pink-600 border-blue-800"
+                />
+                {errors.githubUrl && (
+                  <p className="text-red-700 text-xs mt-1">{errors.githubUrl.message}</p>
+                )}
+              </div>
             </div>
-            <div>
-              <label
-                htmlFor="subject"
-                className="block text-sm font-medium text-purple-600 mb-2 "
-              >
-                Image
-              </label>
-              <input
-                placeholder="Give Website Image"
-                {...register("image", {
-                  required: { value: true, message: "This field is required" },
-                })}
-                type="file"
-                accept="image/*"
-                className="w-full  px-4 py-3 border  rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-bold border-b text-pink-600 border-blue-800"
-              />
-              {errors.image && (
-                <p className="text-red-700">{errors.image.message}</p>
-              )}
+
+            {/* Order and Description - Responsive Layout */}
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+              <div className="w-full sm:w-1/4">
+                <label
+                  htmlFor="order"
+                  className="block text-sm font-medium text-purple-600 mb-2"
+                >
+                  Order
+                </label>
+                <input
+                  placeholder="Order"
+                  {...register("order")}
+                  type="number"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-bold text-pink-600 border-blue-800"
+                />
+                {errors.order && (
+                  <p className="text-red-700 text-xs mt-1">{errors.order.message}</p>
+                )}
+              </div>
+
+              <div className="w-full sm:w-3/4">
+                <label
+                  htmlFor="description"
+                  className="block text-sm font-medium text-purple-600 mb-2"
+                >
+                  Description
+                </label>
+                <textarea
+                  rows={4}
+                  placeholder="Tell me about your project..."
+                  {...register("description")}
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-bold text-pink-600 border-blue-800 resize-none"
+                />
+              </div>
             </div>
+
+            {/* Submit Button */}
+            <button
+              disabled={isSubmitting}
+              type="button"
+              onClick={handleSubmit(onSubmit)}
+              className="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white px-6 py-3 sm:py-4 rounded-lg hover:from-purple-600 hover:to-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-300 font-semibold text-sm sm:text-base shadow-md hover:shadow-lg"
+            >
+              {ButtonText}
+            </button>
           </div>
-
-          <div className="grid grid-cols-3 gap-6">
-            <div>
-              <label
-                htmlFor="subject"
-                className="block text-sm font-medium text-purple-600 mb-2 "
-              >
-                Catagory
-              </label>
-              <select
-                id="color"
-                {...register("category", { required: true })}
-                className="w-full  px-4 py-3 border  rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-bold border-b text-pink-600 border-blue-800"
-              >
-                <option value="">-- Select Catagory --</option>
-                <option value="Web Development">Web Development</option>
-                <option value="Machine Learning">Machine Learning</option>
-                <option value="Data Science">Data Science</option>
-              </select>
-              {errors.liveUrl && (
-                <p className="text-red-700">{errors.liveUrl.message}</p>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="subject"
-                className="block text-sm font-medium text-purple-600 mb-2 "
-              >
-                LiveURL
-              </label>
-              <input
-                placeholder="liveUrl"
-                {...register("liveUrl")}
-                type="text"
-                className="w-full  px-4 py-3 border  rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-bold border-b text-pink-600 border-blue-800"
-              />
-              {errors.liveUrl && (
-                <p className="text-red-700">{errors.liveUrl.message}</p>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="subject"
-                className="block text-sm font-medium text-purple-600 mb-2 "
-              >
-                GitHubURL
-              </label>
-              <input
-                placeholder="githubUrl"
-                {...register("githubUrl")}
-                type="text"
-                className="w-full  px-4 py-3 border  rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-bold border-b text-pink-600 border-blue-800"
-              />
-              {errors.githubUrl && (
-                <p className="text-red-700">{errors.githubUrl.message}</p>
-              )}
-            </div>
-          </div>
-
-          <div className="flex gap-4 w-full">
-            <div className="w-[20%]">
-              <label
-                htmlFor="subject"
-                className="block text-sm font-medium text-purple-600 mb-2 "
-              >
-                ORDER
-              </label>
-              <input
-                placeholder="ORDER"
-                {...register("order")}
-                type="number"
-                className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-bold border-b text-pink-600 border-blue-800"
-              />
-              {errors.order && (
-                <p className="text-red-700">{errors.order.message}</p>
-              )}
-            </div>
-            <div className="w-[80%]">
-              <label
-                htmlFor="message"
-                className="block text-sm font-medium text-purple-600 mb-2 "
-              >
-                Description
-              </label>
-              <textarea
-                rows={6}
-                placeholder="Tell me about your project..."
-                {...register("description")}
-                type="text"
-                className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-bold border-b text-pink-600 border-blue-800"
-              />
-              <p className="text-xs text-gray-500 mt-1"></p>
-            </div>
-          </div>
-
-          <button
-            disabled={isSubmitting}
-            type="submit"
-            value="submit"
-            className="w-full h-10 bg-white/10 text-white px-8 py-3 rounded-lg hover:bg-white/20 disabled:bg-gray-400 transition-colors cursor-pointer whitespace-nowrap mb-5"
-          >
-            {ButtonText}
-          </button>
-        </form>
+        </div>
       </div>
     </section>
   );

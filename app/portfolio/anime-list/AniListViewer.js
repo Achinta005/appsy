@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Download, Star, Tv, ArrowLeft, List } from "lucide-react";
+import { Search, Download, Star, Tv, ArrowLeft, List, Grid3x3, Grid2x2, LayoutGrid } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function AniListViewer() {
   const [username, setUsername] = useState("achinta");
@@ -11,6 +12,7 @@ export default function AniListViewer() {
   const [activeFilter, setActiveFilter] = useState("ALL");
   const [exporting, setExporting] = useState(false);
   const [gridSize, setGridSize] = useState(2);
+  const router = useRouter();
 
   const statusLabels = {
     CURRENT: "Watching",
@@ -31,18 +33,21 @@ export default function AniListViewer() {
   };
 
   const gridConfigs = [
-    { name: "Horizontal", cols: "flex flex-col gap-3" },
+    { name: "Horizontal", cols: "flex flex-col gap-3", icon: List },
     {
       name: "Compact",
-      cols: "grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3",
+      cols: "grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2 sm:gap-3",
+      icon: Grid3x3,
     },
     {
       name: "Normal",
-      cols: "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4",
+      cols: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4",
+      icon: Grid2x2,
     },
     {
       name: "Detailed",
-      cols: "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6",
+      cols: "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6",
+      icon: LayoutGrid,
     },
   ];
 
@@ -75,6 +80,17 @@ export default function AniListViewer() {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fixed handleClick function
+  const handleClick = () => {
+    try {
+      router.push('/portfolio/admin');
+    } catch (error) {
+      console.error('Navigation error:', error);
+      // Fallback to window.location if router fails
+      window.location.href = '/portfolio/admin';
     }
   };
 
@@ -130,97 +146,97 @@ export default function AniListViewer() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900 relative">
+      {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute w-96 h-96 bg-purple-500/10 rounded-full blur-3xl -top-20 -left-20 animate-pulse"></div>
+        <div className="absolute w-64 h-64 sm:w-96 sm:h-96 bg-purple-500/10 rounded-full blur-3xl -top-20 -left-20 animate-pulse"></div>
         <div
-          className="absolute w-96 h-96 bg-blue-500/10 rounded-full blur-3xl top-1/2 -right-20 animate-pulse"
+          className="absolute w-64 h-64 sm:w-96 sm:h-96 bg-blue-500/10 rounded-full blur-3xl top-1/2 -right-20 animate-pulse"
           style={{ animationDelay: "1s" }}
         ></div>
       </div>
 
       <div className="relative z-10 min-h-screen">
+        {/* Sticky Header */}
         <div className="bg-black/20 backdrop-blur-xl border-b border-white/10 sticky top-0 z-40">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => window.history.back()}
-                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-white transition-all duration-300"
-                >
-                  <ArrowLeft size={20} />
-                  <span className="hidden sm:inline">Back</span>
-                </button>
-              </div>
+          <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
+            <div className="flex items-center justify-between gap-3">
+              <button
+                onClick={handleClick}
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white/10 hover:bg-white/20 active:scale-95 rounded-xl text-white transition-all duration-300"
+              >
+                <ArrowLeft size={18} className="sm:w-5 sm:h-5" />
+                <span className="text-sm sm:text-base font-medium">Back</span>
+              </button>
 
-              <h1 className="text-2xl sm:text-3xl font-black text-white">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-white">
                 Ani
                 <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                   List
                 </span>
               </h1>
+              
+              <div className="w-16 sm:w-20"></div>
             </div>
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-4xl mx-auto mb-8">
-            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-6 border border-white/20">
-              <div className="flex flex-col gap-4">
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+          {/* Search Section */}
+          <div className="max-w-4xl mx-auto mb-6 sm:mb-8">
+            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-white/20">
+              <div className="flex flex-col gap-3 sm:gap-4">
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && fetchAnimeList()}
                   placeholder="Enter AniList username..."
-                  className="w-full px-6 py-4 bg-black/30 border border-white/20 rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-4 sm:px-6 py-3 sm:py-4 bg-black/30 border border-white/20 rounded-xl sm:rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
                 />
 
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <button
                     onClick={() => fetchAnimeList()}
                     disabled={loading}
-                    className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold rounded-xl transition-all shadow-lg disabled:opacity-50"
+                    className="flex-1 px-4 sm:px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 active:scale-95 text-white font-bold rounded-xl transition-all shadow-lg disabled:opacity-50 text-sm sm:text-base"
                   >
                     {loading ? (
                       <span className="flex items-center gap-2 justify-center">
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                         Loading...
                       </span>
                     ) : (
                       <span className="flex items-center gap-2 justify-center">
-                        <Search size={20} />
+                        <Search size={18} className="sm:w-5 sm:h-5" />
                         Fetch List
                       </span>
                     )}
                   </button>
 
-                  <div className="flex gap-2">
-                    {[0, 1, 2, 3].map((size) => (
-                      <button
-                        key={size}
-                        onClick={() => setGridSize(size)}
-                        className={`px-4 py-3 rounded-xl font-bold transition-all ${
-                          gridSize === size
-                            ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg"
-                            : "bg-white/10 text-gray-300 hover:bg-white/20"
-                        }`}
-                      >
-                        {size === 0 ? (
-                          <List size={20} />
-                        ) : size === 1 ? (
-                          "S"
-                        ) : size === 2 ? (
-                          "M"
-                        ) : (
-                          "L"
-                        )}
-                      </button>
-                    ))}
+                  {/* Grid Size Controls */}
+                  <div className="flex gap-2 justify-center sm:justify-start">
+                    {gridConfigs.map((config, index) => {
+                      const Icon = config.icon;
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => setGridSize(index)}
+                          className={`px-3 sm:px-4 py-3 rounded-xl font-bold transition-all ${
+                            gridSize === index
+                              ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg"
+                              : "bg-white/10 text-gray-300 hover:bg-white/20"
+                          }`}
+                          title={config.name}
+                        >
+                          <Icon size={18} className="sm:w-5 sm:h-5" />
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
                 {error && (
-                  <div className="p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-300">
+                  <div className="p-3 sm:p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-300 text-sm">
                     {error}
                   </div>
                 )}
@@ -228,69 +244,61 @@ export default function AniListViewer() {
             </div>
           </div>
 
+          {/* Filters and Export */}
           {animeList.length > 0 && (
-            <div className="mb-8">
-              <div className="flex flex-wrap gap-4 items-center justify-between mb-6">
+            <div className="mb-6 sm:mb-8">
+              <div className="flex flex-col gap-4">
+                {/* Status Filters */}
                 <div className="flex flex-wrap gap-2">
                   {Object.entries(statusCounts).map(([status, count]) => (
                     <button
                       key={status}
                       onClick={() => setActiveFilter(status)}
-                      className={`px-4 py-2.5 rounded-xl font-bold transition-all ${
+                      className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-bold transition-all text-xs sm:text-sm ${
                         activeFilter === status
-                          ? `text-white bg-gradient-to-r ${statusColors[status]}`
+                          ? `text-white bg-gradient-to-r ${statusColors[status]} shadow-lg`
                           : "bg-white/10 text-gray-300 hover:bg-white/20"
                       }`}
                     >
-                      {statusLabels[status]} ({count})
+                      <span className="hidden sm:inline">{statusLabels[status]}</span>
+                      <span className="sm:hidden">{statusLabels[status].split(' ')[0]}</span>
+                      <span className="ml-1">({count})</span>
                     </button>
                   ))}
                 </div>
 
-                <div className="flex gap-3">
-                  {[
-                    { format: "json", label: "JSON" }
-                  ].map(({ format, label }) => (
-                    <button
-                      key={format}
-                      onClick={() => exportList(format)}
-                      disabled={exporting}
-                      className={`flex items-center gap-2 px-4 py-2.5
-                 bg-gradient-to-r from-green-600 to-emerald-600
-                 hover:from-green-700 hover:to-emerald-700
-                 text-white font-semibold rounded-xl
-                 transition-all shadow-lg disabled:opacity-50`}
-                    >
-                      <Download size={18} />
-                      <span>{label}</span>
-                    </button>
-                  ))}
+                {/* Export Button */}
+                <div className="flex justify-center sm:justify-end">
+                  <button
+                    onClick={() => exportList('json')}
+                    disabled={exporting}
+                    className="flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 active:scale-95 text-white font-semibold rounded-xl transition-all shadow-lg disabled:opacity-50 text-sm sm:text-base"
+                  >
+                    <Download size={16} className="sm:w-5 sm:h-5" />
+                    <span>Export JSON</span>
+                  </button>
                 </div>
               </div>
             </div>
           )}
 
+          {/* Loading State */}
           {loading && (
-            <div className="flex flex-col items-center justify-center py-20">
-              <div className="w-16 h-16 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin mb-4"></div>
-              <p className="text-white text-lg">Loading anime list...</p>
+            <div className="flex flex-col items-center justify-center py-12 sm:py-20">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin mb-4"></div>
+              <p className="text-white text-base sm:text-lg">Loading anime list...</p>
             </div>
           )}
 
+          {/* Anime Grid */}
           {filteredAnime.length > 0 && (
-            <div
-              className={
-                gridSize === 0
-                  ? gridConfigs[0].cols
-                  : `grid ${gridConfigs[gridSize].cols}`
-              }
-            >
+            <div className={gridConfigs[gridSize].cols}>
               {filteredAnime.map((anime) => (
                 <div
                   key={anime.id}
-                  className="group bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/20 hover:border-white/40 transition-all"
+                  className="group bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-xl sm:rounded-2xl overflow-hidden border border-white/20 hover:border-white/40 transition-all hover:shadow-xl"
                 >
-                  <div className="relative h-72 overflow-hidden">
+                  <div className="relative h-48 sm:h-60 md:h-72 overflow-hidden">
                     <img
                       src={anime.cover_image_large || anime.cover_image_medium}
                       alt={anime.title_english || anime.title_romaji}
@@ -298,31 +306,34 @@ export default function AniListViewer() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
 
+                    {/* Status Badge */}
                     <div
-                      className={`absolute top-3 left-3 px-3 py-1.5 rounded-full font-bold text-xs bg-gradient-to-r ${
+                      className={`absolute top-2 sm:top-3 left-2 sm:left-3 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full font-bold text-xs bg-gradient-to-r ${
                         statusColors[anime.status]
-                      }`}
+                      } shadow-lg`}
                     >
                       {statusLabels[anime.status]}
                     </div>
 
+                    {/* Score Badge */}
                     {anime.average_score && (
-                      <div className="absolute top-3 right-3 bg-gradient-to-r from-yellow-500 to-orange-500 px-3 py-1.5 rounded-full flex items-center gap-1">
-                        <Star size={14} className="text-white fill-white" />
-                        <span className="text-white font-bold text-sm">
+                      <div className="absolute top-2 sm:top-3 right-2 sm:right-3 bg-gradient-to-r from-yellow-500 to-orange-500 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full flex items-center gap-1 shadow-lg">
+                        <Star size={12} className="sm:w-3.5 sm:h-3.5 text-white fill-white" />
+                        <span className="text-white font-bold text-xs sm:text-sm">
                           {anime.average_score}
                         </span>
                       </div>
                     )}
                   </div>
 
-                  <div className="p-4">
-                    <h3 className="text-white font-bold text-base line-clamp-2 mb-2">
+                  {/* Card Content */}
+                  <div className="p-3 sm:p-4">
+                    <h3 className="text-white font-bold text-sm sm:text-base line-clamp-2 mb-2">
                       {anime.title_english || anime.title_romaji}
                     </h3>
-                    <div className="flex items-center justify-between text-sm text-gray-400">
+                    <div className="flex items-center justify-between text-xs sm:text-sm text-gray-400">
                       <span className="flex items-center gap-1">
-                        <Tv size={14} />
+                        <Tv size={12} className="sm:w-3.5 sm:h-3.5" />
                         {anime.progress}/{anime.episodes || "?"}
                       </span>
                       {anime.score > 0 && (
@@ -334,6 +345,16 @@ export default function AniListViewer() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!loading && animeList.length === 0 && (
+            <div className="text-center py-12 sm:py-20">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Search size={32} className="sm:w-10 sm:h-10 text-gray-400" />
+              </div>
+              <p className="text-gray-400 text-base sm:text-lg">Enter a username to fetch anime list</p>
             </div>
           )}
         </div>

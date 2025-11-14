@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Wifi, User, Clock, Hash } from "lucide-react";
 import { PortfolioApiService } from "@/services/PortfolioApiService";
 
 const Ipaddress = () => {
@@ -10,8 +11,7 @@ const Ipaddress = () => {
     const getIps = async () => {
       try {
         const response = await PortfolioApiService.ViewIp();
-        const data = await response;
-        setIpAddresses(data);
+        setIpAddresses(response);
         setError(null);
       } catch (error) {
         console.error("Error fetching IP addresses:", error);
@@ -38,81 +38,128 @@ const Ipaddress = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">Loading IP records...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-4">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          Error: {error}
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-50 p-4 flex items-center justify-center">
+        <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full border-2 border-red-200">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Wifi className="w-8 h-8 text-red-600" />
+            </div>
+            <h3 className="text-xl font-bold text-red-600 mb-2">Error Loading Data</h3>
+            <p className="text-gray-600">{error}</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <header className="mb-8 text-center">
-        <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600">
-          IP Address Records
-        </h1>
-        <p className="text-gray-600 mt-2">Total Records: {ipAddresses.length}</p>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50">
+      {/* Header */}
+      <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-lg border-b border-gray-200 shadow-sm">
+        <div className="px-4 sm:px-6 py-4 sm:py-6">
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-green-500 to-blue-500 rounded-full flex items-center justify-center">
+              <Wifi className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            </div>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600">
+              IP Records
+            </h1>
+          </div>
+          <div className="flex items-center justify-center gap-2">
+            <span className="px-3 py-1 bg-gradient-to-r from-green-500 to-blue-500 text-white text-xs sm:text-sm font-semibold rounded-full">
+              {ipAddresses.length} Total Records
+            </span>
+          </div>
+        </div>
+      </div>
 
-      <section className="w-full overflow-x-auto shadow-2xl rounded-lg">
-        <table className="min-w-full bg-white rounded-lg overflow-hidden">
-          <thead className="bg-gradient-to-r from-green-500 to-blue-500 text-white">
-            <tr>
-              <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
-                User ID
-              </th>
-              <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
-                Username
-              </th>
-              <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
-                IP Address
-              </th>
-              <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
-                Timestamp
-              </th>
-            </tr>
-          </thead>
+      {/* Content */}
+      <div className="px-4 sm:px-6 py-4 sm:py-6">
+        {ipAddresses.length === 0 ? (
+          <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Wifi className="w-10 h-10 text-gray-400" />
+            </div>
+            <p className="text-gray-500 text-lg font-medium">No IP records found</p>
+          </div>
+        ) : (
+          <div className="space-y-3 sm:space-y-4">
+            {ipAddresses.map((ip, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100"
+              >
+                {/* Mobile Card Layout */}
+                <div className="p-4 sm:p-5">
+                  {/* Header Row */}
+                  <div className="flex items-start justify-between mb-3 pb-3 border-b border-gray-100">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-green-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <User className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-gray-500 font-medium mb-1">Username</p>
+                        <p className="text-base sm:text-lg font-bold text-gray-900 truncate">
+                          {ip.username || "N/A"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="ml-2 px-2 py-1 bg-blue-100 rounded-lg flex-shrink-0">
+                      <div className="flex items-center gap-1">
+                        <Hash className="w-3 h-3 text-blue-600" />
+                        <span className="text-xs font-bold text-blue-600">
+                          {ip.id || "N/A"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
 
-          <tbody className="divide-y divide-gray-200">
-            {ipAddresses.length === 0 ? (
-              <tr>
-                <td colSpan="4" className="px-6 py-8 text-center text-gray-500">
-                  No IP records found
-                </td>
-              </tr>
-            ) : (
-              ipAddresses.map((ip, index) => (
-                <tr
-                  key={index}
-                  className="hover:bg-gradient-to-r hover:from-green-50 hover:to-blue-50 transition-all duration-200 ease-in-out"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {ip.id || "N/A"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-semibold">
-                    {ip.username || "N/A"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-mono">
-                    {ip.ipaddress || "N/A"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {formatTimestamp(ip.timestamp)}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </section>
+                  {/* IP Address */}
+                  <div className="mb-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Wifi className="w-4 h-4 text-gray-400" />
+                      <p className="text-xs text-gray-500 font-medium">IP Address</p>
+                    </div>
+                    <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg px-3 py-2">
+                      <p className="text-sm sm:text-base font-mono font-bold text-blue-600 break-all">
+                        {ip.ipaddress || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Timestamp */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <Clock className="w-4 h-4 text-gray-400" />
+                      <p className="text-xs text-gray-500 font-medium">Timestamp</p>
+                    </div>
+                    <p className="text-xs sm:text-sm text-gray-600 font-medium">
+                      {formatTimestamp(ip.timestamp)}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Gradient Bottom Border */}
+                <div className="h-1 bg-gradient-to-r from-green-500 via-blue-500 to-purple-500"></div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Bottom Spacing */}
+      <div className="h-6"></div>
     </div>
   );
 };

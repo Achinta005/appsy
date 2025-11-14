@@ -15,7 +15,7 @@ import {
   IconDashboard,
   IconLogin2,
 } from "@tabler/icons-react";
-import { CircleUser } from "lucide-react";
+import { CircleUser,MapPinHouse } from "lucide-react";
 
 const getToken = () => localStorage.getItem("admin_token");
 const setToken = (token) => localStorage.setItem("admin_token", token);
@@ -94,12 +94,14 @@ export default function Header() {
   const handleAdminClick = () => router.push("/portfolio/admin");
 
   const baseLinks = [
+    { title: "HOME", icon: <IconHome className="h-full w-full text-gray-300" />, href: "/" },
     { title: "Intro", icon: <CircleUser className="h-full w-full text-gray-300" />, href: "/portfolio" },
     { title: "ABOUT", icon: <IconUser className="h-full w-full text-gray-300" />, href: "/portfolio/about" },
     { title: "PROJECTS", icon: <IconCertificate className="h-full w-full text-gray-300" />, href: "/portfolio/projects" },
     { title: "BLOGS", icon: <IconArticle className="h-full w-full text-gray-300" />, href: "/portfolio/blog" },
     { title: "CONTACTS", icon: <IconAddressBook className="h-full w-full text-gray-300" />, href: "/portfolio/contact" },
-    { title: "HOME", icon: <IconHome className="h-full w-full text-gray-300" />, href: "/" },
+    { title: "IP", icon: <MapPinHouse className="h-full w-full text-gray-300" />, href: "/portfolio/ip" },
+    
   ];
 
   const authLinks = isLoggedIn
