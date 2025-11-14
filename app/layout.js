@@ -1,9 +1,5 @@
-"use client";
-
 import "./globals.css";
-import { App } from "@capacitor/app";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import Providers from "./providers.js";
 
 export const metadata = {
   title: "Android App",
@@ -11,23 +7,11 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  const router = useRouter();
-
-  useEffect(() => {
-    const listener = App.addListener("backButton", ({ canGoBack }) => {
-      if (canGoBack) {
-        router.back();
-      } else {
-        App.exitApp();
-      }
-    });
-
-    return () => listener.remove();
-  }, []);
-
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }
