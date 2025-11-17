@@ -9,8 +9,6 @@ import {
   BookOpen, 
   Globe,
   LogOut,
-  Menu,
-  X,
   ChevronRight,
   User,
   Wifi
@@ -28,9 +26,22 @@ const AdminPage = () => {
   const [loading, setLoading] = useState(false);
   const [activeView, setActiveView] = useState("dashboard");
   const [ipAddress, setipAddress] = useState("117.233.158.244");
-  const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
 
+
+  const getIp = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_PYTHON_API_URL}/admin/get-ip`);
+      if (!response.ok) throw new Error("Failed to fetch Your ip");
+      const data = await response.json();
+      setipAddress(data.IP);
+    } catch (error) {}
+  };
+
+  useEffect(() => {
+    getIp()
+  }, [])
+  
   const handleLogout = () => {
     localStorage.removeItem('token');
     router.push('/login'); // Add redirect after logout if needed
