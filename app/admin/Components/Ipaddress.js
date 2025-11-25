@@ -55,23 +55,21 @@ const Ipaddress = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <header className="mb-8 text-center">
-        <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600">
+    <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
+      <header className="mb-6 sm:mb-8 text-center">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600">
           IP Address Records
         </h1>
-        <p className="text-gray-600 mt-2">
+        <p className="text-gray-600 mt-2 text-sm sm:text-base">
           Total Records: {ipAddresses.length}
         </p>
       </header>
 
-      <section className="w-full overflow-x-auto shadow-2xl rounded-lg">
+      {/* Desktop Table View */}
+      <section className="hidden md:block w-full overflow-x-auto shadow-2xl rounded-lg">
         <table className="min-w-full bg-white rounded-lg overflow-hidden">
           <thead className="bg-gradient-to-r from-green-500 to-blue-500 text-white">
             <tr>
-              <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
-                User ID
-              </th>
               <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
                 Username
               </th>
@@ -97,9 +95,6 @@ const Ipaddress = () => {
                   key={index}
                   className="hover:bg-gradient-to-r hover:from-green-50 hover:to-blue-50 transition-all duration-200 ease-in-out"
                 >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {ip._id || "N/A"}
-                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-semibold">
                     {ip.username || "N/A"}
                   </td>
@@ -114,6 +109,57 @@ const Ipaddress = () => {
             )}
           </tbody>
         </table>
+      </section>
+
+      {/* Mobile Card View */}
+      <section className="md:hidden space-y-4">
+        {ipAddresses.length === 0 ? (
+          <div className="bg-white rounded-lg shadow-lg p-6 text-center text-gray-500">
+            No IP records found
+          </div>
+        ) : (
+          ipAddresses.map((ip, index) => (
+            <div
+              key={index}
+              className="bg-white rounded-lg shadow-lg overflow-hidden border-l-4 border-gradient-to-b from-green-500 to-blue-500"
+            >
+              <div className="bg-gradient-to-r from-green-500 to-blue-500 px-4 py-3">
+                <h3 className="text-white font-semibold text-sm">
+                  Record #{index + 1}
+                </h3>
+              </div>
+
+              <div className="p-4 space-y-3">
+                <div className="flex flex-col">
+                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                    Username
+                  </span>
+                  <span className="text-sm text-gray-700 font-semibold">
+                    {ip.username || "N/A"}
+                  </span>
+                </div>
+
+                <div className="flex flex-col">
+                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                    IP Address
+                  </span>
+                  <span className="text-sm text-blue-600 font-mono">
+                    {ip.ipaddress || "N/A"}
+                  </span>
+                </div>
+
+                <div className="flex flex-col">
+                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                    Timestamp
+                  </span>
+                  <span className="text-sm text-gray-600">
+                    {formatTimestamp(ip.timestamp)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </section>
     </div>
   );

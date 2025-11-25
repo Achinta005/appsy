@@ -6,14 +6,13 @@ import {
   getUserFromToken,
   removeAuthToken,
   getAuthToken,
-} from "../../lib/auth";
-import Project from "../Components/Project";
-import ContactResponse from "../Components/ContactResponse";
-import Notepad from "../Components/Notepad";
-import RenderServiceDashboard from "../Components/backendHealthCheck";
-import PythonFlask from "../Components/PythonFlask";
-import Blog from "../Components/Blog";
-import Ipaddress from "../Components/Ipaddress";
+} from "../lib/auth";
+import Project from "./Components/Project";
+import ContactResponse from "./Components/ContactResponse";
+import Notepad from "./Components/Notepad";
+import RenderServiceDashboard from "./Components/backendHealthCheck";
+import Blog from "./Components/Blog";
+import Ipaddress from "./Components/Ipaddress";
 import { PortfolioApiService } from "@/services/PortfolioApiService";
 import {
   Folder,
@@ -154,14 +153,6 @@ const AdminPage = () => {
       image:
         "https://res.cloudinary.com/dc1fkirb4/image/upload/v1756037563/write-a-great-blog-post_ivsbz9.jpg",
     },
-    {
-      id: "Flask",
-      title: "Python Flask",
-      icon: Code,
-      gradient: "from-yellow-500 to-orange-500",
-      image:
-        "https://res.cloudinary.com/dc1fkirb4/image/upload/v1755834332/flask_o3qe55.jpg",
-    },
   ];
 
   if (user.role === "admin" && activeView === "projects") {
@@ -216,20 +207,6 @@ const AdminPage = () => {
           ← Back to Dashboard
         </button>
         <Notepad onDocumentSaved={handleNewDocument} />
-      </div>
-    );
-  }
-
-  if (user.role === "admin" && activeView === "Flask") {
-    return (
-      <div className="min-h-screen p-4 sm:p-6 lg:p-8 bg-gray-600">
-        <button
-          onClick={() => setActiveView("dashboard")}
-          className="mb-4 px-4 py-2 bg-white/10 backdrop-blur-3xl text-white cursor-pointer rounded-lg hover:bg-white/20 transition-colors"
-        >
-          ← Back to Dashboard
-        </button>
-        <PythonFlask />
       </div>
     );
   }
