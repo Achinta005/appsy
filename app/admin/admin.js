@@ -60,8 +60,6 @@ const AdminPage = () => {
 
     PortfolioApiService.Fetch_IP(userData.userId)
       .then((result) => {
-        console.log("IP Fetch Result:", result);
-
         if (result && !result.error) {
           setipAddress(result.ip || "Not Available");
         } else {
