@@ -1,14 +1,12 @@
-import React from "react";
-import MobileHomepage from "./hompage";
-import { NavbarDemo } from "@/components/Header";
+import React from 'react'
+import LoginPageWrapper from './login/page'
 
 const page = () => {
   return (
     <div>
-      <NavbarDemo/>
-      <MobileHomepage />
+      <LoginPageWrapper/>
     </div>
-  );
-};
+  )
+}
 
-export default page;
+export default page

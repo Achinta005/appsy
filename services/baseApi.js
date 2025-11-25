@@ -1,29 +1,44 @@
 export const apiCall = async (endpoint, options = {}) => {
-const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
-  
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+
   const defaultHeaders = {};
+
+  // Only set JSON header if not sending FormData
   if (!(options.body instanceof FormData)) {
     defaultHeaders["Content-Type"] = "application/json";
   }
-  
-  const config = {
-    headers: {
-      ...defaultHeaders,
-      ...(token && { Authorization: `Bearer ${token}` }),
-      ...options.headers,
-    },
-    ...options,
+
+  // Build final headers (token included)
+  const headers = {
+    ...defaultHeaders,
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(options.headers || {})
   };
-  
+
+  // Final fetch config
+  const config = {
+    ...options,
+    headers
+  };
+
   try {
-    const response = await fetch(`${endpoint}`, config);
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message || `HTTP error! status: ${response.status}`);
+    const res = await fetch(endpoint, config);
+
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      data = { message: "Invalid JSON response" };
     }
+
+    if (!res.ok) {
+      throw new Error(data.message || `Request failed with ${res.status}`);
+    }
+
     return data;
-  } catch (error) {
-    console.error(`API call failed for ${endpoint}:`, error);
-    throw error;
+  } catch (err) {
+    console.error(`API call failed (${endpoint}):`, err.message);
+    throw err;
   }
 };
