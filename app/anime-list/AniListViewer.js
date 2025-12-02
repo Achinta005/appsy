@@ -11,6 +11,7 @@ export default function AniListViewer() {
   const [activeFilter, setActiveFilter] = useState("ALL");
   const [exporting, setExporting] = useState(false);
   const [gridSize, setGridSize] = useState(2);
+  const [response, setResponse] = useState("")
 
   const statusLabels = {
     CURRENT: "Watching",
@@ -73,7 +74,7 @@ export default function AniListViewer() {
       if (data.success && Array.isArray(data.animeList)) {
         setAnimeList(data.animeList);
         if (data.cached) {
-          setError("AniList fetch failed — showing synced cached data");
+          setResponse("Showing synced cached data");
         }
       } else {
         setAnimeList([]);
@@ -230,6 +231,11 @@ export default function AniListViewer() {
                 {error && (
                   <div className="p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-300">
                     {error}
+                  </div>
+                )}
+                {response &&(
+                  <div className="p-4 bg-green-500/20 border border-green-500/50 rounded-xl text-white">
+                    {response}
                   </div>
                 )}
               </div>
