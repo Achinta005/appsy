@@ -1,5 +1,4 @@
 import "./globals.css";
-import Providers from "./providers.js";
 import DeepLinkHandler from "./DeepLinkHandler";
 
 export const metadata = {
@@ -12,7 +11,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <DeepLinkHandler />
-        <Providers>{children}</Providers>
+{children}
       </body>
     </html>
   );
