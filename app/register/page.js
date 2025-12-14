@@ -124,7 +124,7 @@ const RegisterPage = () => {
           >
             HOME
           </Link>
-          <div className="max-w-md w-full space-y-8 p-8">
+          <div className="w-full max-w-2xl lg:max-w-3xl space-y-8 p-8">
             <div className="text-center">
               <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
                 Create an Account
@@ -134,46 +134,47 @@ const RegisterPage = () => {
               </p>
             </div>
 
-            <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8 shadow-2xl">
+            <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-6 md:p-10 shadow-2xl w-full mx-auto">
               <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                 <div className="space-y-4">
-                  <LabelInputContainer>
-                    <Label
-                      htmlFor="username"
-                      className="text-sm font-medium text-neutral-300"
-                    >
-                      Username
-                    </Label>
-                    <Input
-                      id="username"
-                      name="username"
-                      type="text"
-                      required
-                      placeholder="Choose a username"
-                      value={formData.username}
-                      onChange={handleChange}
-                      className="h-10 md:h-11 bg-white/5 border border-white/10 text-white placeholder:text-neutral-500 focus:border-cyan-500 focus:bg-white/10 transition-all duration-300"
-                    />
-                  </LabelInputContainer>
-                  <LabelInputContainer>
-                    <Label
-                      htmlFor="email"
-                      className="text-sm font-medium text-neutral-300"
-                    >
-                      Email
-                    </Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="text"
-                      required
-                      placeholder="Choose a Email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      className="h-10 md:h-11 bg-white/5 border border-white/10 text-white placeholder:text-neutral-500 focus:border-cyan-500 focus:bg-white/10 transition-all duration-300"
-                    />
-                  </LabelInputContainer>
-
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <LabelInputContainer>
+                      <Label
+                        htmlFor="username"
+                        className="text-sm font-medium text-neutral-300"
+                      >
+                        Username
+                      </Label>
+                      <Input
+                        id="username"
+                        name="username"
+                        type="text"
+                        required
+                        placeholder="Choose a username"
+                        value={formData.username}
+                        onChange={handleChange}
+                        className="h-10 md:h-11 bg-white/5 border border-white/10 text-white placeholder:text-neutral-500 focus:border-cyan-500 focus:bg-white/10 transition-all duration-300"
+                      />
+                    </LabelInputContainer>
+                    <LabelInputContainer>
+                      <Label
+                        htmlFor="email"
+                        className="text-sm font-medium text-neutral-300"
+                      >
+                        Email
+                      </Label>
+                      <Input
+                        id="email"
+                        name="email"
+                        type="text"
+                        required
+                        placeholder="Enter your Email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="h-10 md:h-11 bg-white/5 border border-white/10 text-white placeholder:text-neutral-500 focus:border-cyan-500 focus:bg-white/10 transition-all duration-300"
+                      />
+                    </LabelInputContainer>
+                  </div>
                   <LabelInputContainer>
                     <Label
                       htmlFor="password"
@@ -195,12 +196,12 @@ const RegisterPage = () => {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-700 hover:text-cyan-400 transition-colors duration-200"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500 hover:text-green-700 transition-colors duration-200"
                       >
                         {showPassword ? (
-                          <IconEyeOff className="h-5 w-5 cursor-pointer" />
+                          <IconEyeOff className="h-6 w-6 cursor-pointer" />
                         ) : (
-                          <IconEye className="h-5 w-5 cursor-pointer" />
+                          <IconEye className="h-6 w-6 cursor-pointer" />
                         )}
                       </button>
                     </div>
@@ -253,15 +254,22 @@ const RegisterPage = () => {
                   )}
                   <BottomGradient />
                 </button>
+                <div className="flex items-center gap-4 my-2">
+                  <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+                  <span className="text-xs text-neutral-500 uppercase tracking-widest">
+                    Or
+                  </span>
+                  <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+                </div>
+                <div className="text-center">
+                  <button
+                    onClick={() => router.push("/login")}
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium cursor-pointer"
+                  >
+                    Already have an account? Sign in
+                  </button>
+                </div>
               </form>
-            </div>
-            <div className="text-center">
-              <button
-                onClick={() => router.push("/login")}
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium cursor-pointer"
-              >
-                Already have an account? Sign in
-              </button>
             </div>
           </div>
         </div>
