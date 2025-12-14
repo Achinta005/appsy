@@ -29,16 +29,22 @@ const LoginContent = () => {
   const searchParams = useSearchParams();
 
   useEffect(() => {
+    // 1️⃣ Read token from URL
     const tokenFromUrl = searchParams.get("token");
+
     if (tokenFromUrl && tokenFromUrl.split(".").length === 3) {
-      setAuthToken(tokenFromUrl);
-      router.push("/admin");
+      // 2️⃣ Persist token (THIS IS REQUIRED)
+      localStorage.setItem("auth_token", tokenFromUrl);
+
+      // 3️⃣ Remove token from URL (security)
+      router.replace("/admin");
       return;
     }
 
-    const token = getAuthToken();
-    if (token && token.split(".").length === 3) {
-      router.push("/admin");
+    // 4️⃣ Fallback: already logged in
+    const existingToken = getAuthToken();
+    if (existingToken && existingToken.split(".").length === 3) {
+      router.replace("/admin");
     }
   }, [searchParams, router]);
 

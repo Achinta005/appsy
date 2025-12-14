@@ -1,5 +1,6 @@
 import "./globals.css";
 import Providers from "./providers.js";
+import DeepLinkHandler from "./DeepLinkHandler";
 
 export const metadata = {
   title: "Android App",
@@ -10,6 +11,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
+        <DeepLinkHandler />
         <Providers>{children}</Providers>
       </body>
     </html>

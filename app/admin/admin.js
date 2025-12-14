@@ -2,11 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  getUserFromToken,
-  removeAuthToken,
-  getAuthToken,
-} from "../lib/auth";
+import { getUserFromToken, removeAuthToken } from "../lib/auth";
 import Project from "./Components/Project";
 import ContactResponse from "./Components/ContactResponse";
 import Notepad from "./Components/Notepad";
@@ -41,36 +37,40 @@ const AdminPage = () => {
   };
 
   useEffect(() => {
-    const userData = getUserFromToken();
-    if (userData) {
+    const initAdmin = async () => {
+      const userData = getUserFromToken();
+
+      // 1️⃣ Auth guard
+      if (!userData || !userData.userId) {
+        setipAddress("User Not Logged In");
+        router.replace("/login");
+        setLoading(false);
+        return;
+      }
+
+      // 2️⃣ Set user state
       setUser(userData);
-    } else {
-      router.push("/login");
-    }
-    setLoading(false);
-  }, [router]);
 
-  useEffect(() => {
-    const userData = getUserFromToken();
+      // 3️⃣ Fetch IP
+      try {
+        const result = await PortfolioApiService.Fetch_IP(userData.userId);
 
-    if (!userData || !userData.userId) {
-      setipAddress("User Not Logged In");
-      return;
-    }
-
-    PortfolioApiService.Fetch_IP(userData.userId)
-      .then((result) => {
         if (result && !result.error) {
           setipAddress(result.ip || "Not Available");
         } else {
           setipAddress("Not Available");
         }
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error("Error fetching IP:", error);
         setipAddress("Currently Not Available !");
-      });
-  }, []);
+      } finally {
+        // 4️⃣ Stop loading AFTER everything
+        setLoading(false);
+      }
+    };
+
+    initAdmin();
+  }, [router]);
 
   const handleLogout = () => {
     removeAuthToken();

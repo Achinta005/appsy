@@ -2,14 +2,33 @@
   "name": "appsy",
   "version": "0.1.0",
   "private": true,
+  "main": "main.js",
+
   "scripts": {
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "all": "next dev -H 0.0.0.0",
-    "export": "next export"
+    "export": "next export",
+
+    "electron": "electron .",
+    "dist": "electron-builder"
   },
+
+  "build": {
+    "appId": "com.admin.desktop",
+    "productName": "Admin",
+    "icon": "icons/icon.ico",
+    "files": [
+      "main.js",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis"
+    }
+  },
+
   "dependencies": {
     "@capacitor/android": "^7.4.4",
     "@capacitor/cli": "^7.4.4",
@@ -32,8 +51,11 @@
     "tailwind-merge": "^3.4.0",
     "three": "^0.181.1"
   },
+
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "electron": "^39.2.7",
+    "electron-builder": "^26.0.12",
     "eslint": "^9",
     "eslint-config-next": "16.0.2",
     "tailwindcss": "^4"

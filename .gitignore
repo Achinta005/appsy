@@ -41,4 +41,8 @@ yarn-error.log*
 next-env.d.ts
 
 .vscode
-android
+dist
+icons
+npm
+appsy@0.1.0
+main.js
