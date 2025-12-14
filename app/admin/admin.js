@@ -96,60 +96,67 @@ const AdminPage = () => {
       title: "Manage Projects",
       icon: Folder,
       gradient: "from-blue-500 to-purple-500",
-      image: "https://res.cloudinary.com/dc1fkirb4/image/upload/v1755754879/a1_cqsx8x.jpg",
-    },
-    {
-      id: "render",
-      title: "Render Health Check",
-      icon: Server,
-      gradient: "from-blue-500 to-purple-500",
-      image: "https://res.cloudinary.com/dc1fkirb4/image/upload/v1763994657/render-dashboard_qyvptu.png",
-    },
-    {
-      id: "anime",
-      title: "AnimeList",
-      icon: BookOpen,
-      gradient: "from-pink-500 to-red-500",
-      image: "https://res.cloudinary.com/dc1fkirb4/image/upload/v1760892290/background-desktop_r4pccr.jpg",
-      action: handleClick,
-      isExternal: true,
-    },
-    {
-      id: "IP",
-      title: "IP Addresses",
-      icon: Globe,
-      gradient: "from-green-500 to-teal-500",
-      image: "https://res.cloudinary.com/dc1fkirb4/image/upload/v1761317160/ip-address-lookup_czcb34.jpg",
-    },
-    {
-      id: "messages",
-      title: "View Messages",
-      icon: MessageSquare,
-      gradient: "from-indigo-500 to-blue-500",
-      image: "https://res.cloudinary.com/dc1fkirb4/image/upload/v1755754879/a2_jjgzr3.png",
+      image:
+        "https://res.cloudinary.com/dc1fkirb4/image/upload/v1755754879/a1_cqsx8x.jpg",
     },
     {
       id: "Blog",
       title: "Blog Upload",
       icon: BookOpen,
       gradient: "from-cyan-500 to-blue-500",
-      image: "https://res.cloudinary.com/dc1fkirb4/image/upload/v1756037563/write-a-great-blog-post_ivsbz9.jpg",
+      image:
+        "https://res.cloudinary.com/dc1fkirb4/image/upload/v1756037563/write-a-great-blog-post_ivsbz9.jpg",
+    },
+    {
+      id: "messages",
+      title: "View Messages",
+      icon: MessageSquare,
+      gradient: "from-indigo-500 to-blue-500",
+      image:
+        "https://res.cloudinary.com/dc1fkirb4/image/upload/v1755754879/a2_jjgzr3.png",
+    },
+    {
+      id: "render",
+      title: "Render Health Check",
+      icon: Server,
+      gradient: "from-blue-500 to-purple-500",
+      image:
+        "https://res.cloudinary.com/dc1fkirb4/image/upload/v1763994657/render-dashboard_qyvptu.png",
+    },
+    {
+      id: "IP",
+      title: "IP Addresses",
+      icon: Globe,
+      gradient: "from-green-500 to-teal-500",
+      image:
+        "https://res.cloudinary.com/dc1fkirb4/image/upload/v1761317160/ip-address-lookup_czcb34.jpg",
+    },
+    {
+      id: "anime",
+      title: "AnimeList",
+      icon: BookOpen,
+      gradient: "from-pink-500 to-red-500",
+      image:
+        "https://res.cloudinary.com/dc1fkirb4/image/upload/v1760892290/background-desktop_r4pccr.jpg",
+      action: handleClick,
+      isExternal: true,
     },
     {
       id: "Notepad",
       title: "Go To Notepad",
       icon: FileText,
       gradient: "from-purple-500 to-pink-500",
-      image: "https://res.cloudinary.com/dc1fkirb4/image/upload/v1755754879/a3_uutdd3.avif",
+      image:
+        "https://res.cloudinary.com/dc1fkirb4/image/upload/v1755754879/a3_uutdd3.avif",
     },
   ];
 
   // Grid layout configurations
   const gridLayouts = {
-    "2": "grid-cols-1 sm:grid-cols-2",
-    "3": "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
-    "4": "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
-    "5": "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5",
+    2: "grid-cols-1 sm:grid-cols-2",
+    3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+    4: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
+    5: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5",
   };
 
   if (user.role === "admin" && activeView === "projects") {
@@ -266,14 +273,16 @@ const AdminPage = () => {
                   </div>
                   <div className="text-xs">
                     <p className="text-white font-medium">
-                      <span className="text-lime-400">User:</span> {user.username}
+                      <span className="text-lime-400">User:</span>{" "}
+                      {user.username}
                     </p>
                     <p className="text-gray-300">
                       <span className="text-lime-400">Role:</span> {user.role}
                     </p>
                     {user.email && (
                       <p className="text-yellow-400 text-xs truncate max-w-[150px]">
-                        <span className="text-lime-400">Email:</span> {user.email}
+                        <span className="text-lime-400">Email:</span>{" "}
+                        {user.email}
                       </p>
                     )}
                   </div>
@@ -289,15 +298,21 @@ const AdminPage = () => {
 
               {/* Title Section */}
               <div className="mb-3">
-                <h1 className="text-2xl sm:text-3xl font-bold text-white">Dashboard</h1>
-                <p className="text-xs sm:text-sm text-gray-300">Manage your portfolio</p>
+                <h1 className="text-2xl sm:text-3xl font-bold text-white">
+                  Admin Panel
+                </h1>
+                <p className="text-xs sm:text-sm text-gray-300">
+                  Manage Core Funtionalities
+                </p>
               </div>
 
               {/* IP Bar */}
               <div className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-2">
                 <Wifi className="w-3 h-3 sm:w-4 sm:h-4 text-green-400 flex-shrink-0" />
                 <span className="text-xs text-gray-300">IP:</span>
-                <span className="text-xs text-green-400 font-mono truncate">{ipAddress}</span>
+                <span className="text-xs text-green-400 font-mono truncate">
+                  {ipAddress}
+                </span>
               </div>
             </div>
 
@@ -310,22 +325,28 @@ const AdminPage = () => {
                   </div>
                   <div className="text-sm">
                     <p className="text-white font-medium">
-                      <span className="text-lime-400">User:</span> {user.username}
+                      <span className="text-lime-400">User:</span>{" "}
+                      {user.username}
                     </p>
                     <p className="text-gray-300">
                       <span className="text-lime-400">Role:</span> {user.role}
                     </p>
                     {user.email && (
                       <p className="text-yellow-400 text-xs">
-                        <span className="text-lime-400">Email:</span> {user.email}
+                        <span className="text-lime-400">Email:</span>{" "}
+                        {user.email}
                       </p>
                     )}
                   </div>
                 </div>
 
                 <div className="absolute left-1/2 transform -translate-x-1/2 text-center">
-                  <h1 className="text-4xl font-bold text-white whitespace-nowrap">Dashboard</h1>
-                  <p className="text-sm text-gray-300">Manage your portfolio</p>
+                  <h1 className="text-4xl font-bold text-white whitespace-nowrap">
+                    Admin Panel
+                  </h1>
+                  <p className="text-sm text-gray-300">
+                    Manage Core Funtionalities
+                  </p>
                 </div>
 
                 <button
@@ -339,7 +360,9 @@ const AdminPage = () => {
               <div className="flex items-center gap-2 bg-white/5 rounded-xl px-4 py-2">
                 <Wifi className="w-4 h-4 text-green-400 flex-shrink-0" />
                 <span className="text-sm text-gray-300">IP:</span>
-                <span className="text-sm text-green-400 font-mono">{ipAddress}</span>
+                <span className="text-sm text-green-400 font-mono">
+                  {ipAddress}
+                </span>
               </div>
             </div>
           </div>
@@ -349,7 +372,9 @@ const AdminPage = () => {
       {/* Grid Layout Selector */}
       <div className="px-3 sm:px-4 lg:px-6 pt-4 pb-3 max-w-7xl mx-auto">
         <div className="flex items-center gap-2 overflow-x-auto pb-2">
-          <span className="text-white text-xs sm:text-sm font-medium whitespace-nowrap">Grid:</span>
+          <span className="text-white text-xs sm:text-sm font-medium whitespace-nowrap">
+            Grid:
+          </span>
           {["2", "3", "4", "5"].map((layout) => (
             <button
               key={layout}
@@ -368,7 +393,9 @@ const AdminPage = () => {
 
       {/* Menu Grid - Fully Responsive & Compact */}
       <div className="px-3 sm:px-4 lg:px-6 pb-4 sm:pb-6 max-w-7xl mx-auto">
-        <div className={`grid ${gridLayouts[gridLayout]} gap-2 sm:gap-3 lg:gap-4`}>
+        <div
+          className={`grid ${gridLayouts[gridLayout]} gap-2 sm:gap-3 lg:gap-4`}
+        >
           {user.role === "admin" &&
             menuItems.map((item) => (
               <button
@@ -394,13 +421,21 @@ const AdminPage = () => {
                       <h3 className="text-white font-semibold text-xs sm:text-sm mb-0.5 truncate">
                         {item.title}
                       </h3>
-                      <p className="text-gray-400 text-[10px] sm:text-xs hidden sm:block">Tap to access</p>
+                      <p className="text-gray-400 text-[10px] sm:text-xs hidden sm:block">
+                        Tap to access
+                      </p>
                     </div>
 
                     <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-white group-hover:translate-x-1 transition-all flex-shrink-0" />
                   </div>
 
-                  <div className={`${gridLayout === "5" ? "h-20 sm:h-24" : "h-24 sm:h-32 lg:h-36"} overflow-hidden`}>
+                  <div
+                    className={`${
+                      gridLayout === "5"
+                        ? "h-20 sm:h-24"
+                        : "h-24 sm:h-32 lg:h-36"
+                    } overflow-hidden`}
+                  >
                     <img
                       src={item.image}
                       alt={item.title}
@@ -422,12 +457,20 @@ const AdminPage = () => {
                     <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
                   <div className="flex-1 text-left min-w-0">
-                    <h3 className="text-white font-semibold text-xs sm:text-sm mb-0.5 truncate">Go To Notepad</h3>
-                    <p className="text-gray-400 text-[10px] sm:text-xs hidden sm:block">Tap to access</p>
+                    <h3 className="text-white font-semibold text-xs sm:text-sm mb-0.5 truncate">
+                      Go To Notepad
+                    </h3>
+                    <p className="text-gray-400 text-[10px] sm:text-xs hidden sm:block">
+                      Tap to access
+                    </p>
                   </div>
                   <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-white group-hover:translate-x-1 transition-all flex-shrink-0" />
                 </div>
-                <div className={`${gridLayout === "5" ? "h-20 sm:h-24" : "h-24 sm:h-32 lg:h-36"} overflow-hidden`}>
+                <div
+                  className={`${
+                    gridLayout === "5" ? "h-20 sm:h-24" : "h-24 sm:h-32 lg:h-36"
+                  } overflow-hidden`}
+                >
                   <img
                     src="https://res.cloudinary.com/dc1fkirb4/image/upload/v1755754879/a3_uutdd3.avif"
                     alt="Notepad"
