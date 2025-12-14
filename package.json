@@ -4,11 +4,11 @@
   "private": true,
   "main": "main.js",
   "scripts": {
-    "dev": "next dev --webpack",
-    "build": "next build --webpack",
+    "dev": "next dev",
+    "build": "next build",
     "start": "next start",
-    "lint": "eslint",
     "all": "next dev -H 0.0.0.0",
+    "lint": "eslint",
     "export": "next export",
     "electron": "electron .",
     "dist": "electron-builder"
