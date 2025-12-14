@@ -38,11 +38,23 @@ const LoginContent = () => {
       return;
     }
 
-    // 2️⃣ Mobile OAuth (token already stored by DeepLinkHandler)
-    const existingToken = getAuthToken();
-    if (existingToken && existingToken.split(".").length === 3) {
-      router.replace("/admin");
-    }
+    // 2️⃣ Mobile OAuth: token may arrive LATER
+    const checkAndRedirect = () => {
+      const token = getAuthToken();
+      if (token && token.split(".").length === 3) {
+        router.replace("/admin");
+      }
+    };
+
+    // Initial check
+    checkAndRedirect();
+
+    // 🔑 Listen for deep link completion
+    window.addEventListener("auth-token-ready", checkAndRedirect);
+
+    return () => {
+      window.removeEventListener("auth-token-ready", checkAndRedirect);
+    };
   }, [searchParams, router]);
 
   const handleChange = (e) => {
