@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getAuthToken } from "../../lib/auth";
-import { getUserFromToken } from "../../lib/auth";
+import { getAuthToken } from "../lib/auth";
+import { getUserFromToken } from "../lib/auth";
 import { useRouter } from "next/navigation";
 import { PortfolioApiService } from "@/services/PortfolioApiService";
 

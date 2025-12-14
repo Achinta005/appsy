@@ -56,6 +56,7 @@ export const getUserFromToken = () => {
       userId: decoded.id,
       username: decoded.username,
       role: decoded.role,
+      email:decoded.email,
     };
   } catch (err) {
     console.error("Error decoding token:", err);

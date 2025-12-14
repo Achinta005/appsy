@@ -1,5 +1,5 @@
 import React from 'react'
-import { BlogUpload } from './Blogbulk'
+import { BlogUpload } from './BlogUpload'
 
 const Blog = () => {
   return (
