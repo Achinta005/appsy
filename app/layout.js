@@ -11,7 +11,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <DeepLinkHandler />
-{children}
+        {children}
       </body>
     </html>
   );
