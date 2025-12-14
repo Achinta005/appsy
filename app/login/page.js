@@ -29,19 +29,16 @@ const LoginContent = () => {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    // 1️⃣ Read token from URL
+    // 1️⃣ Web / Electron OAuth (token in URL)
     const tokenFromUrl = searchParams.get("token");
 
     if (tokenFromUrl && tokenFromUrl.split(".").length === 3) {
-      // 2️⃣ Persist token (THIS IS REQUIRED)
       localStorage.setItem("auth_token", tokenFromUrl);
-
-      // 3️⃣ Remove token from URL (security)
       router.replace("/admin");
       return;
     }
 
-    // 4️⃣ Fallback: already logged in
+    // 2️⃣ Mobile OAuth (token already stored by DeepLinkHandler)
     const existingToken = getAuthToken();
     if (existingToken && existingToken.split(".").length === 3) {
       router.replace("/admin");
@@ -68,11 +65,8 @@ const LoginContent = () => {
         setError(data.error || "Invalid username or password");
         return;
       }
-
-      setAuthToken(data.token);
-
-      router.push("/admin");
-      router.refresh();
+      localStorage.setItem("auth_token", data.token);
+      router.replace("/admin");
     } catch (err) {
       console.error("Login error:", err);
       setError("Unable to login. Check network or credentials.");

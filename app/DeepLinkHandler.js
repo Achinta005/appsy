@@ -2,11 +2,8 @@
 
 import { App } from "@capacitor/app";
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 export default function DeepLinkHandler() {
-  const router = useRouter();
-
   useEffect(() => {
     const listener = App.addListener("appUrlOpen", ({ url }) => {
       console.log("Deep link received:", url);
@@ -18,8 +15,8 @@ export default function DeepLinkHandler() {
         const token = parsedUrl.searchParams.get("token");
 
         if (token && token.split(".").length === 3) {
+          // ✅ ONLY STORE TOKEN
           localStorage.setItem("auth_token", token);
-          router.replace("/admin");
         }
       } catch (err) {
         console.error("Invalid deep link URL", err);
@@ -29,7 +26,7 @@ export default function DeepLinkHandler() {
     return () => {
       listener.remove();
     };
-  }, [router]);
+  }, []);
 
   return null;
 }
