@@ -9,6 +9,7 @@ import Notepad from "../Notepad/Notepad";
 import RenderServiceDashboard from "../Server/backendHealthCheck";
 import Blog from "../BlogUpload/Blog";
 import Ipaddress from "../IpDatabase/Ipaddress";
+import WeeklyVisitsDashboard from "../VisitTracker/WeeklyVisitsDashboard";
 import { PortfolioApiService } from "@/services/PortfolioApiService";
 import {
   Folder,
@@ -24,7 +25,9 @@ import {
   Server,
   Grid3x3,
   LayoutGrid,
+  ChartColumn
 } from "lucide-react";
+import gradient from "@material-tailwind/react/theme/components/timeline/timelineIconColors/gradient";
 
 const AdminPage = () => {
   const [user, setUser] = useState({});
@@ -116,6 +119,13 @@ const AdminPage = () => {
         "https://res.cloudinary.com/dc1fkirb4/image/upload/v1755754879/a2_jjgzr3.png",
     },
     {
+      id:"Visit-Tracker",
+      title:"Track Portfolio Visits",
+      icon:ChartColumn,
+      gradient:"from-pink-500 to-teal-500",
+      image:"https://res.cloudinary.com/dc1fkirb4/image/upload/v1765812000/17-what_cc424d55614b9ae928b5_vzjkj1.png",
+    },
+    {
       id: "render",
       title: "Render Health Check",
       icon: Server,
@@ -186,7 +196,19 @@ const AdminPage = () => {
       </div>
     );
   }
-
+  if (user.role === "admin" && activeView === "Visit-Tracker") {
+    return (
+      <div className="">
+        <button
+          onClick={() => setActiveView("dashboard")}
+          className="mb-3 sm:mb-4 px-3 sm:px-4 py-2 cursor-pointer bg-white/40 backdrop-blur-3xl text-white rounded-lg hover:bg-white/20 transition-colors text-sm absolute mt-5 ml-3"
+        >
+          ← Back
+        </button>
+        <WeeklyVisitsDashboard />
+      </div>
+    );
+  }
   if (user.role === "admin" && activeView === "messages") {
     return (
       <div className="min-h-screen p-3 sm:p-4 lg:p-6 bg-[url(https://res.cloudinary.com/dc1fkirb4/image/upload/v1755757547/response_arjl1x.webp)] bg-cover bg-center">
