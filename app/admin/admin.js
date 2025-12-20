@@ -10,6 +10,7 @@ import RenderServiceDashboard from "../Server/backendHealthCheck";
 import Blog from "../BlogUpload/Blog";
 import Ipaddress from "../IpDatabase/Ipaddress";
 import WeeklyVisitsDashboard from "../VisitTracker/WeeklyVisitsDashboard";
+import ConversionPage from "../BinaryConverter/ConversionPage";
 import { PortfolioApiService } from "@/services/PortfolioApiService";
 import {
   Folder,
@@ -25,7 +26,8 @@ import {
   Server,
   Grid3x3,
   LayoutGrid,
-  ChartColumn
+  ChartColumn,
+  Binary
 } from "lucide-react";
 import gradient from "@material-tailwind/react/theme/components/timeline/timelineIconColors/gradient";
 
@@ -140,6 +142,13 @@ const AdminPage = () => {
       gradient: "from-green-500 to-teal-500",
       image:
         "https://res.cloudinary.com/dc1fkirb4/image/upload/v1761317160/ip-address-lookup_czcb34.jpg",
+    },
+    {
+      id:"number-conversion",
+      title:"Binary Converter",
+      icon:Binary,
+      gradient:"from-pink-500 to-teal-500",
+      image:"https://www.wikihow.com/images/thumb/9/96/Convert-from-Binary-to-Decimal-Step-4-Version-6.jpg/v4-460px-Convert-from-Binary-to-Decimal-Step-4-Version-6.jpg"
     },
     {
       id: "anime",
@@ -261,6 +270,19 @@ const AdminPage = () => {
           ← Back
         </button>
         <Ipaddress />
+      </div>
+    );
+  }
+  if (user.role === "admin" && activeView === "number-conversion") {
+    return (
+      <div className="min-h-screen p-3 sm:p-4 lg:p-6 bg-gradient-to-bl from-pink-600 via-yellow-400 to-purple-700">
+        <button
+          onClick={() => setActiveView("dashboard")}
+          className="mb-3 sm:mb-4 px-3 sm:px-4 py-2 bg-white/30 backdrop-blur-3xl text-white cursor-pointer rounded-lg hover:bg-white/20 transition-colors text-sm"
+        >
+          ← Back
+        </button>
+        < ConversionPage/>
       </div>
     );
   }
