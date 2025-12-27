@@ -8,14 +8,6 @@ const SERVICES = [
     apiKey: process.env.NEXT_PUBLIC_SERVICE1_API_KEY,
     healthUrl: process.env.NEXT_PUBLIC_SERVICE1_HEALTH,
   },
-
-  {
-    name: "Portfolio Backend",
-    id: process.env.NEXT_PUBLIC_SERVICE2_ID,
-    apiKey: process.env.NEXT_PUBLIC_SERVICE2_API_KEY,
-    healthUrl: process.env.NEXT_PUBLIC_SERVICE2_HEALTH,
-  },
-
   {
     name: "ML Backend",
     id: process.env.NEXT_PUBLIC_SERVICE3_ID,
