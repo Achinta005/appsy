@@ -27,7 +27,7 @@ import {
   ChartColumn,
   Binary,
   ArrowBigLeft,
-  filePlay,
+  FilePlay
 } from "lucide-react";
 import gradient from "@material-tailwind/react/theme/components/timeline/timelineIconColors/gradient";
 
@@ -39,9 +39,12 @@ const AdminPage = () => {
   const [documents, setDocuments] = useState([]);
   const [gridLayout, setGridLayout] = useState("5");
   const router = useRouter();
+
+
   const handleClick = () => {
     router.push("/fun");
   };
+  
   useEffect(() => {
     const initAdmin = async () => {
       const userData = getUserFromToken();
@@ -161,7 +164,7 @@ const AdminPage = () => {
     {
       id: "fun",
       title: "Fun",
-      icon: filePlay,
+      icon: FilePlay,
       gradient: "from-blue-500 to-purple-500",
       image:
         "https://img.freepik.com/premium-vector/fun-playful-logo-using-custom-typography-with-quirky-shapes-bright-colors_1307247-1830.jpg?semt=ais_hybrid&w=740&q=80",
