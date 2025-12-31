@@ -24,8 +24,6 @@ import {
   User,
   Wifi,
   Server,
-  Grid3x3,
-  LayoutGrid,
   ChartColumn,
   Binary,
   ArrowBigLeft,
@@ -40,10 +38,6 @@ const AdminPage = () => {
   const [documents, setDocuments] = useState([]);
   const [gridLayout, setGridLayout] = useState("5");
   const router = useRouter();
-
-  const handleClick = () => {
-    router.push("/anime-list");
-  };
 
   useEffect(() => {
     const initAdmin = async () => {
@@ -152,16 +146,6 @@ const AdminPage = () => {
       gradient: "from-pink-500 to-teal-500",
       image:
         "https://www.wikihow.com/images/thumb/9/96/Convert-from-Binary-to-Decimal-Step-4-Version-6.jpg/v4-460px-Convert-from-Binary-to-Decimal-Step-4-Version-6.jpg",
-    },
-    {
-      id: "anime",
-      title: "AnimeList",
-      icon: BookOpen,
-      gradient: "from-pink-500 to-red-500",
-      image:
-        "https://res.cloudinary.com/dc1fkirb4/image/upload/v1760892290/background-desktop_r4pccr.jpg",
-      action: handleClick,
-      isExternal: true,
     },
     {
       id: "Notepad",

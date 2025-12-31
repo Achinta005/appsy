@@ -1,7 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Download, Star, Tv, ArrowLeft, List ,ArrowBigLeft} from "lucide-react";
+import {
+  Search,
+  Download,
+  Star,
+  Tv,
+  ArrowLeft,
+  List,
+  ArrowBigLeft,
+} from "lucide-react";
 
 export default function AniListViewer() {
   const [username, setUsername] = useState("achinta");
@@ -153,7 +161,7 @@ export default function AniListViewer() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => window.history.back()}
+                  onClick={() => window.location.reload()}
                   className="group inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-white overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95 cursor-pointer relative"
                 >
                   {/* Gradient Background */}
