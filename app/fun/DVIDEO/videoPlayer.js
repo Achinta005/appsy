@@ -233,34 +233,42 @@ export default function DriveVideoPlayer() {
             {viewMode === "list" && (
               <div className="bg-gray-900/50 backdrop-blur-xl rounded-2xl border border-gray-800/50 overflow-hidden shadow-2xl">
                 {/* Header Row */}
-                <div className="bg-gray-800/50 border-b border-gray-700/50 px-4 py-2 flex items-center gap-4 text-gray-400 text-xs font-semibold uppercase">
-                  <div className="w-8"></div>
-                  <div className="flex-1">Name</div>
-                  <div className="w-24 text-right">Duration</div>
+                <div className="bg-gray-800/50 border-b border-gray-700/50 px-4 py-3 grid grid-cols-[48px_1fr_120px_100px] gap-4 items-center text-gray-400 text-xs font-semibold uppercase">
+                  <div></div>
+                  <div>Name</div>
+                  <div className="text-center">Year</div>
+                  <div className="text-right">Duration</div>
                 </div>
-
                 {/* Video Rows */}
                 <div className="divide-y divide-gray-800/50">
                   {filteredVideos.map((video, index) => (
                     <div
                       key={video.id}
                       onClick={() => setSelectedVideo(video)}
-                      className="px-4 py-2 flex items-center gap-4 hover:bg-gray-800/50 cursor-pointer transition-all group"
+                      className="px-4 py-3 grid grid-cols-[48px_1fr_120px_100px] gap-4 items-center hover:bg-gray-800/50 cursor-pointer transition-all group"
                     >
                       {/* Icon */}
                       <div className="w-8 h-8 bg-gradient-to-br from-red-600 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Film className="w-4 h-4 text-white" />
+                        <img
+                          src={video.thumbnail}
+                          alt={video.name}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
                       </div>
-
                       {/* Video Name */}
-                      <div className="flex-1 min-w-0">
+                      <div className="min-w-0">
                         <p className="text-white text-sm font-medium truncate group-hover:text-red-400 transition-colors">
                           {video.name}
                         </p>
                       </div>
-
+                      {/* Year */}
+                      <div className="text-center">
+                        <span className="text-gray-400 text-xs font-medium">
+                          {video.year}
+                        </span>
+                      </div>
                       {/* Duration */}
-                      <div className="w-24 text-right">
+                      <div className="text-right">
                         <span className="text-gray-400 text-xs font-medium">
                           {video.duration}
                         </span>
@@ -309,6 +317,7 @@ export default function DriveVideoPlayer() {
                       <h3 className="text-white font-bold text-base sm:text-lg line-clamp-2 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-red-400 group-hover:to-purple-400 group-hover:bg-clip-text transition-all leading-tight">
                         {video.name}
                       </h3>
+                      <h2 className="text-gray-400">{video.year}</h2>
                     </div>
                   </div>
                 ))}

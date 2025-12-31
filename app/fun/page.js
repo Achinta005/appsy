@@ -1,12 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, Code, Play, Zap, ArrowLeft } from "lucide-react";
+import { BookOpen, Code, Play, Zap, ArrowBigLeft } from "lucide-react";
 import AniListViewer from "./anime-list/AniListViewer";
 import DriveVideoPlayer from "./DVIDEO/videoPlayer";
+import { useRouter } from "next/navigation";
 
 export default function HomePage() {
   const [activeComponent, setActiveComponent] = useState(null);
+  const router = useRouter();
+  const handleAdminClick = () => {
+    router.push("/admin");
+  };
 
   const boxes = [
     {
@@ -37,6 +42,23 @@ export default function HomePage() {
   // Main landing page with boxes
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+      <div className="absolute top-8 left-8 z-20">
+        <button
+          onClick={handleAdminClick}
+          className="relative group inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-white overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95 cursor-pointer"
+        >
+          {/* Gradient Background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-transform duration-300 group-hover:scale-110"></div>
+
+          {/* Shine Effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-30 transition-opacity duration-500 transform -skew-x-12 group-hover:translate-x-full"></div>
+
+          {/* Button Content */}
+          <ArrowBigLeft className="w-5 h-5 relative z-10 group-hover:-translate-x-1 transition-transform duration-300" />
+          <span className="relative z-10">Back</span>
+        </button>
+      </div>
+
       {/* Animated background blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute w-96 h-96 bg-purple-500/20 rounded-full blur-3xl -top-20 -left-20 animate-pulse"></div>
@@ -52,7 +74,6 @@ export default function HomePage() {
 
       {/* Content */}
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center p-8">
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl w-full">
           {boxes.map((box) => {
             const Icon = box.icon;
