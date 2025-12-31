@@ -33,6 +33,12 @@ export const PortfolioApiService = {
     return apiCall(`${process.env.NEXT_PUBLIC_PYTHON_API_URL}/admin/view-ip`);
   },
 
+  deleteIpAddress: async (ipId) => {
+    return apiCall(`${process.env.NEXT_PUBLIC_PYTHON_API_URL}/admin/delete-ip/${ipId}`, {
+      method: "DELETE",
+    });
+  },
+
   // Authentication
   Register: async (formData) => {
     return apiCall(`${process.env.NEXT_PUBLIC_PYTHON_API_URL}/auth/register`, {
@@ -76,16 +82,25 @@ export const PortfolioApiService = {
     );
   },
 
+  deleteContact: async (contactId) => {
+    return apiCall(
+      `${process.env.NEXT_PUBLIC_PYTHON_API_URL}/contact/delete_response/${contactId}`,
+      {
+        method: "DELETE",
+      }
+    );
+  },
+
   //Post Notepad Documents
-Notepad: async (title, content, user) => {
-  return apiCall(
-    `${process.env.NEXT_PUBLIC_PYTHON_API_URL}/admin/create_documents`,
-    {
-      method: "POST",
-      body: JSON.stringify({ user, title, content }),
-    }
-  );
-},
+  Notepad: async (title, content, user) => {
+    return apiCall(
+      `${process.env.NEXT_PUBLIC_PYTHON_API_URL}/admin/create_documents`,
+      {
+        method: "POST",
+        body: JSON.stringify({ user, title, content }),
+      }
+    );
+  },
 
   //Fetch User Notepad Documents
   FetchNotepadDocs: async (user) => {

@@ -27,7 +27,8 @@ import {
   Grid3x3,
   LayoutGrid,
   ChartColumn,
-  Binary
+  Binary,
+  ArrowBigLeft,
 } from "lucide-react";
 import gradient from "@material-tailwind/react/theme/components/timeline/timelineIconColors/gradient";
 
@@ -121,11 +122,12 @@ const AdminPage = () => {
         "https://res.cloudinary.com/dc1fkirb4/image/upload/v1755754879/a2_jjgzr3.png",
     },
     {
-      id:"Visit-Tracker",
-      title:"Track Portfolio Visits",
-      icon:ChartColumn,
-      gradient:"from-pink-500 to-teal-500",
-      image:"https://res.cloudinary.com/dc1fkirb4/image/upload/v1765812000/17-what_cc424d55614b9ae928b5_vzjkj1.png",
+      id: "Visit-Tracker",
+      title: "Track Portfolio Visits",
+      icon: ChartColumn,
+      gradient: "from-pink-500 to-teal-500",
+      image:
+        "https://res.cloudinary.com/dc1fkirb4/image/upload/v1765812000/17-what_cc424d55614b9ae928b5_vzjkj1.png",
     },
     {
       id: "render",
@@ -144,11 +146,12 @@ const AdminPage = () => {
         "https://res.cloudinary.com/dc1fkirb4/image/upload/v1761317160/ip-address-lookup_czcb34.jpg",
     },
     {
-      id:"number-conversion",
-      title:"Binary Converter",
-      icon:Binary,
-      gradient:"from-pink-500 to-teal-500",
-      image:"https://www.wikihow.com/images/thumb/9/96/Convert-from-Binary-to-Decimal-Step-4-Version-6.jpg/v4-460px-Convert-from-Binary-to-Decimal-Step-4-Version-6.jpg"
+      id: "number-conversion",
+      title: "Binary Converter",
+      icon: Binary,
+      gradient: "from-pink-500 to-teal-500",
+      image:
+        "https://www.wikihow.com/images/thumb/9/96/Convert-from-Binary-to-Decimal-Step-4-Version-6.jpg/v4-460px-Convert-from-Binary-to-Decimal-Step-4-Version-6.jpg",
     },
     {
       id: "anime",
@@ -183,9 +186,17 @@ const AdminPage = () => {
       <div className="min-h-screen p-3 sm:p-4 lg:p-6 bg-gradient-to-tr from-blue-700 via-pink-600 to-yellow-300">
         <button
           onClick={() => setActiveView("dashboard")}
-          className="mb-3 sm:mb-4 px-3 sm:px-4 py-2 cursor-pointer bg-white/40 backdrop-blur-3xl text-white rounded-lg hover:bg-white/20 transition-colors text-sm"
+          className="group inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-white overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95 cursor-pointer mb-6 relative"
         >
-          ← Back
+          {/* Gradient Background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-transform duration-300 group-hover:scale-110"></div>
+
+          {/* Shine Effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-30 transition-opacity duration-500 transform -skew-x-12 group-hover:translate-x-full"></div>
+
+          {/* Button Content */}
+          <ArrowBigLeft className="w-5 h-5 relative z-10 group-hover:-translate-x-1 transition-transform duration-300" />
+          <span className="relative z-10">Back</span>
         </button>
         <Project />
       </div>
@@ -194,40 +205,99 @@ const AdminPage = () => {
 
   if (user.role === "admin" && activeView === "render") {
     return (
-      <div className="">
-        <button
-          onClick={() => setActiveView("dashboard")}
-          className="mb-3 sm:mb-4 px-3 sm:px-4 py-2 cursor-pointer bg-white/40 backdrop-blur-3xl text-white rounded-lg hover:bg-white/20 transition-colors text-sm absolute mt-5 ml-3"
-        >
-          ← Back
-        </button>
-        <RenderServiceDashboard />
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4 sm:p-6">
+        <div className="max-w-6xl mx-auto">
+          {/* Back Button - Properly positioned */}
+          <button
+            onClick={() => setActiveView("dashboard")}
+            className="group inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-white overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95 cursor-pointer mb-6 relative"
+          >
+            {/* Gradient Background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-transform duration-300 group-hover:scale-110"></div>
+
+            {/* Shine Effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-30 transition-opacity duration-500 transform -skew-x-12 group-hover:translate-x-full"></div>
+
+            {/* Button Content */}
+            <ArrowBigLeft className="w-5 h-5 relative z-10 group-hover:-translate-x-1 transition-transform duration-300" />
+            <span className="relative z-10">Back</span>
+          </button>
+
+          {/* Render Service Dashboard Component */}
+          <RenderServiceDashboard />
+        </div>
       </div>
     );
   }
   if (user.role === "admin" && activeView === "Visit-Tracker") {
     return (
-      <div className="">
-        <button
-          onClick={() => setActiveView("dashboard")}
-          className="mb-3 sm:mb-4 px-3 sm:px-4 py-2 cursor-pointer bg-white/40 backdrop-blur-3xl text-white rounded-lg hover:bg-white/20 transition-colors text-sm absolute mt-5 ml-3"
-        >
-          ← Back
-        </button>
-        <WeeklyVisitsDashboard />
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 sm:p-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Back Button - Properly positioned */}
+          <button
+            onClick={() => setActiveView("dashboard")}
+            className="group inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-white overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95 cursor-pointer mb-6 relative"
+          >
+            {/* Gradient Background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-transform duration-300 group-hover:scale-110"></div>
+
+            {/* Shine Effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-30 transition-opacity duration-500 transform -skew-x-12 group-hover:translate-x-full"></div>
+
+            {/* Button Content */}
+            <ArrowBigLeft className="w-5 h-5 relative z-10 group-hover:-translate-x-1 transition-transform duration-300" />
+            <span className="relative z-10">Back</span>
+          </button>
+
+          {/* Weekly Visits Dashboard Component */}
+          <WeeklyVisitsDashboard />
+        </div>
       </div>
     );
   }
+
   if (user.role === "admin" && activeView === "messages") {
     return (
-      <div className="min-h-screen p-3 sm:p-4 lg:p-6 bg-[url(https://res.cloudinary.com/dc1fkirb4/image/upload/v1755757547/response_arjl1x.webp)] bg-cover bg-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Back Button - Properly positioned */}
+          <button
+            onClick={() => setActiveView("dashboard")}
+            className="group inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-white overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95 cursor-pointer mb-6 relative"
+          >
+            {/* Gradient Background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-transform duration-300 group-hover:scale-110"></div>
+
+            {/* Shine Effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-30 transition-opacity duration-500 transform -skew-x-12 group-hover:translate-x-full"></div>
+
+            {/* Button Content */}
+            <ArrowBigLeft className="w-5 h-5 relative z-10 group-hover:-translate-x-1 transition-transform duration-300" />
+            <span className="relative z-10">Back</span>
+          </button>
+          <ContactResponse />
+        </div>
+      </div>
+    );
+  }
+  if (user.role === "admin" && activeView === "IP") {
+    return (
+      <div className="min-h-screen p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
         <button
           onClick={() => setActiveView("dashboard")}
-          className="mb-3 sm:mb-4 px-3 sm:px-4 py-2 bg-white/20 backdrop-blur-3xl text-black cursor-pointer rounded-lg hover:bg-white/30 transition-colors text-sm"
+          className="group inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-white overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95 cursor-pointer mb-6 relative"
         >
-          ← Back
+          {/* Gradient Background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-transform duration-300 group-hover:scale-110"></div>
+
+          {/* Shine Effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-30 transition-opacity duration-500 transform -skew-x-12 group-hover:translate-x-full"></div>
+
+          {/* Button Content */}
+          <ArrowBigLeft className="w-5 h-5 relative z-10 group-hover:-translate-x-1 transition-transform duration-300" />
+          <span className="relative z-10">Back</span>
         </button>
-        <ContactResponse />
+        <Ipaddress />
       </div>
     );
   }
@@ -237,9 +307,17 @@ const AdminPage = () => {
       <div className="min-h-screen p-3 sm:p-4 lg:p-6 bg-[url(https://res.cloudinary.com/dc1fkirb4/image/upload/v1755758676/notepad_e5ey08.jpg)] bg-cover bg-center">
         <button
           onClick={() => setActiveView("dashboard")}
-          className="mb-3 sm:mb-4 px-3 sm:px-4 py-2 bg-white/10 backdrop-blur-3xl text-white cursor-pointer rounded-lg hover:bg-white/20 transition-colors text-sm"
+          className="group inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-white overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95 cursor-pointer mb-6 relative"
         >
-          ← Back
+          {/* Gradient Background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-transform duration-300 group-hover:scale-110"></div>
+
+          {/* Shine Effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-30 transition-opacity duration-500 transform -skew-x-12 group-hover:translate-x-full"></div>
+
+          {/* Button Content */}
+          <ArrowBigLeft className="w-5 h-5 relative z-10 group-hover:-translate-x-1 transition-transform duration-300" />
+          <span className="relative z-10">Back</span>
         </button>
         <Notepad onDocumentSaved={handleNewDocument} />
       </div>
@@ -251,52 +329,41 @@ const AdminPage = () => {
       <div className="min-h-screen p-3 sm:p-4 lg:p-6 bg-gradient-to-bl from-pink-600 via-yellow-400 to-purple-700">
         <button
           onClick={() => setActiveView("dashboard")}
-          className="mb-3 sm:mb-4 px-3 sm:px-4 py-2 bg-white/30 backdrop-blur-3xl text-white cursor-pointer rounded-lg hover:bg-white/20 transition-colors text-sm"
+          className="group inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-white overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95 cursor-pointer mb-6 relative"
         >
-          ← Back
+          {/* Gradient Background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-transform duration-300 group-hover:scale-110"></div>
+
+          {/* Shine Effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-30 transition-opacity duration-500 transform -skew-x-12 group-hover:translate-x-full"></div>
+
+          {/* Button Content */}
+          <ArrowBigLeft className="w-5 h-5 relative z-10 group-hover:-translate-x-1 transition-transform duration-300" />
+          <span className="relative z-10">Back</span>
         </button>
         <Blog />
       </div>
     );
   }
 
-  if (user.role === "admin" && activeView === "IP") {
-    return (
-      <div className="min-h-screen p-3 sm:p-4 lg:p-6 bg-gradient-to-bl from-pink-600 via-yellow-400 to-purple-700">
-        <button
-          onClick={() => setActiveView("dashboard")}
-          className="mb-3 sm:mb-4 px-3 sm:px-4 py-2 bg-white/30 backdrop-blur-3xl text-white cursor-pointer rounded-lg hover:bg-white/20 transition-colors text-sm"
-        >
-          ← Back
-        </button>
-        <Ipaddress />
-      </div>
-    );
-  }
   if (user.role === "admin" && activeView === "number-conversion") {
     return (
       <div className="min-h-screen p-3 sm:p-4 lg:p-6 bg-gradient-to-bl from-pink-600 via-yellow-400 to-purple-700">
         <button
           onClick={() => setActiveView("dashboard")}
-          className="mb-3 sm:mb-4 px-3 sm:px-4 py-2 bg-white/30 backdrop-blur-3xl text-white cursor-pointer rounded-lg hover:bg-white/20 transition-colors text-sm"
+          className="group inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-white overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95 cursor-pointer mb-6 relative"
         >
-          ← Back
-        </button>
-        < ConversionPage/>
-      </div>
-    );
-  }
+          {/* Gradient Background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-transform duration-300 group-hover:scale-110"></div>
 
-  if (user.role === "editor" && activeView === "Notepad") {
-    return (
-      <div className="min-h-screen p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-slate-900 to-slate-800">
-        <button
-          onClick={() => setActiveView("dashboard")}
-          className="mb-3 sm:mb-4 px-3 sm:px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm"
-        >
-          ← Back
+          {/* Shine Effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-30 transition-opacity duration-500 transform -skew-x-12 group-hover:translate-x-full"></div>
+
+          {/* Button Content */}
+          <ArrowBigLeft className="w-5 h-5 relative z-10 group-hover:-translate-x-1 transition-transform duration-300" />
+          <span className="relative z-10">Back</span>
         </button>
-        <Notepad onDocumentSaved={handleNewDocument} />
+        <ConversionPage />
       </div>
     );
   }
