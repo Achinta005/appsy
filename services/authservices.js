@@ -1,7 +1,13 @@
+"use client";
+
 import { useAuth } from "@/app/context/authContext";
 
 export default function useApi() {
-  const { accessToken, setAccessToken } = useAuth();
+  const {
+    accessToken,
+    setAccessToken,
+    setIsAuthenticated,
+  } = useAuth();
 
   const apiFetch = async (url, options = {}) => {
     const res = await fetch(url, {
@@ -13,27 +19,25 @@ export default function useApi() {
       credentials: "include",
     });
 
-    // ✅ Access token expired
+    // 🔐 Access token expired
     if (res.status === 401) {
-      const refreshRes = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/refresh`,
-        {
-          method: "POST",
-          credentials: "include",
-        }
-      );
+      const refreshRes = await fetch("/api/auth/refresh", {
+        method: "POST",
+        credentials: "include",
+      });
 
       if (!refreshRes.ok) {
-        setIsAuthenticated(false);
         setAccessToken(null);
+        setIsAuthenticated(false);
         throw new Error("Session expired");
       }
 
       const refreshData = await refreshRes.json();
+
       setAccessToken(refreshData.accessToken);
       setIsAuthenticated(true);
 
-      // 🔁 retry original request
+      // 🔁 Retry original request
       return fetch(url, {
         ...options,
         headers: {

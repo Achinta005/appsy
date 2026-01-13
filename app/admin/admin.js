@@ -66,17 +66,11 @@ const AdminPage = () => {
   // Logout handler
   const handleLogout = async () => {
     try {
-      const response = await apiFetch(
-        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/auth/logout`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const res = await apiFetch("/api/auth/logout", {
+        method: "POST",
+      });
 
-      if (!response.ok) {
+      if (!res.ok) {
         throw new Error("Logout failed");
       }
 
@@ -108,9 +102,7 @@ const AdminPage = () => {
         onFeatureSelect={setActiveFeature}
         userRole={user.role}
         isCollapsed={sidebarCollapsed}
-        onToggleCollapse={() =>
-          setSidebarCollapsed((prev) => !prev)
-        }
+        onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
       />
 
       {/* Main Content */}

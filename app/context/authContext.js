@@ -13,7 +13,7 @@ export function AuthProvider({ children }) {
     const restoreSession = async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_SERVER_API_URL}/auth/refresh`,
+          `/api/auth/refresh`,
           {
             method: "POST",
             credentials: "include",

@@ -51,7 +51,7 @@ const LoginContent = () => {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/auth/login`,
+        `/api/auth/login`,
         {
           method: "POST",
           credentials: "include",
