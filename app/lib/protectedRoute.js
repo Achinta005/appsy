@@ -101,7 +101,7 @@ export default function ProtectedRoute({ children }) {
 
           {/* Description */}
           <p className="text-purple-200 text-lg mb-8 max-w-md mx-auto leading-relaxed">
-            Your session has expired or you're not authenticated. You'll be redirected to the login page shortly.
+            Your session has expired or you&apos;re not authenticated. You&apos;ll be redirected to the login page shortly.
           </p>
 
           {/* Countdown Loading */}
