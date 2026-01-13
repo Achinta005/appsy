@@ -2,7 +2,6 @@
 
 import { jwtDecode } from "jwt-decode";
 
-// ✅ Single source of truth
 export const AUTH_TOKEN_KEY = "auth_token";
 
 /**
@@ -14,7 +13,7 @@ export const setAuthToken = (token) => {
   if (token && token.split(".").length === 3) {
     localStorage.setItem(AUTH_TOKEN_KEY, token);
   } else {
-    console.warn("Attempted to store invalid token:", token);
+    localStorage.removeItem(AUTH_TOKEN_KEY);
   }
 };
 
@@ -35,9 +34,9 @@ export const removeAuthToken = () => {
 };
 
 /**
- * Check if user is authenticated
+ * Check if token exists and is structurally valid
  */
-export const isAuthenticated = () => {
+export const hasValidToken = () => {
   const token = getAuthToken();
   return !!(token && token.split(".").length === 3);
 };
@@ -45,21 +44,19 @@ export const isAuthenticated = () => {
 /**
  * Decode user info from JWT
  */
-export const getUserFromToken = () => {
-  const token = getAuthToken();
-
+export const getUserFromToken = (token) => {
   if (!token || token.split(".").length !== 3) return null;
 
   try {
     const decoded = jwtDecode(token);
     return {
-      userId: decoded.id,
+      userId: decoded.id, // backend uses `sub`
       username: decoded.username,
       role: decoded.role,
-      email:decoded.email,
+      email: decoded.email, // exists in your JWT
     };
   } catch (err) {
-    console.error("Error decoding token:", err);
+    console.error("JWT decode failed:", err);
     return null;
   }
 };

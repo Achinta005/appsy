@@ -1,13 +1,16 @@
 "use client";
 import React from "react";
 import AdminPage from "./admin";
+import ProtectedRoute from "../lib/protectedRoute";
 
-const page = () => {
+const Page = () => {
   return (
     <>
-      <AdminPage />
+      <ProtectedRoute>
+        <AdminPage />
+      </ProtectedRoute>
     </>
   );
 };
 
-export default page;
+export default Page;

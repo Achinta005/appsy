@@ -4,7 +4,7 @@ export const PortfolioApiService = {
   // Admin
   Ai_enhance: async (plainText) => {
     return apiCall(
-      `${process.env.NEXT_PUBLIC_PYTHON_API_URL}/admin/ai-enhance`,
+      `${process.env.NEXT_PUBLIC_SERVER_API_URL}/admin/ai-enhance`,
       {
         method: "POST",
         body: JSON.stringify({ text: plainText }),
@@ -14,7 +14,7 @@ export const PortfolioApiService = {
 
   Upload_blog: async (formData) => {
     return apiCall(
-      `${process.env.NEXT_PUBLIC_PYTHON_API_URL}/admin/upload_blog`,
+      `${process.env.NEXT_PUBLIC_SERVER_API_URL}/admin/upload_blog`,
       {
         method: "POST",
         body: JSON.stringify(formData),
@@ -23,32 +23,25 @@ export const PortfolioApiService = {
   },
 
   Fetch_IP: async (userId) => {
-    return apiCall(`${process.env.NEXT_PUBLIC_PYTHON_API_URL}/admin/get-ip`, {
+    return apiCall(`${process.env.NEXT_PUBLIC_SERVER_API_URL}/admin/get-ip`, {
       method: "POST",
       body: JSON.stringify({ user_id: userId }),
     });
   },
 
   ViewIp: async () => {
-    return apiCall(`${process.env.NEXT_PUBLIC_PYTHON_API_URL}/admin/view-ip`);
+    return apiCall(`${process.env.NEXT_PUBLIC_SERVER_API_URL}/admin/view-ip`);
   },
 
   deleteIpAddress: async (ipId) => {
-    return apiCall(`${process.env.NEXT_PUBLIC_PYTHON_API_URL}/admin/delete-ip/${ipId}`, {
+    return apiCall(`${process.env.NEXT_PUBLIC_SERVER_API_URL}/admin/delete-ip/${ipId}`, {
       method: "DELETE",
     });
   },
 
   // Authentication
   Register: async (formData) => {
-    return apiCall(`${process.env.NEXT_PUBLIC_PYTHON_API_URL}/auth/register`, {
-      method: "POST",
-      body: JSON.stringify(formData),
-    });
-  },
-
-  Login: async (formData) => {
-    return apiCall(`${process.env.NEXT_PUBLIC_PYTHON_API_URL}/auth/login`, {
+    return apiCall(`${process.env.NEXT_PUBLIC_SERVER_API_URL}/auth/register`, {
       method: "POST",
       body: JSON.stringify(formData),
     });
@@ -57,7 +50,7 @@ export const PortfolioApiService = {
   // AnimeList
   FetchAnimeList: async (username) => {
     return apiCall(
-      `${process.env.NEXT_PUBLIC_PYTHON_API_URL}/alist/anilist/BaseFunction/fetch`,
+      `${process.env.NEXT_PUBLIC_SERVER_API_URL}/alist/anilist/BaseFunction/fetch`,
       {
         method: "POST",
         body: JSON.stringify({ username: username.trim() }),
@@ -67,7 +60,7 @@ export const PortfolioApiService = {
 
   UplaodProject: async (formData) => {
     return apiCall(
-      `${process.env.NEXT_PUBLIC_PYTHON_API_URL}/project/project_upload`,
+      `${process.env.NEXT_PUBLIC_SERVER_API_URL}/project/project_upload`,
       {
         method: "POST",
         body: formData,
@@ -78,13 +71,13 @@ export const PortfolioApiService = {
   //View Contact Responses
   ContactResponses: async () => {
     return apiCall(
-      `${process.env.NEXT_PUBLIC_PYTHON_API_URL}/contact/contact_responses`
+      `${process.env.NEXT_PUBLIC_SERVER_API_URL}/contact/contact_responses`
     );
   },
 
   deleteContact: async (contactId) => {
     return apiCall(
-      `${process.env.NEXT_PUBLIC_PYTHON_API_URL}/contact/delete_response/${contactId}`,
+      `${process.env.NEXT_PUBLIC_SERVER_API_URL}/contact/delete_response/${contactId}`,
       {
         method: "DELETE",
       }
@@ -94,7 +87,7 @@ export const PortfolioApiService = {
   //Post Notepad Documents
   Notepad: async (title, content, user) => {
     return apiCall(
-      `${process.env.NEXT_PUBLIC_PYTHON_API_URL}/admin/create_documents`,
+      `${process.env.NEXT_PUBLIC_SERVER_API_URL}/admin/create_documents`,
       {
         method: "POST",
         body: JSON.stringify({ user, title, content }),
@@ -105,7 +98,7 @@ export const PortfolioApiService = {
   //Fetch User Notepad Documents
   FetchNotepadDocs: async (user) => {
     return apiCall(
-      `${process.env.NEXT_PUBLIC_PYTHON_API_URL}/admin/fetch_documents`,
+      `${process.env.NEXT_PUBLIC_SERVER_API_URL}/admin/fetch_documents`,
       {
         method: "POST",
         body: JSON.stringify(user),
