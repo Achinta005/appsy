@@ -10,6 +10,7 @@ import {
   FilePlay,
   LayoutDashboard,
   ListCheck,
+  UserLock
 } from "lucide-react";
 
 // Import your feature components
@@ -24,6 +25,7 @@ import ConversionPage from "../features/BinaryConverter/ConversionPage";
 import Notepad from "../features/Notepad/Notepad";
 import AniListViewer from "../features/anime-list/AniListViewer";
 import DriveVideoPlayer from "../features/DVIDEO/videoPlayer";
+import RBACManagement from "../features/RBAC/page";
 
 export const adminFeatures = {
   dashboard: {
@@ -31,8 +33,16 @@ export const adminFeatures = {
     icon: LayoutDashboard,
     gradient: "from-purple-500 to-pink-500",
     component: DashboardHome,
-    roles: ["admin", "editor"],
+    roles: ["admin"],
     description: "Overview and analytics",
+  },
+  RBAC:{
+    title:"RBAC",
+    icon:UserLock,
+    gradient:"from-pink-500 to-teal-500",
+    component:RBACManagement,
+    roles:["admin"],
+    description:"Role Based Access Control"
   },
   
   projects: {
@@ -101,7 +111,7 @@ export const adminFeatures = {
     gradient: "from-pink-500 to-teal-500",
     image: "https://www.wikihow.com/images/thumb/9/96/Convert-from-Binary-to-Decimal-Step-4-Version-6.jpg/v4-460px-Convert-from-Binary-to-Decimal-Step-4-Version-6.jpg",
     component: ConversionPage,
-    roles: ["admin"],
+    roles: ["admin","viewer"],
     description: "Number system converter",
   },
   alist:{
