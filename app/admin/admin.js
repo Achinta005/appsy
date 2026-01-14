@@ -119,6 +119,7 @@ const AdminPage = () => {
           <AdminFeatureRenderer
             featureKey={activeFeature}
             onBack={() => setActiveFeature("dashboard")}
+            onFeatureSelect={setActiveFeature}
           />
         </main>
       </div>
