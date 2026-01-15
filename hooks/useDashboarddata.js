@@ -54,6 +54,11 @@ const DATA_SOURCES = {
     method: "sse",
     transform: (data) => data.visits,
   },
+  activities: {
+    endpoint: `${process.env.NEXT_PUBLIC_SERVER_API_URL}/activity/stream`,
+    method: "sse",
+    transform: (data) => data,
+  },
 };
 
 export function useDashboardData() {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useDashboardData } from "@/hooks/useDashboarddata";
+import { useActivityStream } from "@/hooks/useActivityStream";
 import {
   Users,
   MessageSquare,
@@ -8,10 +9,12 @@ import {
   Activity,
   Eye,
   FileText,
-  Server,
   Loader2,
   RefreshCw,
   TrendingUp,
+  Activity as ActivityIcon,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
 import {
   LineChart,
@@ -192,6 +195,35 @@ export default function DashboardHome({ onFeatureSelect }) {
     refreshAll,
     isLoading,
   } = useDashboardData();
+  const { activities, isConnected, error, refresh } = useActivityStream();
+
+  // Format timestamp
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60)
+      return `${diffMins} minute${diffMins > 1 ? "s" : ""} ago`;
+    if (diffHours < 24)
+      return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+    return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+  };
+
+  const getActivityColor = (type) => {
+    const colors = {
+      PROJECT_CREATED: "bg-blue-400",
+      PROJECT_UPDATED: "bg-purple-400",
+      MESSAGE_RECEIVED: "bg-green-400",
+      BLOG_PUBLISHED: "bg-pink-400",
+      USER_REGISTERED: "bg-yellow-400",
+    };
+    return colors[type] || "bg-gray-400";
+  };
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -309,10 +341,16 @@ export default function DashboardHome({ onFeatureSelect }) {
             >
               Upload Project
             </button>
-            <button className="bg-gradient-to-r from-green-500 to-teal-500 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:shadow-lg transition-all transform hover:-translate-y-1" onClick={() => onFeatureSelect && onFeatureSelect("messages")}>
+            <button
+              className="bg-gradient-to-r from-green-500 to-teal-500 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:shadow-lg transition-all transform hover:-translate-y-1"
+              onClick={() => onFeatureSelect && onFeatureSelect("messages")}
+            >
               View Messages
             </button>
-            <button className="bg-gradient-to-r from-pink-500 to-rose-500 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:shadow-lg transition-all transform hover:-translate-y-1" onClick={() => onFeatureSelect && onFeatureSelect("visitTracker")}>
+            <button
+              className="bg-gradient-to-r from-pink-500 to-rose-500 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:shadow-lg transition-all transform hover:-translate-y-1"
+              onClick={() => onFeatureSelect && onFeatureSelect("visitTracker")}
+            >
               Check Analytics
             </button>
           </div>
@@ -320,40 +358,74 @@ export default function DashboardHome({ onFeatureSelect }) {
 
         {/* Recent Activity Feed */}
         <div className="bg-white/10 backdrop-blur-lg rounded-xl p-5 border border-white/20 mb-8">
-          <h2 className="text-lg font-bold text-white mb-3">Recent Activity</h2>
-          <div className="space-y-2">
-            {[
-              {
-                action: "New project uploaded",
-                time: "2 hours ago",
-                type: "success",
-              },
-              {
-                action: "Message received from visitor",
-                time: "5 hours ago",
-                type: "info",
-              },
-              {
-                action: "Blog post published",
-                time: "1 day ago",
-                type: "success",
-              },
-            ].map((activity, idx) => (
-              <div
-                key={idx}
-                className="flex items-center gap-3 p-2.5 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
-              >
-                <div
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    activity.type === "success" ? "bg-green-400" : "bg-blue-400"
-                  }`}
-                />
-                <div className="flex-1">
-                  <p className="text-white text-sm">{activity.action}</p>
-                  <p className="text-gray-400 text-xs">{activity.time}</p>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <ActivityIcon className="w-5 h-5" />
+              Recent Activity
+            </h2>
+            <div className="flex items-center gap-2">
+              {isConnected ? (
+                <div className="flex items-center gap-1.5 text-xs text-green-400">
+                  <Wifi className="w-3.5 h-3.5" />
+                  <span>Live</span>
                 </div>
+              ) : (
+                <div className="flex items-center gap-1.5 text-xs text-red-400">
+                  <WifiOff className="w-3.5 h-3.5" />
+                  <span>Disconnected</span>
+                </div>
+              )}
+              <button
+                onClick={refresh}
+                className="text-xs text-gray-400 hover:text-white transition-colors"
+              >
+                Refresh
+              </button>
+            </div>
+          </div>
+
+          {error && (
+            <div className="mb-3 p-2 bg-red-500/20 border border-red-500/50 rounded text-xs text-red-300">
+              {error}
+            </div>
+          )}
+
+          <div className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar">
+            {activities.length === 0 ? (
+              <div className="text-center py-8 text-gray-400">
+                <ActivityIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No recent activity</p>
               </div>
-            ))}
+            ) : (
+              activities.map((activity) => (
+                <div
+                  key={activity.id}
+                  className="flex items-center gap-3 p-2.5 bg-white/5 rounded-lg hover:bg-white/10 transition-all cursor-pointer animate-slideIn"
+                >
+                  <div
+                    className={`w-1.5 h-1.5 rounded-full ${getActivityColor(
+                      activity.type
+                    )} flex-shrink-0`}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-sm truncate">
+                      {activity.action}
+                    </p>
+                    <p className="text-gray-400 text-xs">
+                      {formatTimestamp(activity.timestamp)}
+                    </p>
+                  </div>
+                  {isConnected && activity.id === activities[0]?.id && (
+                    <div className="flex-shrink-0">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -370,6 +442,36 @@ export default function DashboardHome({ onFeatureSelect }) {
       `,
         }}
       />
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.2);
+          border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateX(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        .animate-slideIn {
+          animation: slideIn 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 }
