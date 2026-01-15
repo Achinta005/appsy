@@ -1,12 +1,28 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
+// Service configuration for health checks
+const HEALTH_SERVICES = [
+  {
+    id: "service1",
+    name: "Main Server",
+    healthUrl: process.env.NEXT_PUBLIC_SERVICE1_HEALTH,
+    type: "NestJS",
+  },
+  {
+    id: "service2",
+    name: "ML Backend",
+    healthUrl: process.env.NEXT_PUBLIC_SERVICE3_HEALTH,
+    type: "FastAPI",
+  },
+];
+
 // Configuration for each data source
 const DATA_SOURCES = {
   users: {
     endpoint: `${process.env.NEXT_PUBLIC_SERVER_API_URL}/auth/users/count`,
-    method: 'fetch', // 'fetch' or 'sse'
-    pollInterval: 30000, // milliseconds (null = no polling)
-    transform: (data) => data, // Transform response
+    method: 'fetch',
+    pollInterval: 30000,
+    transform: (data) => data,
   },
   projects: {
     endpoint: `${process.env.NEXT_PUBLIC_SERVER_API_URL}/project/projects/count`,
@@ -27,31 +43,85 @@ const DATA_SOURCES = {
     transform: (data) => data,
   },
   weeklyVisits: {
-    endpoint: `${process.env.NEXT_PUBLIC_SERVER_API_URL}/track/visits/count`,
-    method: 'fetch',
-    pollInterval: 60000,
-    transform: (data) => data,
+    endpoint: `${process.env.NEXT_PUBLIC_SERVER_API_URL}/track/visits/count/stream`,
+    method: 'sse',
+    transform: (data) => data.count,
   },
-  serviceHealth: {
-    endpoint: '/api/health/status',
-    method: 'sse', // Real-time SSE
-    transform: (data) => data.status,
+  allVisits: {
+    endpoint: `${process.env.NEXT_PUBLIC_SERVER_API_URL}/track/visits/stream`,
+    method: 'sse',
+    transform: (data) => data.visits,
   },
-  // Add new data sources here easily:
-  // newMetric: {
-  //   endpoint: '/api/new-metric',
-  //   method: 'fetch',
-  //   pollInterval: 30000,
-  //   transform: (data) => data.value,
-  // },
 };
 
 export function useDashboardData() {
   const [data, setData] = useState({});
   const [loading, setLoading] = useState({});
   const [errors, setErrors] = useState({});
+  const [serviceHealth, setServiceHealth] = useState({});
+  const [checkingServices, setCheckingServices] = useState({});
   const eventSourcesRef = useRef({});
   const pollIntervalsRef = useRef({});
+
+  // Check health of a single service
+  const checkServiceHealth = useCallback(async (service) => {
+    setCheckingServices((prev) => ({ ...prev, [service.id]: true }));
+    try {
+      const res = await fetch(service.healthUrl, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      
+      if (!res.ok) throw new Error("Health check failed");
+      
+      setServiceHealth((prev) => ({
+        ...prev,
+        [service.id]: {
+          status: 'operational',
+          name: service.name,
+          type: service.type,
+          lastCheck: new Date().toISOString(),
+        },
+      }));
+      
+      return true;
+    } catch (err) {
+      setServiceHealth((prev) => ({
+        ...prev,
+        [service.id]: {
+          status: 'down',
+          name: service.name,
+          type: service.type,
+          lastCheck: new Date().toISOString(),
+          error: err.message,
+        },
+      }));
+      return false;
+    } finally {
+      setCheckingServices((prev) => ({ ...prev, [service.id]: false }));
+    }
+  }, []);
+
+  // Check all services
+  const checkAllServices = useCallback(async () => {
+    const results = await Promise.all(
+      HEALTH_SERVICES.map((service) => checkServiceHealth(service))
+    );
+    return results;
+  }, [checkServiceHealth]);
+
+  // Get overall service health status
+  const getOverallHealth = useCallback(() => {
+    const statuses = Object.values(serviceHealth).map(s => s.status);
+    
+    if (statuses.length === 0) return 'unknown';
+    if (statuses.every(s => s === 'operational')) return 'operational';
+    if (statuses.some(s => s === 'down')) return 'degraded';
+    
+    return 'operational';
+  }, [serviceHealth]);
 
   // Fetch data from a single endpoint
   const fetchData = useCallback(async (key, config) => {
@@ -66,7 +136,6 @@ export function useDashboardData() {
       }
 
       const result = await response.json();
-    //   console.log(result)
       const transformedData = config.transform ? config.transform(result) : result;
 
       setData(prev => ({ ...prev, [key]: transformedData }));
@@ -80,7 +149,6 @@ export function useDashboardData() {
 
   // Setup SSE connection for real-time data
   const setupSSE = useCallback((key, config) => {
-    // Close existing connection if any
     if (eventSourcesRef.current[key]) {
       eventSourcesRef.current[key].close();
     }
@@ -104,15 +172,17 @@ export function useDashboardData() {
       setErrors(prev => ({ ...prev, [key]: 'Connection error' }));
       eventSource.close();
       
-      // Retry connection after 5 seconds
       setTimeout(() => setupSSE(key, config), 5000);
     };
 
     eventSourcesRef.current[key] = eventSource;
   }, []);
 
-  // Initialize all data sources
+  // Initialize all data sources and health checks
   useEffect(() => {
+    // Initial health check
+    checkAllServices();
+
     // Fetch all data sources in parallel
     const fetchPromises = Object.entries(DATA_SOURCES).map(([key, config]) => {
       if (config.method === 'fetch') {
@@ -123,7 +193,6 @@ export function useDashboardData() {
       }
     });
 
-    // Wait for initial fetch to complete
     Promise.all(fetchPromises).then(() => {
       console.log('Initial data fetch completed');
     });
@@ -137,19 +206,24 @@ export function useDashboardData() {
       }
     });
 
+    // Setup health check polling (every 2 minutes)
+    const healthCheckInterval = setInterval(() => {
+      checkAllServices();
+    }, 120000);
+
     // Cleanup function
     return () => {
-      // Clear all polling intervals
+      clearInterval(healthCheckInterval);
+      
       Object.values(pollIntervalsRef.current).forEach(interval => {
         clearInterval(interval);
       });
 
-      // Close all SSE connections
       Object.values(eventSourcesRef.current).forEach(eventSource => {
         eventSource.close();
       });
     };
-  }, [fetchData, setupSSE]);
+  }, [fetchData, setupSSE, checkAllServices]);
 
   // Manual refresh function
   const refresh = useCallback((key) => {
@@ -166,15 +240,26 @@ export function useDashboardData() {
         fetchData(key, config);
       }
     });
-  }, [fetchData]);
+    checkAllServices();
+  }, [fetchData, checkAllServices]);
 
   return {
-    data,
-    loading,
+    data: {
+      ...data,
+      serviceHealth: getOverallHealth(),
+    },
+    loading: {
+      ...loading,
+      serviceHealth: Object.values(checkingServices).some(Boolean),
+    },
     errors,
+    serviceHealth,
+    checkingServices,
     refresh,
     refreshAll,
-    isLoading: Object.values(loading).some(Boolean),
+    checkServiceHealth,
+    checkAllServices,
+    isLoading: Object.values(loading).some(Boolean) || Object.values(checkingServices).some(Boolean),
     hasErrors: Object.values(errors).some(Boolean),
   };
 }
