@@ -6,6 +6,7 @@ export default function AdminFeatureRenderer({
   featureKey,
   onBack,
   onFeatureSelect,
+  userRole
 }) {
   if (!featureKey) return null;
 

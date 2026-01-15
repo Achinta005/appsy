@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Search, Trash2, Globe, Calendar, X } from "lucide-react";
-import { PortfolioApiService } from "@/services/PortfolioApiService";
+import useApi from "@/services/authservices";
 
 const Ipaddress = () => {
   const [ipAddresses, setIpAddresses] = useState([]);
@@ -8,12 +8,20 @@ const Ipaddress = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const apiFetch = useApi();
 
   useEffect(() => {
     const getIps = async () => {
       try {
-        const response = await PortfolioApiService.ViewIp();
-        const data = await response;
+        const response = await apiFetch(
+          `${process.env.NEXT_PUBLIC_SERVER_API_URL}/admin/view-ip`
+        );
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch IP addresses");
+        }
+        
+        const data = await response.json();
         setIpAddresses(data.data || []);
         setError(null);
       } catch (error) {
@@ -24,7 +32,7 @@ const Ipaddress = () => {
       }
     };
     getIps();
-  }, []);
+  }, [apiFetch]);
 
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return "N/A";
@@ -45,7 +53,16 @@ const Ipaddress = () => {
 
   const handleDelete = async (ipId) => {
     try {
-      await PortfolioApiService.deleteIpAddress(ipId);
+      const response = await apiFetch(
+        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/admin/delete-ip/${ipId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete IP address");
+      }
 
       // Remove from local state
       setIpAddresses(ipAddresses.filter((ip) => ip._id !== ipId));
@@ -54,6 +71,7 @@ const Ipaddress = () => {
       console.log("Deleted IP:", ipId);
     } catch (error) {
       console.error("Error deleting IP:", error);
+      setError(error.message);
     }
   };
 
@@ -153,7 +171,7 @@ const Ipaddress = () => {
                   {/* Delete Button */}
                   <div className="flex-shrink-0 ml-5">
                     <button
-                      onClick={() => setDeleteConfirm(ip.ipaddress || index)}
+                      onClick={() => setDeleteConfirm(ip._id || index)}
                       className="bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-2 shadow-md group-hover:shadow-lg font-semibold"
                     >
                       <Trash2 className="w-4 h-4" />

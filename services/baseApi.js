@@ -1,7 +1,4 @@
-export const apiCall = async (endpoint, options = {}) => {
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
+export const apiCall = async (endpoint, options = {}, accessToken = null) => {
   const defaultHeaders = {};
 
   // Only set JSON header if not sending FormData
@@ -12,14 +9,14 @@ export const apiCall = async (endpoint, options = {}) => {
   // Build final headers (token included)
   const headers = {
     ...defaultHeaders,
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(options.headers || {})
+    ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+    ...(options.headers || {}),
   };
 
   // Final fetch config
   const config = {
     ...options,
-    headers
+    headers,
   };
 
   try {

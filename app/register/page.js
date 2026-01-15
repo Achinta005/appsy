@@ -7,9 +7,9 @@ import * as THREE from "three";
 import { cn } from "../lib/util";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PortfolioApiService } from "@/services/PortfolioApiService";
-import { 
-  IconEye, 
+import useApi from "@/services/authservices";
+import {
+  IconEye,
   IconEyeOff,
   IconShield,
   IconUser,
@@ -18,7 +18,7 @@ import {
   IconCheck,
   IconAlertCircle,
   IconArrowLeft,
-  IconSparkles
+  IconSparkles,
 } from "@tabler/icons-react";
 
 const RegisterPage = () => {
@@ -34,6 +34,7 @@ const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState("");
   const router = useRouter();
+  const apiFetch = useApi();
 
   const handleChange = (e) => {
     setError("");
@@ -50,8 +51,17 @@ const RegisterPage = () => {
     setSuccess("");
 
     try {
-      const response = await PortfolioApiService.Register(formData);
-      const data = await response;
+      const response = await apiFetch(
+        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/auth/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+      const data = await response.json();
 
       if (!data.success) {
         setError(data.error || "Registration failed");
@@ -89,19 +99,19 @@ const RegisterPage = () => {
       if (!vantaEffect && window.VANTA && vantaRef.current) {
         setVantaEffect(
           window.VANTA.NET({
-          el: vantaRef.current,
-          THREE: THREE,
-          mouseControls: true,
-          touchControls: true,
-          gyroControls: false,
-          minHeight: 200.0,
-          minWidth: 200.0,
-          scale: 1.0,
-          scaleMobile: 1.0,
-          backgroundColor: 0x0,
-          points: 20.0,
-          maxDistance: 10.0,
-          spacing: 20.0,
+            el: vantaRef.current,
+            THREE: THREE,
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.0,
+            minWidth: 200.0,
+            scale: 1.0,
+            scaleMobile: 1.0,
+            backgroundColor: 0x0,
+            points: 20.0,
+            maxDistance: 10.0,
+            spacing: 20.0,
           })
         );
       }
@@ -116,10 +126,7 @@ const RegisterPage = () => {
 
   return (
     <>
-      <div
-        ref={vantaRef}
-        className="fixed inset-0 -z-10 pointer-events-none"
-      />
+      <div ref={vantaRef} className="fixed inset-0 -z-10 pointer-events-none" />
 
       {/* Floating background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -178,7 +185,8 @@ const RegisterPage = () => {
                         className={cn(
                           "h-12 bg-white/5 border border-white/10 text-white placeholder:text-neutral-500",
                           "focus:border-cyan-500/50 focus:bg-white/10 focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300",
-                          focusedField === "username" && "shadow-lg shadow-cyan-500/10"
+                          focusedField === "username" &&
+                            "shadow-lg shadow-cyan-500/10"
                         )}
                       />
                     </div>
@@ -204,7 +212,8 @@ const RegisterPage = () => {
                         className={cn(
                           "h-12 bg-white/5 border border-white/10 text-white placeholder:text-neutral-500",
                           "focus:border-cyan-500/50 focus:bg-white/10 focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300",
-                          focusedField === "email" && "shadow-lg shadow-cyan-500/10"
+                          focusedField === "email" &&
+                            "shadow-lg shadow-cyan-500/10"
                         )}
                       />
                     </div>
@@ -232,14 +241,17 @@ const RegisterPage = () => {
                       className={cn(
                         "h-12 bg-white/5 border border-white/10 text-white placeholder:text-neutral-500 pr-12",
                         "focus:border-cyan-500/50 focus:bg-white/10 focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300",
-                        focusedField === "password" && "shadow-lg shadow-cyan-500/10"
+                        focusedField === "password" &&
+                          "shadow-lg shadow-cyan-500/10"
                       )}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-cyan-400 transition-colors duration-200"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
                     >
                       {showPassword ? (
                         <IconEyeOff className="h-5 w-5" />
@@ -345,13 +357,20 @@ const RegisterPage = () => {
 
             {/* Footer */}
             <div className="text-center text-xs text-neutral-500 space-y-2">
-              <p>By creating an account, you agree to our Terms of Service and Privacy Policy</p>
+              <p>
+                By creating an account, you agree to our Terms of Service and
+                Privacy Policy
+              </p>
               <div className="flex items-center justify-center gap-4">
                 <span>© 2026 Admin Panel</span>
                 <span>•</span>
-                <a href="#" className="hover:text-cyan-400 transition-colors">Help</a>
+                <a href="#" className="hover:text-cyan-400 transition-colors">
+                  Help
+                </a>
                 <span>•</span>
-                <a href="#" className="hover:text-cyan-400 transition-colors">Support</a>
+                <a href="#" className="hover:text-cyan-400 transition-colors">
+                  Support
+                </a>
               </div>
             </div>
           </div>
@@ -360,7 +379,8 @@ const RegisterPage = () => {
 
       <style jsx>{`
         @keyframes float {
-          0%, 100% {
+          0%,
+          100% {
             transform: translateY(0px) translateX(0px);
           }
           25% {
@@ -374,9 +394,23 @@ const RegisterPage = () => {
           }
         }
         @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
-          20%, 40%, 60%, 80% { transform: translateX(4px); }
+          0%,
+          100% {
+            transform: translateX(0);
+          }
+          10%,
+          30%,
+          50%,
+          70%,
+          90% {
+            transform: translateX(-4px);
+          }
+          20%,
+          40%,
+          60%,
+          80% {
+            transform: translateX(4px);
+          }
         }
         @keyframes slideIn {
           from {

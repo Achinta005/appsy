@@ -1,39 +1,46 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
+import useApi from "@/services/authservices";
 
 export default function ConversionPage() {
-  const [numberInput, setNumberInput] = useState('');
-  const [numberBase, setNumberBase] = useState('decimal');
+  const [numberInput, setNumberInput] = useState("");
+  const [numberBase, setNumberBase] = useState("decimal");
   const [numberResult, setNumberResult] = useState(null);
-  
-  const [ipInput, setIpInput] = useState('');
+
+  const [ipInput, setIpInput] = useState("");
   const [ipResult, setIpResult] = useState(null);
-  
+
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+  const apiFetch = useApi();
 
   const handleNumberConversion = async () => {
     setLoading(true);
-    setError('');
+    setError("");
     setNumberResult(null);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API_URL}/convert/number`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          value: numberInput,
-          base: numberBase
-        })
-      });
+      const response = await apiFetch(
+        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/convert/number`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            value: numberInput,
+            base: numberBase,
+          }),
+        }
+      );
 
-      const data = await response.json();
-      
       if (!response.ok) {
-        throw new Error(data.error || 'Conversion failed');
+        const data = await response.json();
+        throw new Error(data.error || "Conversion failed");
       }
 
+      const data = await response.json();
       setNumberResult(data);
     } catch (err) {
       setError(err.message);
@@ -44,22 +51,27 @@ export default function ConversionPage() {
 
   const handleIpConversion = async () => {
     setLoading(true);
-    setError('');
+    setError("");
     setIpResult(null);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API_URL}/convert/ip`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ip: ipInput })
-      });
+      const response = await apiFetch(
+        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/convert/ip`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ ip: ipInput }),
+        }
+      );
 
-      const data = await response.json();
-      
       if (!response.ok) {
-        throw new Error(data.error || 'Conversion failed');
+        const data = await response.json();
+        throw new Error(data.error || "Conversion failed");
       }
 
+      const data = await response.json();
       setIpResult(data);
     } catch (err) {
       setError(err.message);
@@ -69,18 +81,32 @@ export default function ConversionPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50/10 to-indigo-100 p-8 rounded-2xl backdrop-blur-3xl">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl font-bold text-gray-800 mb-8 text-center">
           Number & IP Converter
         </h1>
 
+        {/* Error Display - Moved to top */}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6 relative">
+            <button
+              onClick={() => setError("")}
+              className="absolute top-2 right-2 text-red-700 hover:text-red-900"
+            >
+              ✕
+            </button>
+            <strong className="font-bold">Error: </strong>
+            <span className="block sm:inline">{error}</span>
+          </div>
+        )}
+
         {/* Number Conversion Section */}
-        <div className="bg-white/50 rounded-lg shadow-lg p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <h2 className="text-2xl font-semibold text-gray-700 mb-4">
             Number Conversion
           </h2>
-          
+
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -116,7 +142,7 @@ export default function ConversionPage() {
               disabled={loading || !numberInput}
               className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
             >
-              {loading ? 'Converting...' : 'Convert'}
+              {loading ? "Converting..." : "Convert"}
             </button>
           </div>
 
@@ -124,10 +150,22 @@ export default function ConversionPage() {
             <div className="mt-6 p-4 bg-gray-50 rounded-md">
               <h3 className="font-semibold text-gray-700 mb-2">Results:</h3>
               <div className="space-y-2">
-                <p><span className="font-medium">Decimal:</span> {numberResult.decimal}</p>
-                <p><span className="font-medium">Binary:</span> {numberResult.binary}</p>
-                <p><span className="font-medium">Octal:</span> {numberResult.octal}</p>
-                <p><span className="font-medium">Hexadecimal:</span> {numberResult.hex}</p>
+                <p>
+                  <span className="font-medium">Decimal:</span>{" "}
+                  {numberResult.decimal}
+                </p>
+                <p>
+                  <span className="font-medium">Binary:</span>{" "}
+                  {numberResult.binary}
+                </p>
+                <p>
+                  <span className="font-medium">Octal:</span>{" "}
+                  {numberResult.octal}
+                </p>
+                <p>
+                  <span className="font-medium">Hexadecimal:</span>{" "}
+                  {numberResult.hex}
+                </p>
               </div>
             </div>
           )}
@@ -138,7 +176,7 @@ export default function ConversionPage() {
           <h2 className="text-2xl font-semibold text-gray-700 mb-4">
             IP Address to Binary
           </h2>
-          
+
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -158,7 +196,7 @@ export default function ConversionPage() {
               disabled={loading || !ipInput}
               className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
             >
-              {loading ? 'Converting...' : 'Convert IP'}
+              {loading ? "Converting..." : "Convert IP"}
             </button>
           </div>
 
@@ -166,10 +204,17 @@ export default function ConversionPage() {
             <div className="mt-6 p-4 bg-gray-50 rounded-md">
               <h3 className="font-semibold text-gray-700 mb-2">Results:</h3>
               <div className="space-y-2">
-                <p><span className="font-medium">IP Address:</span> {ipResult.ip}</p>
-                <p><span className="font-medium">Binary (Full):</span> {ipResult.binaryFull}</p>
-                <p className="mt-2"><span className="font-medium">Octets:</span></p>
-                {ipResult.octets.map((octet, idx) => (
+                <p>
+                  <span className="font-medium">IP Address:</span> {ipResult.ip}
+                </p>
+                <p>
+                  <span className="font-medium">Binary (Full):</span>{" "}
+                  {ipResult.binaryFull}
+                </p>
+                <p className="mt-2">
+                  <span className="font-medium">Octets:</span>
+                </p>
+                {ipResult.octets?.map((octet, idx) => (
                   <p key={idx} className="ml-4">
                     Octet {idx + 1}: {octet.decimal} = {octet.binary}
                   </p>
@@ -178,12 +223,6 @@ export default function ConversionPage() {
             </div>
           )}
         </div>
-
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-            {error}
-          </div>
-        )}
       </div>
     </div>
   );

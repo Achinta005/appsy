@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getUserFromToken } from "../lib/auth";
-import { PortfolioApiService } from "../../services/PortfolioApiService";
 import { useAuth } from "../context/authContext";
 import useApi from "../../services/authservices";
 
@@ -11,11 +10,12 @@ import useApi from "../../services/authservices";
 import AdminSidebar from "./components/AdminSidebar";
 import AdminHeader from "./components/AdminHeader";
 import AdminFeatureRenderer from "./components/AdminFeatureRenderer";
+import { adminFeatures } from "./config/adminFeatures";
 
 const AdminPage = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeFeature, setActiveFeature] = useState("dashboard");
+  const [activeFeature, setActiveFeature] = useState(null); // Changed to null
   const [ipAddress, setIpAddress] = useState("Loading...");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -43,8 +43,22 @@ const AdminPage = () => {
       const userData = getUserFromToken(accessToken);
       setUser(userData);
 
+      // Set default feature based on role
+      const defaultFeature = getDefaultFeatureForRole(userData.role);
+      setActiveFeature(defaultFeature);
+
       try {
-        const result = await PortfolioApiService.Fetch_IP(userData.userId);
+        const data = await apiFetch(
+          `${process.env.NEXT_PUBLIC_SERVER_API_URL}/admin/get-ip`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ user_id: userData.userId }),
+          }
+        );
+        const result = await data.json();
         if (result && !result.error) {
           setIpAddress(result.ip || "Not Available");
         } else {
@@ -62,6 +76,20 @@ const AdminPage = () => {
       initAdmin();
     }
   }, [accessToken]);
+
+  // Helper function to get default feature based on role
+  const getDefaultFeatureForRole = (role) => {
+    if (role === "admin") {
+      return "dashboard";
+    }
+
+    // For non-admin roles, find the first available feature
+    const availableFeature = Object.entries(adminFeatures).find(
+      ([_, feature]) => feature.roles.includes(role)
+    );
+
+    return availableFeature ? availableFeature[0] : null;
+  };
 
   // Logout handler
   const handleLogout = async () => {
@@ -83,7 +111,7 @@ const AdminPage = () => {
   };
 
   // Loading state
-  if (loading || !user) {
+  if (loading || !user || !activeFeature) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800">
         <div className="text-center">
@@ -118,7 +146,12 @@ const AdminPage = () => {
         <main className="flex-1 overflow-auto">
           <AdminFeatureRenderer
             featureKey={activeFeature}
-            onBack={() => setActiveFeature("dashboard")}
+            onBack={() => {
+              // Go back to default feature for the user's role
+              const defaultFeature = getDefaultFeatureForRole(user.role);
+              setActiveFeature(defaultFeature);
+            }}
+            userRole={user.role}
             onFeatureSelect={setActiveFeature}
           />
         </main>

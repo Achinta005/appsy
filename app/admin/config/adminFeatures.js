@@ -111,7 +111,7 @@ export const adminFeatures = {
     gradient: "from-pink-500 to-teal-500",
     image: "https://www.wikihow.com/images/thumb/9/96/Convert-from-Binary-to-Decimal-Step-4-Version-6.jpg/v4-460px-Convert-from-Binary-to-Decimal-Step-4-Version-6.jpg",
     component: ConversionPage,
-    roles: ["admin","viewer"],
+    roles: ["admin","editor"],
     description: "Number system converter",
   },
   alist:{

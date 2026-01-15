@@ -10,6 +10,8 @@ import {
   List,
   ArrowBigLeft,
 } from "lucide-react";
+import { useAuth } from "@/app/context/authContext";
+import useApi from "@/services/authservices";
 
 export default function AniListViewer() {
   const [username, setUsername] = useState("achinta");
@@ -20,6 +22,8 @@ export default function AniListViewer() {
   const [exporting, setExporting] = useState(false);
   const [gridSize, setGridSize] = useState(2);
   const [response, setResponse] = useState("");
+  const { accessToken } = useAuth();
+  const apiFetch = useApi();
 
   const statusLabels = {
     CURRENT: "Watching",
@@ -69,7 +73,10 @@ export default function AniListViewer() {
         `${process.env.NEXT_PUBLIC_SERVER_API_URL}/alist/anilist/BaseFunction/fetch`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
           credentials: "include",
           body: JSON.stringify({ username: user }),
         }
@@ -103,13 +110,18 @@ export default function AniListViewer() {
 
     setExporting(true);
     try {
-      const res = await fetch(
+      const res = await apiFetch(
         `${process.env.NEXT_PUBLIC_SERVER_API_URL}/alist/anilist/BaseFunction/fetch`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ username, format, filter: activeFilter }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username,
+            format,
+            filter: activeFilter,
+          }),
         }
       );
 

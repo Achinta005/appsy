@@ -10,7 +10,7 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
-import { PortfolioApiService } from "@/services/PortfolioApiService";
+import useApi from "@/services/authservices";
 
 const ContactResponse = () => {
   const [contacts, setContacts] = useState([]);
@@ -18,11 +18,15 @@ const ContactResponse = () => {
   const [selectedContact, setSelectedContact] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-  
+  const apiFetch = useApi();
+
   useEffect(() => {
     const getContacts = async () => {
       try {
-        const data = await PortfolioApiService.ContactResponses();
+        const res = await apiFetch(
+          `${process.env.NEXT_PUBLIC_SERVER_API_URL}/contact/contact_responses`
+        );
+        const data = await res.json();
         const contactData = data?.data || [];
         setContacts(contactData);
       } catch (error) {
@@ -68,10 +72,29 @@ const ContactResponse = () => {
 
   const handleDelete = async (contactId) => {
     try {
-      setContacts(contacts.filter((c) => c._id !== contactId));
-      setDeleteConfirm(null);
-      setSelectedContact(null);
-      console.log("Deleted contact:", contactId);
+
+      const response = await apiFetch(
+        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/contact/delete_response/${contactId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete contact");
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        setContacts(contacts.filter((c) => c._id !== contactId));
+        setDeleteConfirm(null);
+        setSelectedContact(null);
+
+        console.log("Successfully deleted contact:", contactId);
+      } else {
+        throw new Error(result.message || "Deletion failed");
+      }
     } catch (error) {
       console.error("Error deleting contact:", error);
     }

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { PortfolioApiService } from "@/services/PortfolioApiService";
+import useApi from "@/services/authservices";
 
 const Project = () => {
   const {
@@ -12,6 +12,7 @@ const Project = () => {
   } = useForm();
 
   const [buttonText, setButtonText] = useState("UPLOAD");
+  const apiFetch = useApi();
 
   const onSubmit = async (data) => {
     setButtonText("Uploading...");
@@ -27,7 +28,13 @@ const Project = () => {
     formData.append("description", data.description || "");
 
     try {
-      await PortfolioApiService.UplaodProject(formData);
+      await apiFetch(
+        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/project/project_upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
       reset();
       setButtonText("Uploaded Successfully");
       setTimeout(() => setButtonText("UPLOAD"), 3000);
@@ -57,7 +64,9 @@ const Project = () => {
                 {...register("title", { required: "Title is required" })}
               />
               {errors.title && (
-                <p className="text-red-400 text-xs mt-1.5">{errors.title.message}</p>
+                <p className="text-red-400 text-xs mt-1.5">
+                  {errors.title.message}
+                </p>
               )}
             </div>
 
@@ -86,7 +95,9 @@ const Project = () => {
                 {...register("image", { required: "Image is required" })}
               />
               {errors.image && (
-                <p className="text-red-400 text-xs mt-1.5">{errors.image.message}</p>
+                <p className="text-red-400 text-xs mt-1.5">
+                  {errors.image.message}
+                </p>
               )}
             </div>
 
@@ -99,15 +110,29 @@ const Project = () => {
                 className="w-full bg-slate-900/50 border border-slate-600/50 px-4 py-2.5 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all"
                 {...register("category", { required: "Category is required" })}
               >
-                <option value="" className="bg-slate-800">Select Category</option>
-                <option value="Web Development" className="bg-slate-800">Web Development</option>
-                <option value="Machine Learning" className="bg-slate-800">Machine Learning</option>
-                <option value="Data Science" className="bg-slate-800">Data Science</option>
-                <option value="Mobile App" className="bg-slate-800">Mobile App</option>
-                <option value="Other" className="bg-slate-800">Other</option>
+                <option value="" className="bg-slate-800">
+                  Select Category
+                </option>
+                <option value="Web Development" className="bg-slate-800">
+                  Web Development
+                </option>
+                <option value="Machine Learning" className="bg-slate-800">
+                  Machine Learning
+                </option>
+                <option value="Data Science" className="bg-slate-800">
+                  Data Science
+                </option>
+                <option value="Mobile App" className="bg-slate-800">
+                  Mobile App
+                </option>
+                <option value="Other" className="bg-slate-800">
+                  Other
+                </option>
               </select>
               {errors.category && (
-                <p className="text-red-400 text-xs mt-1.5">{errors.category.message}</p>
+                <p className="text-red-400 text-xs mt-1.5">
+                  {errors.category.message}
+                </p>
               )}
             </div>
 

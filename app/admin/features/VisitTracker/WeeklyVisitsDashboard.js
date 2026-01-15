@@ -22,6 +22,8 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
+import { useAuth } from "@/app/context/authContext";
+import useApi from "@/services/authservices";
 
 export default function WeeklyVisitsDashboard() {
   const [visits, setVisits] = useState([]);
@@ -32,6 +34,8 @@ export default function WeeklyVisitsDashboard() {
   const [viewType, setViewType] = useState("bar");
   const [weeksToShow, setWeeksToShow] = useState("all");
   const [expandedWeeks, setExpandedWeeks] = useState(new Set());
+  const {accessToken} = useAuth();
+  const apiFetch =useApi()
 
   const API_BASE = process.env.NEXT_PUBLIC_SERVER_API_URL;
 
@@ -53,9 +57,9 @@ export default function WeeklyVisitsDashboard() {
 
     try {
       const [visitsRes, statsRes, currentWeekRes] = await Promise.all([
-        fetch(`${API_BASE}/track/visits`),
-        fetch(`${API_BASE}/track/visits/stats/summary`),
-        fetch(`${API_BASE}/track/visits/current/week`),
+        apiFetch(`${API_BASE}/track/visits`),
+        apiFetch(`${API_BASE}/track/visits/stats/summary`),
+        apiFetch(`${API_BASE}/track/visits/current/week`),
       ]);
 
       if (!visitsRes.ok || !statsRes.ok || !currentWeekRes.ok) {
@@ -115,7 +119,7 @@ export default function WeeklyVisitsDashboard() {
 
   const fetchVisits = async () => {
     try {
-      const response = await fetch(`${API_BASE}/track/visits`);
+      const response = await apiFetch(`${API_BASE}/track/visits`);
       if (!response.ok) throw new Error("Failed to fetch visits");
       const data = await response.json();
       setVisits(data);
@@ -126,7 +130,7 @@ export default function WeeklyVisitsDashboard() {
 
   const fetchRecentWeeks = async (weeks) => {
     try {
-      const response = await fetch(`${API_BASE}/track/visits/recent/${weeks}`);
+      const response = await apiFetch(`${API_BASE}/track/visits/recent/${weeks}`);
       if (!response.ok) throw new Error("Failed to fetch recent weeks");
       const data = await response.json();
       setVisits(data);

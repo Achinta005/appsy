@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import React, { useState, useEffect } from "react";
 import {
   Users,
@@ -9,6 +9,7 @@ import {
   UserCheck,
   AlertCircle,
 } from "lucide-react";
+import useApi from "@/services/authservices";
 
 export default function RBACManagement() {
   const [users, setUsers] = useState([]);
@@ -18,27 +19,33 @@ export default function RBACManagement() {
   const [filterRole, setFilterRole] = useState("all");
   const [editingUser, setEditingUser] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const apiFetch = useApi();
 
   // Fetch users from NestJS backend
   useEffect(() => {
     fetchUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API_URL}/auth/users`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await apiFetch(
+        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/auth/users`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) throw new Error("Failed to fetch users");
 
       const data = await response.json();
-      console.log(data)
+      console.log(data);
       setUsers(data);
       setError(null);
     } catch (err) {
@@ -50,36 +57,50 @@ export default function RBACManagement() {
 
   const updateUserRole = async (userId, newRole) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API_URL}/auth/users/${userId}/role`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ role: newRole }),
-      });
+      setIsUpdating(true);
+      const response = await apiFetch(
+        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/auth/users/${userId}/role`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ role: newRole }),
+        }
+      );
 
       if (!response.ok) throw new Error("Failed to update user role");
 
       const updatedUser = await response.json();
       setUsers(users.map((u) => (u._id === userId ? updatedUser : u)));
       setEditingUser(null);
+      setError(null);
     } catch (err) {
       setError(err.message);
+    } finally {
+      setIsUpdating(false);
     }
   };
 
   const deleteUser = async (userId) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API_URL}/auth/users/${userId}`, {
-        method: "DELETE",
-      });
+      setIsDeleting(true);
+      const response = await apiFetch(
+        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/auth/users/${userId}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!response.ok) throw new Error("Failed to delete user");
 
       setUsers(users.filter((u) => u._id !== userId));
       setShowDeleteConfirm(null);
+      setError(null);
     } catch (err) {
       setError(err.message);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -150,10 +171,11 @@ export default function RBACManagement() {
           </div>
           <button
             onClick={fetchUsers}
-            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center gap-2"
+            disabled={loading}
+            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-800 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center gap-2"
           >
             <svg
-              className="w-5 h-5"
+              className={`w-5 h-5 ${loading ? "animate-spin" : ""}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -165,7 +187,7 @@ export default function RBACManagement() {
                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
               />
             </svg>
-            Refresh
+            {loading ? "Refreshing..." : "Refresh"}
           </button>
         </div>
 
@@ -307,7 +329,8 @@ export default function RBACManagement() {
                           onChange={(e) =>
                             updateUserRole(user._id, e.target.value)
                           }
-                          className="px-3 py-1 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                          disabled={isUpdating}
+                          className="px-3 py-1 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500 disabled:opacity-50"
                         >
                           <option value="admin">Admin</option>
                           <option value="editor">Editor</option>
@@ -337,14 +360,16 @@ export default function RBACManagement() {
                               editingUser === user._id ? null : user._id
                             )
                           }
-                          className="p-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-colors"
+                          disabled={isUpdating}
+                          className="p-2 bg-blue-500/20 hover:bg-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed text-blue-400 rounded-lg transition-colors"
                           title="Edit Role"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => setShowDeleteConfirm(user._id)}
-                          className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors"
+                          disabled={isDeleting}
+                          className="p-2 bg-red-500/20 hover:bg-red-500/30 disabled:opacity-50 disabled:cursor-not-allowed text-red-400 rounded-lg transition-colors"
                           title="Delete User"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -379,15 +404,17 @@ export default function RBACManagement() {
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowDeleteConfirm(null)}
-                  className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                  disabled={isDeleting}
+                  className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => deleteUser(showDeleteConfirm)}
-                  className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                  disabled={isDeleting}
+                  className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
                 >
-                  Delete
+                  {isDeleting ? "Deleting..." : "Delete"}
                 </button>
               </div>
             </div>
