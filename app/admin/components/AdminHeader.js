@@ -11,7 +11,6 @@ import {
   Sun,
   Shield,
   Lock,
-  Globe,
   Mail,
   Volume2,
   Eye,
@@ -23,20 +22,20 @@ import {
   Activity,
   X,
 } from "lucide-react";
-import { useActivityStream } from "@/hooks/useActivityStream";
 
 export default function AdminHeader({
-  user,
-  ipAddress,
+  user ,
+  ipAddress ,
   onLogout,
   onFeatureSelect,
+  activities,
+  isConnected,
+  userProfile ,
 }) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
-  const [userProfile, setUserProfile] = useState(null);
   const [lastViewedActivityId, setLastViewedActivityId] = useState(null);
-  const { activities, isConnected, error, refresh } = useActivityStream();
   const [settings, setSettings] = useState({
     theme: "dark",
     notifications: true,
@@ -52,59 +51,52 @@ export default function AdminHeader({
   const settingsRef = useRef(null);
   const profileRef = useRef(null);
 
-  // Load last viewed activity ID from localStorage
+  // Auto-update lastViewedActivityId when bell is clicked and new activities arrive
   useEffect(() => {
-    const stored = localStorage.getItem(`lastViewedActivity_${user.id}`);
-    if (stored) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLastViewedActivityId(stored);
+    if (activities.length > 0 && !lastViewedActivityId) {
+      return;
     }
-  }, [user.id]);
 
-  // Check if there are new unviewed activities
-  const hasNewActivities =
-    activities.length > 0 &&
-    (!lastViewedActivityId || activities[0]?.id !== lastViewedActivityId);
+    if (showNotifications && activities.length > 0) {
+      const latestActivityId = activities[0]._id || activities[0].id;
+      if (latestActivityId !== lastViewedActivityId) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setLastViewedActivityId(latestActivityId);
+      }
+    }
+  }, [activities, showNotifications, lastViewedActivityId]);
 
-  // Mark activities as viewed when notification panel is opened
+  // Calculate unread count
+  const unreadCount = activities.filter((activity) => {
+    if (!lastViewedActivityId) return false;
+
+    const lastViewedIndex = activities.findIndex(
+      (a) => (a._id || a.id) === lastViewedActivityId
+    );
+
+    const activityIndex = activities.findIndex(
+      (a) => (a._id || a.id) === (activity._id || activity.id)
+    );
+
+    if (lastViewedIndex === -1) {
+      return true;
+    }
+
+    return activityIndex < lastViewedIndex;
+  }).length;
+
+  const hasNewActivities = unreadCount > 0;
+  const recentActivities = activities.slice(0, 5);
+
   const handleNotificationClick = () => {
+    const wasOpen = showNotifications;
     setShowNotifications(!showNotifications);
 
-    if (!showNotifications && activities.length > 0) {
-      // Mark the latest activity as viewed
-      const latestActivityId = activities[0].id;
+    if (!wasOpen && activities.length > 0) {
+      const latestActivityId = activities[0]._id || activities[0].id;
       setLastViewedActivityId(latestActivityId);
-      localStorage.setItem(`lastViewedActivity_${user.id}`, latestActivityId);
     }
   };
-
-  // Fetch user profile from database
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        // Replace with your actual API endpoint
-        const response = await fetch(`/api/users/${user.id}/profile`);
-        if (response.ok) {
-          const data = await response.json();
-          setUserProfile(data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch user profile:", error);
-        // Fallback to user object data
-        setUserProfile({
-          fullName: user.username,
-          email: user.email || "admin@example.com",
-          bio: user.bio || "System Administrator",
-          phone: user.phone || "+1 234 567 8900",
-          department: user.department || "IT Department",
-          joinedDate: user.createdAt || new Date().toISOString(),
-          lastLogin: new Date().toISOString(),
-        });
-      }
-    };
-
-    fetchUserProfile();
-  }, [user]);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -148,31 +140,9 @@ export default function AdminHeader({
     return date.toLocaleDateString();
   };
 
-  const handleSettingChange = async (key, value) => {
+  const handleSettingChange = (key, value) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
-    // Save to database
-    try {
-      await fetch(`/api/users/${user.id}/settings`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ [key]: value }),
-      });
-    } catch (error) {
-      console.error("Failed to save setting:", error);
-    }
   };
-
-  const recentActivities = activities.slice(0, 5);
-
-  // Count unread from top 5 only
-  const unreadCount = recentActivities.filter((activity) => {
-    if (!lastViewedActivityId) return true;
-    const activityIndex = activities.findIndex((a) => a.id === activity.id);
-    const lastViewedIndex = activities.findIndex(
-      (a) => a.id === lastViewedActivityId
-    );
-    return activityIndex < lastViewedIndex || lastViewedIndex === -1;
-  }).length;
 
   return (
     <header className="sticky top-0 z-30 bg-gradient-to-r from-slate-800/95 via-purple-800/95 to-slate-800/95 backdrop-blur-xl border-b border-white/10 shadow-lg">
@@ -212,8 +182,8 @@ export default function AdminHeader({
                   <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
                 )}
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-white text-xs flex items-center justify-center font-bold shadow-lg">
-                    {unreadCount > 9 ? "9+" : unreadCount}
+                  <span className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-red-500 rounded-full text-white text-xs flex items-center justify-center font-bold shadow-lg px-1">
+                    {unreadCount > 99 ? "99+" : unreadCount}
                   </span>
                 )}
               </button>
@@ -245,9 +215,9 @@ export default function AdminHeader({
                       </div>
                     ) : (
                       <div className="p-2 space-y-1">
-                        {recentActivities.map((activity) => (
+                        {recentActivities.map((activity, index) => (
                           <div
-                            key={activity.id}
+                            key={`${activity.id || activity._id}-${index}`}
                             className="flex items-center gap-3 p-2.5 bg-white/5 rounded-lg hover:bg-white/10 transition-all cursor-pointer"
                           >
                             <div
@@ -272,7 +242,7 @@ export default function AdminHeader({
                     <button
                       className="w-full text-center text-sm text-purple-400 hover:text-purple-300 transition-colors"
                       onClick={() => {
-                        onFeatureSelect && onFeatureSelect("activity");
+                        onFeatureSelect("activity");
                         setShowNotifications(false);
                       }}
                     >
@@ -535,50 +505,75 @@ export default function AdminHeader({
                   <p className="text-xs text-purple-300">{user.role}</p>
                 </div>
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0 shadow-lg">
-                  <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                  {!userProfile?.avatar ? (
+                    <User className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  ) : (
+                    <img
+                      src={userProfile.avatar}
+                      alt="User avatar"
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  )}
                 </div>
               </button>
 
               {showProfile && userProfile && (
                 <div className="absolute right-0 mt-2 w-80 bg-slate-900/98 border border-white/20 rounded-xl shadow-2xl backdrop-blur-xl overflow-hidden animate-slideDown">
-                  <div className="p-6 bg-gradient-to-br from-purple-600/20 to-pink-600/20 border-b border-white/10">
+                  <div className="p-4 bg-gradient-to-br from-purple-600/20 to-pink-600/20 border-b border-white/10">
                     <div className="flex items-start gap-4">
                       <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
-                        <User className="w-8 h-8 text-white" />
+                        {!userProfile.avatar ? (
+                          <User className="w-8 h-8 text-white" />
+                        ) : (
+                          <img
+                            src={userProfile.avatar}
+                            alt="User avatar"
+                            className="w-full h-full object-cover rounded-full"
+                          />
+                        )}
                       </div>
                       <div className="flex-1">
                         <h3 className="text-white font-semibold text-lg">
-                          {userProfile.fullName}
+                          {userProfile.fullName || user.username}
                         </h3>
                         <p className="text-purple-300 text-sm">{user.role}</p>
-                        <p className="text-gray-400 text-xs mt-1">
-                          {userProfile.department}
-                        </p>
                       </div>
                     </div>
                   </div>
 
                   <div className="p-4 space-y-3">
-                    <div className="flex items-center gap-3 text-sm">
-                      <Mail className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-300">{userProfile.email}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm">
-                      <Globe className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-300">{userProfile.phone}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm">
-                      <Clock className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-300">
-                        Joined {formatTimestamp(userProfile.joinedDate)}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm">
-                      <Eye className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-300">
-                        Last login {formatTimestamp(userProfile.lastLogin)}
-                      </span>
-                    </div>
+                    {userProfile.email && (
+                      <div className="flex items-center gap-3 text-sm">
+                        <Mail className="w-4 h-4 text-gray-400" />
+                        <span className="text-gray-300">
+                          {userProfile.email}
+                        </span>
+                      </div>
+                    )}
+                    {userProfile.phone && (
+                      <div className="flex items-center gap-3 text-sm">
+                        <Wifi className="w-4 h-4 text-gray-400" />
+                        <span className="text-gray-300">
+                          {userProfile.phone}
+                        </span>
+                      </div>
+                    )}
+                    {userProfile.joinedDate && (
+                      <div className="flex items-center gap-3 text-sm">
+                        <Clock className="w-4 h-4 text-gray-400" />
+                        <span className="text-gray-300">
+                          Joined {userProfile.joinedDate}
+                        </span>
+                      </div>
+                    )}
+                    {userProfile.lastLogin && (
+                      <div className="flex items-center gap-3 text-sm">
+                        <Eye className="w-4 h-4 text-gray-400" />
+                        <span className="text-gray-300">
+                          Last login {userProfile.lastLogin}
+                        </span>
+                      </div>
+                    )}
 
                     {userProfile.bio && (
                       <div className="pt-3 border-t border-white/10">
@@ -589,7 +584,10 @@ export default function AdminHeader({
                     )}
 
                     <div className="pt-3 border-t border-white/10 space-y-2">
-                      <button className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm transition-colors flex items-center justify-center gap-2">
+                      <button
+                        onClick={() => console.log("Edit profile")}
+                        className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm transition-colors flex items-center justify-center gap-2"
+                      >
                         <UserCog className="w-4 h-4" />
                         Edit Profile
                       </button>

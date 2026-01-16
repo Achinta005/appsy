@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { getUserFromToken } from "../lib/auth";
 import { useAuth } from "../context/authContext";
 import useApi from "../../services/authservices";
+import useUserProfile from "@/hooks/useUserdata";
+import { useActivityStream } from "@/hooks/useActivityStream";
 
 // Components
 import AdminSidebar from "./components/AdminSidebar";
@@ -18,6 +20,8 @@ const AdminPage = () => {
   const [activeFeature, setActiveFeature] = useState(null);
   const [ipAddress, setIpAddress] = useState("Loading...");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { userProfile } = useUserProfile();
+  const { activities, isConnected } = useActivityStream();
 
   const router = useRouter();
   const {
@@ -141,6 +145,9 @@ const AdminPage = () => {
           ipAddress={ipAddress}
           onLogout={handleLogout}
           onFeatureSelect={setActiveFeature}
+          activities={activities}
+          isConnected={isConnected}
+          userProfile={userProfile}
         />
 
         {/* Content */}

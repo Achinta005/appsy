@@ -255,18 +255,6 @@ export default function DashboardHome({ onFeatureSelect }) {
       {/* Main Content Container */}
       <div className="relative z-10 space-y-4 p-6 max-w-7xl mx-auto">
         {/* Dashboard Header */}
-        {/* <div className="flex justify-end">
-          <button
-            onClick={refreshAll}
-            disabled={isLoading}
-            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all disabled:opacity-50 absolute top-3"
-          >
-            <RefreshCw
-              className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
-            />
-            Refresh
-          </button>
-        </div> */}
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           {/* Stats Grid - Left Column */}
@@ -397,9 +385,9 @@ export default function DashboardHome({ onFeatureSelect }) {
                 <p className="text-sm">No recent activity</p>
               </div>
             ) : (
-              activities.map((activity) => (
+              activities.map((activity, index) => (
                 <div
-                  key={activity.id}
+                  key={`${activity.id}-${index}`}
                   className="flex items-center gap-3 p-2.5 bg-white/5 rounded-lg hover:bg-white/10 transition-all cursor-pointer animate-slideIn"
                 >
                   <div
@@ -415,7 +403,7 @@ export default function DashboardHome({ onFeatureSelect }) {
                       {formatTimestamp(activity.timestamp)}
                     </p>
                   </div>
-                  {isConnected && activity.id === activities[0]?.id && (
+                  {isConnected && index === 0 && (
                     <div className="flex-shrink-0">
                       <span className="relative flex h-2 w-2">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>

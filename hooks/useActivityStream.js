@@ -8,6 +8,7 @@ export function useActivityStream() {
 
   const eventSourceRef = useRef(null);
   const lastEventIdRef = useRef(null);
+  const isInitialized = useRef(false);
 
   // Fetch initial activities on mount
   const fetchInitialActivities = useCallback(async () => {
@@ -46,6 +47,7 @@ export function useActivityStream() {
     // Close existing connection
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
+      eventSourceRef.current = null;
     }
 
     const url = new URL(
@@ -71,8 +73,14 @@ export function useActivityStream() {
         lastEventIdRef.current = activity.id;
 
         setActivities((prev) => {
-          // Prevent duplicates
-          if (prev.some((a) => a.id === activity.id)) {
+          // Prevent duplicates - check both id and timestamp
+          const isDuplicate = prev.some(
+            (a) => a.id === activity.id || 
+            (a.timestamp === activity.timestamp && a.action === activity.action)
+          );
+          
+          if (isDuplicate) {
+            console.log('Duplicate activity prevented:', activity.id);
             return prev;
           }
           
@@ -114,6 +122,10 @@ export function useActivityStream() {
 
   // Initial setup: fetch activities then connect to stream
   useEffect(() => {
+    // Prevent double initialization (React Strict Mode in dev)
+    if (isInitialized.current) return;
+    isInitialized.current = true;
+    
     fetchInitialActivities().then(() => {
       connect();
     });
@@ -123,7 +135,7 @@ export function useActivityStream() {
         eventSourceRef.current.close();
       }
     };
-  }, [connect, fetchInitialActivities]);
+  }, []);
 
   // Manual refresh via REST
   const refresh = useCallback(async () => {
