@@ -22,6 +22,7 @@ import {
   Activity,
   X,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function AdminHeader({
   user ,
@@ -50,6 +51,7 @@ export default function AdminHeader({
   const notifRef = useRef(null);
   const settingsRef = useRef(null);
   const profileRef = useRef(null);
+  const router = useRouter()
 
   // Auto-update lastViewedActivityId when bell is clicked and new activities arrive
   useEffect(() => {
@@ -585,8 +587,8 @@ export default function AdminHeader({
 
                     <div className="pt-3 border-t border-white/10 space-y-2">
                       <button
-                        onClick={() => console.log("Edit profile")}
-                        className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm transition-colors flex items-center justify-center gap-2"
+                        onClick={() => router.push('/admin/user/profile')}
+                        className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer"
                       >
                         <UserCog className="w-4 h-4" />
                         Edit Profile
