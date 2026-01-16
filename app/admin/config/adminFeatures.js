@@ -6,7 +6,7 @@ import {
   Server,
   Globe,
   Binary,
-  FileText,
+  Activity,
   FilePlay,
   LayoutDashboard,
   ListCheck,
@@ -26,6 +26,7 @@ import Notepad from "../features/Notepad/Notepad";
 import AniListViewer from "../features/anime-list/AniListViewer";
 import DriveVideoPlayer from "../features/DVIDEO/videoPlayer";
 import RBACManagement from "../features/RBAC/page";
+import ActivitiesPage from "../features/Activity/activity";
 
 export const adminFeatures = {
   dashboard: {
@@ -44,7 +45,14 @@ export const adminFeatures = {
     roles:["admin"],
     description:"Role Based Access Control"
   },
-  
+  activity:{
+    title:"Recent Activities",
+    icon:Activity,
+    gradient:"from-indigo-500 to-blue-500",
+    component: ActivitiesPage,
+    roles:["admin"],
+    description:"Check Recent Activities"
+  },
   projects: {
     title: "Manage Projects",
     icon: Folder,

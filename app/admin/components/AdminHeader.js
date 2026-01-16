@@ -1,11 +1,182 @@
 "use client";
+import { useState, useEffect, useRef } from "react";
+import {
+  User,
+  LogOut,
+  Wifi,
+  Bell,
+  Settings,
+  Search,
+  Moon,
+  Sun,
+  Shield,
+  Lock,
+  Globe,
+  Mail,
+  Volume2,
+  Eye,
+  Database,
+  Download,
+  Trash2,
+  UserCog,
+  Clock,
+  Activity,
+  X,
+} from "lucide-react";
+import { useActivityStream } from "@/hooks/useActivityStream";
 
-import { User, LogOut, Wifi, Bell, Settings, Search } from "lucide-react";
+export default function AdminHeader({
+  user,
+  ipAddress,
+  onLogout,
+  onFeatureSelect,
+}) {
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
+  const [lastViewedActivityId, setLastViewedActivityId] = useState(null);
+  const { activities, isConnected, error, refresh } = useActivityStream();
+  const [settings, setSettings] = useState({
+    theme: "dark",
+    notifications: true,
+    emailAlerts: true,
+    soundEffects: false,
+    twoFactorAuth: false,
+    sessionTimeout: 30,
+    dataRetention: 90,
+    autoBackup: true,
+  });
 
-export default function AdminHeader({ user, ipAddress, onLogout }) {
+  const notifRef = useRef(null);
+  const settingsRef = useRef(null);
+  const profileRef = useRef(null);
+
+  // Load last viewed activity ID from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem(`lastViewedActivity_${user.id}`);
+    if (stored) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLastViewedActivityId(stored);
+    }
+  }, [user.id]);
+
+  // Check if there are new unviewed activities
+  const hasNewActivities =
+    activities.length > 0 &&
+    (!lastViewedActivityId || activities[0]?.id !== lastViewedActivityId);
+
+  // Mark activities as viewed when notification panel is opened
+  const handleNotificationClick = () => {
+    setShowNotifications(!showNotifications);
+
+    if (!showNotifications && activities.length > 0) {
+      // Mark the latest activity as viewed
+      const latestActivityId = activities[0].id;
+      setLastViewedActivityId(latestActivityId);
+      localStorage.setItem(`lastViewedActivity_${user.id}`, latestActivityId);
+    }
+  };
+
+  // Fetch user profile from database
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        // Replace with your actual API endpoint
+        const response = await fetch(`/api/users/${user.id}/profile`);
+        if (response.ok) {
+          const data = await response.json();
+          setUserProfile(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+        // Fallback to user object data
+        setUserProfile({
+          fullName: user.username,
+          email: user.email || "admin@example.com",
+          bio: user.bio || "System Administrator",
+          phone: user.phone || "+1 234 567 8900",
+          department: user.department || "IT Department",
+          joinedDate: user.createdAt || new Date().toISOString(),
+          lastLogin: new Date().toISOString(),
+        });
+      }
+    };
+
+    fetchUserProfile();
+  }, [user]);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notifRef.current && !notifRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+      if (settingsRef.current && !settingsRef.current.contains(event.target)) {
+        setShowSettings(false);
+      }
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setShowProfile(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const getActivityColor = (type) => {
+    const colors = {
+      create: "bg-green-400",
+      update: "bg-blue-400",
+      delete: "bg-red-400",
+      login: "bg-purple-400",
+      warning: "bg-yellow-400",
+    };
+    return colors[type] || "bg-gray-400";
+  };
+
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now - date;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+
+    if (minutes < 1) return "Just now";
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    return date.toLocaleDateString();
+  };
+
+  const handleSettingChange = async (key, value) => {
+    setSettings((prev) => ({ ...prev, [key]: value }));
+    // Save to database
+    try {
+      await fetch(`/api/users/${user.id}/settings`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [key]: value }),
+      });
+    } catch (error) {
+      console.error("Failed to save setting:", error);
+    }
+  };
+
+  const recentActivities = activities.slice(0, 5);
+
+  // Count unread from top 5 only
+  const unreadCount = recentActivities.filter((activity) => {
+    if (!lastViewedActivityId) return true;
+    const activityIndex = activities.findIndex((a) => a.id === activity.id);
+    const lastViewedIndex = activities.findIndex(
+      (a) => a.id === lastViewedActivityId
+    );
+    return activityIndex < lastViewedIndex || lastViewedIndex === -1;
+  }).length;
+
   return (
     <header className="sticky top-0 z-30 bg-gradient-to-r from-slate-800/95 via-purple-800/95 to-slate-800/95 backdrop-blur-xl border-b border-white/10 shadow-lg">
-      <div className="px-4 sm:px-6 py-4">
+      <div className="px-4 sm:px-6 py-2">
         <div className="flex items-center justify-between gap-4">
           {/* Search Bar - Hidden on mobile */}
           <div className="hidden md:flex items-center gap-3 flex-1 max-w-md">
@@ -31,28 +202,401 @@ export default function AdminHeader({ user, ipAddress, onLogout }) {
             </div>
 
             {/* Notifications */}
-            <button className="relative p-2 hover:bg-white/10 rounded-lg transition-colors">
-              <Bell className="w-5 h-5 text-gray-300" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
+            <div className="relative" ref={notifRef}>
+              <button
+                onClick={handleNotificationClick}
+                className="relative p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <Bell className="w-5 h-5 text-gray-300" />
+                {hasNewActivities && (
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                )}
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-white text-xs flex items-center justify-center font-bold shadow-lg">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {showNotifications && (
+                <div className="absolute right-0 mt-2 w-80 bg-slate-900/98 border border-white/20 rounded-xl shadow-2xl backdrop-blur-xl overflow-hidden animate-slideDown">
+                  <div className="p-4 border-b border-white/10 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Activity className="w-5 h-5 text-purple-400" />
+                      <h3 className="text-white font-semibold">
+                        Recent Activity
+                      </h3>
+                    </div>
+                    {isConnected && (
+                      <span className="flex items-center gap-1.5 text-xs text-green-400">
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                        </span>
+                        Live
+                      </span>
+                    )}
+                  </div>
+                  <div className="max-h-96 overflow-y-auto">
+                    {recentActivities.length === 0 ? (
+                      <div className="p-8 text-center text-gray-400">
+                        <Bell className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                        <p className="text-sm">No recent activity</p>
+                      </div>
+                    ) : (
+                      <div className="p-2 space-y-1">
+                        {recentActivities.map((activity) => (
+                          <div
+                            key={activity.id}
+                            className="flex items-center gap-3 p-2.5 bg-white/5 rounded-lg hover:bg-white/10 transition-all cursor-pointer"
+                          >
+                            <div
+                              className={`w-1.5 h-1.5 rounded-full ${getActivityColor(
+                                activity.type
+                              )} flex-shrink-0`}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-white text-sm truncate">
+                                {activity.action}
+                              </p>
+                              <p className="text-gray-400 text-xs">
+                                {formatTimestamp(activity.timestamp)}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-3 border-t border-white/10 bg-white/5">
+                    <button
+                      className="w-full text-center text-sm text-purple-400 hover:text-purple-300 transition-colors"
+                      onClick={() => {
+                        onFeatureSelect && onFeatureSelect("activity");
+                        setShowNotifications(false);
+                      }}
+                    >
+                      View all activity
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Settings */}
-            <button className="hidden sm:block p-2 hover:bg-white/10 rounded-lg transition-colors">
-              <Settings className="w-5 h-5 text-gray-300" />
-            </button>
+            <div className="relative hidden sm:block" ref={settingsRef}>
+              <button
+                onClick={() => setShowSettings(!showSettings)}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <Settings className="w-5 h-5 text-gray-300" />
+              </button>
+
+              {showSettings && (
+                <div className="absolute right-0 mt-2 w-96 bg-slate-900/98 border border-white/20 rounded-xl shadow-2xl backdrop-blur-xl overflow-hidden animate-slideDown">
+                  <div className="p-4 border-b border-white/10 flex items-center justify-between">
+                    <h3 className="text-white font-semibold flex items-center gap-2">
+                      <Settings className="w-5 h-5 text-purple-400" />
+                      Settings
+                    </h3>
+                    <button
+                      onClick={() => setShowSettings(false)}
+                      className="p-1 hover:bg-white/10 rounded-lg transition-colors"
+                    >
+                      <X className="w-4 h-4 text-gray-400" />
+                    </button>
+                  </div>
+
+                  <div className="max-h-[500px] overflow-y-auto p-4 space-y-4">
+                    {/* Theme */}
+                    <div className="space-y-2">
+                      <label className="text-sm text-gray-300 flex items-center gap-2">
+                        {settings.theme === "dark" ? (
+                          <Moon className="w-4 h-4" />
+                        ) : (
+                          <Sun className="w-4 h-4" />
+                        )}
+                        Theme
+                      </label>
+                      <select
+                        value={settings.theme}
+                        onChange={(e) =>
+                          handleSettingChange("theme", e.target.value)
+                        }
+                        className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-400"
+                      >
+                        <option value="dark">Dark</option>
+                        <option value="light">Light</option>
+                        <option value="auto">Auto</option>
+                      </select>
+                    </div>
+
+                    {/* Notifications */}
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm text-gray-300 flex items-center gap-2">
+                        <Bell className="w-4 h-4" />
+                        Push Notifications
+                      </label>
+                      <button
+                        onClick={() =>
+                          handleSettingChange(
+                            "notifications",
+                            !settings.notifications
+                          )
+                        }
+                        className={`relative w-11 h-6 rounded-full transition-colors ${
+                          settings.notifications
+                            ? "bg-purple-500"
+                            : "bg-gray-600"
+                        }`}
+                      >
+                        <span
+                          className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                            settings.notifications ? "translate-x-5" : ""
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    {/* Email Alerts */}
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm text-gray-300 flex items-center gap-2">
+                        <Mail className="w-4 h-4" />
+                        Email Alerts
+                      </label>
+                      <button
+                        onClick={() =>
+                          handleSettingChange(
+                            "emailAlerts",
+                            !settings.emailAlerts
+                          )
+                        }
+                        className={`relative w-11 h-6 rounded-full transition-colors ${
+                          settings.emailAlerts ? "bg-purple-500" : "bg-gray-600"
+                        }`}
+                      >
+                        <span
+                          className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                            settings.emailAlerts ? "translate-x-5" : ""
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    {/* Sound Effects */}
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm text-gray-300 flex items-center gap-2">
+                        <Volume2 className="w-4 h-4" />
+                        Sound Effects
+                      </label>
+                      <button
+                        onClick={() =>
+                          handleSettingChange(
+                            "soundEffects",
+                            !settings.soundEffects
+                          )
+                        }
+                        className={`relative w-11 h-6 rounded-full transition-colors ${
+                          settings.soundEffects
+                            ? "bg-purple-500"
+                            : "bg-gray-600"
+                        }`}
+                      >
+                        <span
+                          className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                            settings.soundEffects ? "translate-x-5" : ""
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    {/* Two-Factor Auth */}
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm text-gray-300 flex items-center gap-2">
+                        <Shield className="w-4 h-4" />
+                        Two-Factor Auth
+                      </label>
+                      <button
+                        onClick={() =>
+                          handleSettingChange(
+                            "twoFactorAuth",
+                            !settings.twoFactorAuth
+                          )
+                        }
+                        className={`relative w-11 h-6 rounded-full transition-colors ${
+                          settings.twoFactorAuth
+                            ? "bg-purple-500"
+                            : "bg-gray-600"
+                        }`}
+                      >
+                        <span
+                          className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                            settings.twoFactorAuth ? "translate-x-5" : ""
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    {/* Session Timeout */}
+                    <div className="space-y-2">
+                      <label className="text-sm text-gray-300 flex items-center gap-2">
+                        <Clock className="w-4 h-4" />
+                        Session Timeout (minutes)
+                      </label>
+                      <input
+                        type="number"
+                        value={settings.sessionTimeout}
+                        onChange={(e) =>
+                          handleSettingChange(
+                            "sessionTimeout",
+                            parseInt(e.target.value)
+                          )
+                        }
+                        className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-400"
+                        min="5"
+                        max="120"
+                      />
+                    </div>
+
+                    {/* Data Retention */}
+                    <div className="space-y-2">
+                      <label className="text-sm text-gray-300 flex items-center gap-2">
+                        <Database className="w-4 h-4" />
+                        Data Retention (days)
+                      </label>
+                      <select
+                        value={settings.dataRetention}
+                        onChange={(e) =>
+                          handleSettingChange(
+                            "dataRetention",
+                            parseInt(e.target.value)
+                          )
+                        }
+                        className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-400"
+                      >
+                        <option value="30">30 days</option>
+                        <option value="60">60 days</option>
+                        <option value="90">90 days</option>
+                        <option value="180">180 days</option>
+                        <option value="365">1 year</option>
+                      </select>
+                    </div>
+
+                    {/* Auto Backup */}
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm text-gray-300 flex items-center gap-2">
+                        <Download className="w-4 h-4" />
+                        Auto Backup
+                      </label>
+                      <button
+                        onClick={() =>
+                          handleSettingChange(
+                            "autoBackup",
+                            !settings.autoBackup
+                          )
+                        }
+                        className={`relative w-11 h-6 rounded-full transition-colors ${
+                          settings.autoBackup ? "bg-purple-500" : "bg-gray-600"
+                        }`}
+                      >
+                        <span
+                          className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                            settings.autoBackup ? "translate-x-5" : ""
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    <div className="pt-4 border-t border-white/10 space-y-2">
+                      <button className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm transition-colors flex items-center justify-center gap-2">
+                        <Lock className="w-4 h-4" />
+                        Change Password
+                      </button>
+                      <button className="w-full px-4 py-2 bg-red-600/20 hover:bg-red-600/30 rounded-lg text-red-400 text-sm transition-colors flex items-center justify-center gap-2">
+                        <Trash2 className="w-4 h-4" />
+                        Clear All Data
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* User Profile */}
-            <div className="flex items-center gap-2 sm:gap-3 bg-white/10 rounded-lg pl-2 sm:pl-3 pr-1 py-1 border border-white/20">
-              <div className="hidden sm:block text-right">
-                <p className="text-xs sm:text-sm font-medium text-white">
-                  {user.username}
-                </p>
-                <p className="text-xs text-purple-300">{user.role}</p>
-              </div>
+            <div className="relative" ref={profileRef}>
+              <button
+                onClick={() => setShowProfile(!showProfile)}
+                className="flex items-center gap-2 sm:gap-3 bg-white/10 rounded-lg pl-2 sm:pl-3 pr-1 py-1 border border-white/20 hover:bg-white/15 transition-colors"
+              >
+                <div className="hidden sm:block text-right">
+                  <p className="text-xs sm:text-sm font-medium text-white">
+                    {user.username}
+                  </p>
+                  <p className="text-xs text-purple-300">{user.role}</p>
+                </div>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                </div>
+              </button>
 
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0 shadow-lg">
-                <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-              </div>
+              {showProfile && userProfile && (
+                <div className="absolute right-0 mt-2 w-80 bg-slate-900/98 border border-white/20 rounded-xl shadow-2xl backdrop-blur-xl overflow-hidden animate-slideDown">
+                  <div className="p-6 bg-gradient-to-br from-purple-600/20 to-pink-600/20 border-b border-white/10">
+                    <div className="flex items-start gap-4">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+                        <User className="w-8 h-8 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-white font-semibold text-lg">
+                          {userProfile.fullName}
+                        </h3>
+                        <p className="text-purple-300 text-sm">{user.role}</p>
+                        <p className="text-gray-400 text-xs mt-1">
+                          {userProfile.department}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 space-y-3">
+                    <div className="flex items-center gap-3 text-sm">
+                      <Mail className="w-4 h-4 text-gray-400" />
+                      <span className="text-gray-300">{userProfile.email}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm">
+                      <Globe className="w-4 h-4 text-gray-400" />
+                      <span className="text-gray-300">{userProfile.phone}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm">
+                      <Clock className="w-4 h-4 text-gray-400" />
+                      <span className="text-gray-300">
+                        Joined {formatTimestamp(userProfile.joinedDate)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm">
+                      <Eye className="w-4 h-4 text-gray-400" />
+                      <span className="text-gray-300">
+                        Last login {formatTimestamp(userProfile.lastLogin)}
+                      </span>
+                    </div>
+
+                    {userProfile.bio && (
+                      <div className="pt-3 border-t border-white/10">
+                        <p className="text-sm text-gray-400 italic">
+                          &quot;{userProfile.bio}&quot;
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="pt-3 border-t border-white/10 space-y-2">
+                      <button className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm transition-colors flex items-center justify-center gap-2">
+                        <UserCog className="w-4 h-4" />
+                        Edit Profile
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Logout Button */}
@@ -73,6 +617,22 @@ export default function AdminHeader({ user, ipAddress, onLogout }) {
           <span className="text-xs text-green-400 font-mono">{ipAddress}</span>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-slideDown {
+          animation: slideDown 0.2s ease-out;
+        }
+      `}</style>
     </header>
   );
 }

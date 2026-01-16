@@ -15,7 +15,7 @@ import { adminFeatures } from "./config/adminFeatures";
 const AdminPage = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeFeature, setActiveFeature] = useState(null); // Changed to null
+  const [activeFeature, setActiveFeature] = useState(null);
   const [ipAddress, setIpAddress] = useState("Loading...");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -140,6 +140,7 @@ const AdminPage = () => {
           user={user}
           ipAddress={ipAddress}
           onLogout={handleLogout}
+          onFeatureSelect={setActiveFeature}
         />
 
         {/* Content */}
