@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import useApi from "@/services/authservices";
 
 export default function ConversionPage() {
@@ -13,7 +13,23 @@ export default function ConversionPage() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [theme, setTheme] = useState("light");
   const apiFetch = useApi();
+
+  // Initialize and listen for theme changes
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme") || "light";
+    setTheme(savedTheme);
+
+    const handleStorageChange = (e) => {
+      if (e.key === "theme") {
+        setTheme(e.newValue || "light");
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   const handleNumberConversion = async () => {
     setLoading(true);
@@ -80,19 +96,37 @@ export default function ConversionPage() {
     }
   };
 
+  // Theme-based styles
+  const isDark = theme === "dark";
+  const bgGradient = isDark
+    ? "from-slate-950 via-purple-950 to-slate-950"
+    : "from-blue-50 to-indigo-100";
+  const textPrimary = isDark ? "text-white" : "text-gray-800";
+  const textSecondary = isDark ? "text-slate-400" : "text-gray-700";
+  const textLabel = isDark ? "text-slate-300" : "text-gray-700";
+  const cardBg = isDark ? "bg-slate-800/50" : "bg-white";
+  const inputBg = isDark ? "bg-slate-700/50 border-slate-600" : "bg-white border-gray-300";
+  const inputText = isDark ? "text-white" : "text-gray-900";
+  const inputFocus = isDark ? "focus:ring-purple-500 focus:border-purple-500" : "focus:ring-blue-500 focus:border-blue-500";
+  const buttonPrimary = isDark ? "bg-purple-600 hover:bg-purple-700" : "bg-blue-600 hover:bg-blue-700";
+  const buttonSecondary = isDark ? "bg-indigo-600 hover:bg-indigo-700" : "bg-indigo-600 hover:bg-indigo-700";
+  const resultBg = isDark ? "bg-slate-700/50" : "bg-gray-50";
+  const errorBg = isDark ? "bg-red-900/30 border-red-500/50 text-red-200" : "bg-red-100 border-red-400 text-red-700";
+  const errorButton = isDark ? "text-red-300 hover:text-red-100" : "text-red-700 hover:text-red-900";
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
+    <div className={`min-h-screen bg-gradient-to-br ${bgGradient} p-8 transition-colors duration-300`}>
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-gray-800 mb-8 text-center">
+        <h1 className={`text-4xl font-bold ${textPrimary} mb-8 text-center transition-colors`}>
           Number & IP Converter
         </h1>
 
-        {/* Error Display - Moved to top */}
+        {/* Error Display */}
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6 relative">
+          <div className={`${errorBg} border px-4 py-3 rounded-lg mb-6 relative transition-colors`}>
             <button
               onClick={() => setError("")}
-              className="absolute top-2 right-2 text-red-700 hover:text-red-900"
+              className={`absolute top-2 right-2 ${errorButton}`}
             >
               ✕
             </button>
@@ -102,14 +136,14 @@ export default function ConversionPage() {
         )}
 
         {/* Number Conversion Section */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+        <div className={`${cardBg} rounded-lg shadow-lg p-6 mb-6 transition-colors`}>
+          <h2 className={`text-2xl font-semibold ${textSecondary} mb-4 transition-colors`}>
             Number Conversion
           </h2>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className={`block text-sm font-medium ${textLabel} mb-2 transition-colors`}>
                 Input Value
               </label>
               <input
@@ -117,18 +151,18 @@ export default function ConversionPage() {
                 value={numberInput}
                 onChange={(e) => setNumberInput(e.target.value)}
                 placeholder="Enter number..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full px-4 py-2 border ${inputBg} ${inputText} rounded-md focus:ring-2 ${inputFocus} focus:outline-none transition-colors`}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className={`block text-sm font-medium ${textLabel} mb-2 transition-colors`}>
                 Input Base
               </label>
               <select
                 value={numberBase}
                 onChange={(e) => setNumberBase(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full px-4 py-2 border ${inputBg} ${inputText} rounded-md focus:ring-2 ${inputFocus} focus:outline-none transition-colors`}
               >
                 <option value="decimal">Decimal (Base 10)</option>
                 <option value="binary">Binary (Base 2)</option>
@@ -140,29 +174,29 @@ export default function ConversionPage() {
             <button
               onClick={handleNumberConversion}
               disabled={loading || !numberInput}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+              className={`w-full ${buttonPrimary} text-white py-2 px-4 rounded-md disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors`}
             >
               {loading ? "Converting..." : "Convert"}
             </button>
           </div>
 
           {numberResult && (
-            <div className="mt-6 p-4 bg-gray-50 rounded-md">
-              <h3 className="font-semibold text-gray-700 mb-2">Results:</h3>
+            <div className={`mt-6 p-4 ${resultBg} rounded-md transition-colors`}>
+              <h3 className={`font-semibold ${textSecondary} mb-2 transition-colors`}>Results:</h3>
               <div className="space-y-2">
-                <p>
+                <p className={textLabel}>
                   <span className="font-medium">Decimal:</span>{" "}
                   {numberResult.decimal}
                 </p>
-                <p>
+                <p className={textLabel}>
                   <span className="font-medium">Binary:</span>{" "}
                   {numberResult.binary}
                 </p>
-                <p>
+                <p className={textLabel}>
                   <span className="font-medium">Octal:</span>{" "}
                   {numberResult.octal}
                 </p>
-                <p>
+                <p className={textLabel}>
                   <span className="font-medium">Hexadecimal:</span>{" "}
                   {numberResult.hex}
                 </p>
@@ -172,14 +206,14 @@ export default function ConversionPage() {
         </div>
 
         {/* IP Conversion Section */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+        <div className={`${cardBg} rounded-lg shadow-lg p-6 mb-6 transition-colors`}>
+          <h2 className={`text-2xl font-semibold ${textSecondary} mb-4 transition-colors`}>
             IP Address to Binary
           </h2>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className={`block text-sm font-medium ${textLabel} mb-2 transition-colors`}>
                 IP Address
               </label>
               <input
@@ -187,35 +221,35 @@ export default function ConversionPage() {
                 value={ipInput}
                 onChange={(e) => setIpInput(e.target.value)}
                 placeholder="e.g., 192.168.1.1"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full px-4 py-2 border ${inputBg} ${inputText} rounded-md focus:ring-2 ${inputFocus} focus:outline-none transition-colors`}
               />
             </div>
 
             <button
               onClick={handleIpConversion}
               disabled={loading || !ipInput}
-              className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+              className={`w-full ${buttonSecondary} text-white py-2 px-4 rounded-md disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors`}
             >
               {loading ? "Converting..." : "Convert IP"}
             </button>
           </div>
 
           {ipResult && (
-            <div className="mt-6 p-4 bg-gray-50 rounded-md">
-              <h3 className="font-semibold text-gray-700 mb-2">Results:</h3>
+            <div className={`mt-6 p-4 ${resultBg} rounded-md transition-colors`}>
+              <h3 className={`font-semibold ${textSecondary} mb-2 transition-colors`}>Results:</h3>
               <div className="space-y-2">
-                <p>
+                <p className={textLabel}>
                   <span className="font-medium">IP Address:</span> {ipResult.ip}
                 </p>
-                <p>
+                <p className={textLabel}>
                   <span className="font-medium">Binary (Full):</span>{" "}
                   {ipResult.binaryFull}
                 </p>
-                <p className="mt-2">
+                <p className={`mt-2 ${textLabel}`}>
                   <span className="font-medium">Octets:</span>
                 </p>
                 {ipResult.octets?.map((octet, idx) => (
-                  <p key={idx} className="ml-4">
+                  <p key={idx} className={`ml-4 ${textLabel}`}>
                     Octet {idx + 1}: {octet.decimal} = {octet.binary}
                   </p>
                 ))}

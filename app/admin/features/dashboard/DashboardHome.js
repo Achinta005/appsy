@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useDashboardData } from "@/hooks/useDashboarddata";
 import { useActivityStream } from "@/hooks/useActivityStream";
 import {
@@ -26,31 +27,45 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const StatCard = ({ icon: Icon, title, value, gradient, isLoading, error }) => (
-  <div className="bg-white/10 backdrop-blur-lg rounded-lg p-3 border border-white/20 hover:border-white/40 transition-all">
-    <div className="flex items-center justify-between gap-2">
-      <div className="flex items-center gap-2 flex-1">
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-serif text-white truncate">{title}</p>
-          {isLoading ? (
-            <div className="flex items-center gap-1 mt-0.5">
-              <Loader2 className="w-3 h-3 text-white animate-spin" />
-              <span className="text-xs text-gray-400">...</span>
-            </div>
-          ) : error ? (
-            <span className="text-xs text-red-400">Error</span>
-          ) : (
-            <h3 className="text-sm font-bold text-green-500 font-mono">
-              {value || 0}
-            </h3>
-          )}
+const StatCard = ({ icon: Icon, title, value, gradient, isLoading, error, theme }) => {
+  const isDark = theme === "dark";
+  const cardBg = isDark ? "bg-white/10 border-white/20 hover:border-white/40" : "bg-white border-purple-200 hover:border-purple-400";
+  const textPrimary = isDark ? "text-white" : "text-gray-900";
+  const textMuted = isDark ? "text-gray-400" : "text-gray-600";
+  const valueColor = isDark ? "text-green-500" : "text-green-600";
+  const errorColor = isDark ? "text-red-400" : "text-red-600";
+
+  return (
+    <div className={`${cardBg} backdrop-blur-lg rounded-lg p-3 border transition-all shadow-lg`}>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 flex-1">
+          <div className="flex-1 min-w-0">
+            <p className={`text-sm font-serif ${textPrimary} truncate`}>{title}</p>
+            {isLoading ? (
+              <div className="flex items-center gap-1 mt-0.5">
+                <Loader2 className={`w-3 h-3 ${textPrimary} animate-spin`} />
+                <span className={`text-xs ${textMuted}`}>...</span>
+              </div>
+            ) : error ? (
+              <span className={`text-xs ${errorColor}`}>Error</span>
+            ) : (
+              <h3 className={`text-sm font-bold ${valueColor} font-mono`}>
+                {value || 0}
+              </h3>
+            )}
+          </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
-const ServiceStatusCard = ({ service, checking }) => {
+const ServiceStatusCard = ({ service, checking, theme }) => {
+  const isDark = theme === "dark";
+  const cardBg = isDark ? "bg-white/10 border-white/20 hover:border-white/40" : "bg-white border-purple-200 hover:border-purple-400";
+  const textPrimary = isDark ? "text-white" : "text-gray-900";
+  const textMuted = isDark ? "text-gray-400" : "text-gray-600";
+
   const getStatusColor = () => {
     if (checking) return "bg-yellow-500";
     if (!service) return "bg-gray-500";
@@ -58,20 +73,20 @@ const ServiceStatusCard = ({ service, checking }) => {
   };
 
   return (
-    <div className="bg-white/10 backdrop-blur-lg rounded-lg p-3 border border-white/20 hover:border-white/40 transition-all">
+    <div className={`${cardBg} backdrop-blur-lg rounded-lg p-3 border transition-all shadow-lg`}>
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 flex-1">
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-serif text-white truncate">
+            <p className={`text-sm font-serif ${textPrimary} truncate`}>
               {service?.name || "Service"}
             </p>
             {checking ? (
               <div className="flex items-center gap-1 mt-0.5">
-                <Loader2 className="w-3 h-3 text-white animate-spin" />
-                <span className="text-xs text-gray-400">Checking...</span>
+                <Loader2 className={`w-3 h-3 ${textPrimary} animate-spin`} />
+                <span className={`text-xs ${textMuted}`}>Checking...</span>
               </div>
             ) : (
-              <h3 className="text-xs text-gray-400 font-mono capitalize">
+              <h3 className={`text-xs ${textMuted} font-mono capitalize`}>
                 {service?.type || "Unknown"}
               </h3>
             )}
@@ -87,7 +102,18 @@ const ServiceStatusCard = ({ service, checking }) => {
   );
 };
 
-const VisitsGraph = ({ visits, loading }) => {
+const VisitsGraph = ({ visits, loading, theme }) => {
+  const isDark = theme === "dark";
+  const cardBg = isDark ? "bg-white/10 border-white/20" : "bg-white border-purple-200";
+  const textPrimary = isDark ? "text-white" : "text-gray-900";
+  const textMuted = isDark ? "text-gray-400" : "text-gray-600";
+  const textSecondary = isDark ? "text-gray-300" : "text-gray-700";
+  const gridColor = isDark ? "#334155" : "#e2e8f0";
+  const tooltipBg = isDark ? "#1e293b" : "#ffffff";
+  const tooltipBorder = isDark ? "#475569" : "#cbd5e1";
+  const tooltipText = isDark ? "#f1f5f9" : "#1e293b";
+  const noDataText = isDark ? "text-gray-400" : "text-gray-500";
+
   const formatWeekLabel = (weekKey) => {
     if (!weekKey) return "";
     const [year, week] = weekKey.split("-W");
@@ -103,27 +129,27 @@ const VisitsGraph = ({ visits, loading }) => {
     : [];
 
   return (
-    <div className="bg-white/10 backdrop-blur-lg rounded-xl p-5 border border-white/20 h-2/3">
+    <div className={`${cardBg} backdrop-blur-lg rounded-xl p-5 border h-2/3 transition-all shadow-lg`}>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold text-white flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-blue-400" />
+        <h2 className={`text-lg font-bold ${textPrimary} flex items-center gap-2`}>
+          <TrendingUp className="w-5 h-5 text-blue-500" />
           Visits Overview
         </h2>
         {loading && (
-          <div className="flex items-center gap-2 text-sm text-gray-400">
+          <div className={`flex items-center gap-2 text-sm ${textMuted}`}>
             <Loader2 className="w-4 h-4 animate-spin" />
             Updating...
           </div>
         )}
         {chartData.length > 0 && (
-          <div className="mt-4 flex items-center justify-center gap-6 text-sm mr-10">
+          <div className={`mt-4 flex items-center justify-center gap-6 text-sm mr-10`}>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-              <span className="text-gray-300">Total Visits</span>
+              <span className={textSecondary}>Total Visits</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-green-500"></div>
-              <span className="text-gray-300">Unique IPs</span>
+              <span className={textSecondary}>Unique IPs</span>
             </div>
           </div>
         )}
@@ -135,19 +161,19 @@ const VisitsGraph = ({ visits, loading }) => {
             data={chartData}
             margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
             <XAxis
               dataKey="week"
-              tick={{ fill: "#94a3b8", fontSize: 12 }}
+              tick={{ fill: isDark ? "#94a3b8" : "#64748b", fontSize: 12 }}
               tickFormatter={formatWeekLabel}
             />
-            <YAxis tick={{ fill: "#94a3b8", fontSize: 12 }} />
+            <YAxis tick={{ fill: isDark ? "#94a3b8" : "#64748b", fontSize: 12 }} />
             <Tooltip
               contentStyle={{
-                backgroundColor: "#1e293b",
-                border: "1px solid #475569",
+                backgroundColor: tooltipBg,
+                border: `1px solid ${tooltipBorder}`,
                 borderRadius: "8px",
-                color: "#f1f5f9",
+                color: tooltipText,
               }}
               labelFormatter={(label) => `Week ${label.split("-W")[1]}`}
               formatter={(value, name) => [
@@ -174,7 +200,7 @@ const VisitsGraph = ({ visits, loading }) => {
           </LineChart>
         </ResponsiveContainer>
       ) : (
-        <div className="h-[240px] flex items-center justify-center text-gray-400">
+        <div className={`h-[240px] flex items-center justify-center ${noDataText}`}>
           <div className="text-center">
             <Activity className="w-12 h-12 mx-auto mb-2 opacity-50" />
             <p>No visit data available</p>
@@ -186,6 +212,7 @@ const VisitsGraph = ({ visits, loading }) => {
 };
 
 export default function DashboardHome({ onFeatureSelect }) {
+  const [theme, setTheme] = useState("light");
   const {
     data,
     loading,
@@ -196,6 +223,38 @@ export default function DashboardHome({ onFeatureSelect }) {
     isLoading,
   } = useDashboardData();
   const { activities, isConnected, error, refresh } = useActivityStream();
+
+  // Initialize and listen for theme changes
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme") || "light";
+    setTheme(savedTheme);
+
+    const handleStorageChange = (e) => {
+      if (e.key === "theme") {
+        setTheme(e.newValue || "light");
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  const isDark = theme === "dark";
+  
+  // Theme-based styles
+  const bgGradient = isDark
+    ? "from-slate-950 via-purple-950 to-slate-950"
+    : "from-blue-50 via-purple-50 to-pink-50";
+  const cardBg = isDark ? "bg-white/10 border-white/20" : "bg-white border-purple-200";
+  const textPrimary = isDark ? "text-white" : "text-gray-900";
+  const textMuted = isDark ? "text-gray-400" : "text-gray-600";
+  const activityBg = isDark ? "bg-white/5 hover:bg-white/10" : "bg-purple-50 hover:bg-purple-100";
+  const errorBg = isDark ? "bg-red-500/20 border-red-500/50 text-red-300" : "bg-red-50 border-red-300 text-red-700";
+  const noActivityText = isDark ? "text-gray-400" : "text-gray-500";
+  
+  const scrollbarTrack = isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(139, 92, 246, 0.1)";
+  const scrollbarThumb = isDark ? "rgba(255, 255, 255, 0.2)" : "rgba(139, 92, 246, 0.3)";
+  const scrollbarThumbHover = isDark ? "rgba(255, 255, 255, 0.3)" : "rgba(139, 92, 246, 0.5)";
 
   // Format timestamp
   const formatTimestamp = (timestamp) => {
@@ -228,34 +287,39 @@ export default function DashboardHome({ onFeatureSelect }) {
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Animated Background Layer */}
-      <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div
-          className="absolute top-0 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20"
-          style={{ animation: "float 7s ease-in-out infinite" }}
-        ></div>
-        <div
-          className="absolute top-0 -right-4 w-72 h-72 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl opacity-20"
-          style={{ animation: "float 7s ease-in-out infinite 2s" }}
-        ></div>
-        <div
-          className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20"
-          style={{ animation: "float 7s ease-in-out infinite 4s" }}
-        ></div>
+      <div className={`fixed inset-0 bg-gradient-to-br ${bgGradient} transition-all duration-300`}>
+        {isDark && (
+          <>
+            <div
+              className="absolute top-0 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20"
+              style={{ animation: "float 7s ease-in-out infinite" }}
+            ></div>
+            <div
+              className="absolute top-0 -right-4 w-72 h-72 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl opacity-20"
+              style={{ animation: "float 7s ease-in-out infinite 2s" }}
+            ></div>
+            <div
+              className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20"
+              style={{ animation: "float 7s ease-in-out infinite 4s" }}
+            ></div>
+          </>
+        )}
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px)`,
+            backgroundImage: isDark
+              ? `linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px)`
+              : `linear-gradient(rgba(139, 92, 246, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(139, 92, 246, 0.05) 1px, transparent 1px)`,
             backgroundSize: "50px 50px",
           }}
         ></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent"></div>
+        <div className={`absolute inset-0 ${isDark ? 'bg-gradient-to-t from-slate-900/50 to-transparent' : 'bg-gradient-to-t from-white/30 to-transparent'}`}></div>
       </div>
 
       {/* Main Content Container */}
       <div className="relative z-10 space-y-4 p-6 max-w-7xl mx-auto">
-        {/* Dashboard Header */}
-
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           {/* Stats Grid - Left Column */}
           <div className="lg:col-span-1 space-y-2">
@@ -266,6 +330,7 @@ export default function DashboardHome({ onFeatureSelect }) {
               gradient="from-blue-500 to-purple-500"
               isLoading={loading.users}
               error={errors.users}
+              theme={theme}
             />
             <StatCard
               icon={FolderOpen}
@@ -274,6 +339,7 @@ export default function DashboardHome({ onFeatureSelect }) {
               gradient="from-green-500 to-teal-500"
               isLoading={loading.projects}
               error={errors.projects}
+              theme={theme}
             />
             <StatCard
               icon={FileText}
@@ -282,6 +348,7 @@ export default function DashboardHome({ onFeatureSelect }) {
               gradient="from-purple-500 to-pink-500"
               isLoading={loading.blogPosts}
               error={errors.blogPosts}
+              theme={theme}
             />
             <StatCard
               icon={MessageSquare}
@@ -290,6 +357,7 @@ export default function DashboardHome({ onFeatureSelect }) {
               gradient="from-orange-500 to-red-500"
               isLoading={loading.messages}
               error={errors.messages}
+              theme={theme}
             />
             <StatCard
               icon={Eye}
@@ -298,6 +366,7 @@ export default function DashboardHome({ onFeatureSelect }) {
               gradient="from-pink-500 to-rose-500"
               isLoading={loading.weeklyVisits}
               error={errors.weeklyVisits}
+              theme={theme}
             />
 
             {/* Service Status Cards */}
@@ -306,19 +375,20 @@ export default function DashboardHome({ onFeatureSelect }) {
                 key={id}
                 service={service}
                 checking={checkingServices[id]}
+                theme={theme}
               />
             ))}
           </div>
 
           {/* Visits Graph - Right Column */}
           <div className="lg:col-span-3">
-            <VisitsGraph visits={data.allVisits} loading={loading.allVisits} />
+            <VisitsGraph visits={data.allVisits} loading={loading.allVisits} theme={theme} />
           </div>
         </div>
 
         {/* Quick Actions Section */}
-        <div className="bg-white/10 backdrop-blur-lg rounded-xl p-5 border border-white/20">
-          <h2 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
+        <div className={`${cardBg} backdrop-blur-lg rounded-xl p-5 border transition-all shadow-lg`}>
+          <h2 className={`text-lg font-bold ${textPrimary} mb-3 flex items-center gap-2`}>
             <Activity className="w-4 h-4" />
             Quick Actions
           </h2>
@@ -345,27 +415,27 @@ export default function DashboardHome({ onFeatureSelect }) {
         </div>
 
         {/* Recent Activity Feed */}
-        <div className="bg-white/10 backdrop-blur-lg rounded-xl p-5 border border-white/20 mb-8">
+        <div className={`${cardBg} backdrop-blur-lg rounded-xl p-5 border mb-8 transition-all shadow-lg`}>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <h2 className={`text-lg font-bold ${textPrimary} flex items-center gap-2`}>
               <ActivityIcon className="w-5 h-5" />
               Recent Activity
             </h2>
             <div className="flex items-center gap-2">
               {isConnected ? (
-                <div className="flex items-center gap-1.5 text-xs text-green-400">
+                <div className="flex items-center gap-1.5 text-xs text-green-500">
                   <Wifi className="w-3.5 h-3.5" />
                   <span>Live</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-1.5 text-xs text-red-400">
+                <div className="flex items-center gap-1.5 text-xs text-red-500">
                   <WifiOff className="w-3.5 h-3.5" />
                   <span>Disconnected</span>
                 </div>
               )}
               <button
                 onClick={refresh}
-                className="text-xs text-gray-400 hover:text-white transition-colors"
+                className={`text-xs ${textMuted} hover:${textPrimary} transition-colors`}
               >
                 Refresh
               </button>
@@ -373,14 +443,14 @@ export default function DashboardHome({ onFeatureSelect }) {
           </div>
 
           {error && (
-            <div className="mb-3 p-2 bg-red-500/20 border border-red-500/50 rounded text-xs text-red-300">
+            <div className={`mb-3 p-2 ${errorBg} border rounded text-xs`}>
               {error}
             </div>
           )}
 
           <div className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar">
             {activities.length === 0 ? (
-              <div className="text-center py-8 text-gray-400">
+              <div className={`text-center py-8 ${noActivityText}`}>
                 <ActivityIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
                 <p className="text-sm">No recent activity</p>
               </div>
@@ -388,7 +458,7 @@ export default function DashboardHome({ onFeatureSelect }) {
               activities.map((activity, index) => (
                 <div
                   key={`${activity.id}-${index}`}
-                  className="flex items-center gap-3 p-2.5 bg-white/5 rounded-lg hover:bg-white/10 transition-all cursor-pointer animate-slideIn"
+                  className={`flex items-center gap-3 p-2.5 ${activityBg} rounded-lg transition-all cursor-pointer animate-slideIn`}
                 >
                   <div
                     className={`w-1.5 h-1.5 rounded-full ${getActivityColor(
@@ -396,10 +466,10 @@ export default function DashboardHome({ onFeatureSelect }) {
                     )} flex-shrink-0`}
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm truncate">
+                    <p className={`${textPrimary} text-sm truncate`}>
                       {activity.action}
                     </p>
-                    <p className="text-gray-400 text-xs">
+                    <p className={`${textMuted} text-xs`}>
                       {formatTimestamp(activity.timestamp)}
                     </p>
                   </div>
@@ -435,15 +505,15 @@ export default function DashboardHome({ onFeatureSelect }) {
           width: 6px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.05);
+          background: ${scrollbarTrack};
           border-radius: 3px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.2);
+          background: ${scrollbarThumb};
           border-radius: 3px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 255, 255, 0.3);
+          background: ${scrollbarThumbHover};
         }
 
         @keyframes slideIn {

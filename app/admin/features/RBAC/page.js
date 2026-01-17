@@ -21,7 +21,23 @@ export default function RBACManagement() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [theme, setTheme] = useState("light");
   const apiFetch = useApi();
+
+  // Initialize and listen for theme changes
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme") || "light";
+    setTheme(savedTheme);
+
+    const handleStorageChange = (e) => {
+      if (e.key === "theme") {
+        setTheme(e.newValue || "light");
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   // Fetch users from NestJS backend
   useEffect(() => {
@@ -145,9 +161,31 @@ export default function RBACManagement() {
     viewer: users.filter((u) => u.role === "viewer").length,
   };
 
+  // Theme-based styles
+  const isDark = theme === "dark";
+  const bgGradient = isDark
+    ? "from-slate-950 via-purple-950 to-slate-950"
+    : "from-blue-50 via-purple-50 to-pink-50";
+  const textPrimary = isDark ? "text-white" : "text-gray-900";
+  const textSecondary = isDark ? "text-gray-400" : "text-gray-600";
+  const textMuted = isDark ? "text-gray-300" : "text-gray-700";
+  const cardBg = isDark ? "bg-slate-800/50 border-slate-700/50" : "bg-white border-purple-200";
+  const inputBg = isDark ? "bg-slate-900/50 border-slate-700" : "bg-white border-purple-200";
+  const inputFocus = isDark ? "focus:border-purple-500" : "focus:border-purple-400";
+  const buttonPrimary = isDark ? "bg-purple-600 hover:bg-purple-700 disabled:bg-purple-800" : "bg-purple-500 hover:bg-purple-600 disabled:bg-purple-300";
+  const tableBorder = isDark ? "border-slate-700" : "border-purple-100";
+  const tableHover = isDark ? "hover:bg-slate-700/30" : "hover:bg-purple-50";
+  const modalBg = isDark ? "bg-slate-800 border-slate-700" : "bg-white border-purple-200";
+  const modalOverlay = isDark ? "bg-black/50" : "bg-black/30";
+  const errorBg = isDark ? "bg-red-500/10 border-red-500/30 text-red-400" : "bg-red-50 border-red-300 text-red-700";
+  const statCardBorder = isDark ? "border-slate-700/50" : "border-purple-200";
+  const selectBg = isDark ? "bg-slate-900 border-slate-600" : "bg-white border-purple-300";
+  const cancelButton = isDark ? "bg-slate-700 hover:bg-slate-600" : "bg-gray-200 hover:bg-gray-300";
+  const deleteButton = isDark ? "bg-red-600 hover:bg-red-700" : "bg-red-500 hover:bg-red-600";
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8">
+      <div className={`min-h-screen bg-gradient-to-br ${bgGradient} p-8 transition-colors duration-300`}>
         <div className="flex items-center justify-center h-96">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent"></div>
         </div>
@@ -156,23 +194,23 @@ export default function RBACManagement() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8">
+    <div className={`min-h-screen bg-gradient-to-br ${bgGradient} p-8 transition-colors duration-300`}>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-              <Shield className="w-8 h-8 text-purple-400" />
+            <h1 className={`text-3xl font-bold ${textPrimary} flex items-center gap-3`}>
+              <Shield className="w-8 h-8 text-purple-500" />
               User Management & RBAC
             </h1>
-            <p className="text-gray-400 mt-2">
+            <p className={`${textSecondary} mt-2`}>
               Manage user roles and permissions
             </p>
           </div>
           <button
             onClick={fetchUsers}
             disabled={loading}
-            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-800 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center gap-2"
+            className={`px-4 py-2 ${buttonPrimary} disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center gap-2 shadow-lg`}
           >
             <svg
               className={`w-5 h-5 ${loading ? "animate-spin" : ""}`}
@@ -193,12 +231,12 @@ export default function RBACManagement() {
 
         {/* Error Alert */}
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-3 text-red-400">
+          <div className={`mb-6 p-4 ${errorBg} border rounded-lg flex items-center gap-3`}>
             <AlertCircle className="w-5 h-5" />
             <span>{error}</span>
             <button
               onClick={() => setError(null)}
-              className="ml-auto text-red-400 hover:text-red-300"
+              className={`ml-auto ${isDark ? 'text-red-400 hover:text-red-300' : 'text-red-700 hover:text-red-600'}`}
             >
               ×
             </button>
@@ -207,72 +245,72 @@ export default function RBACManagement() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6">
+          <div className={`${cardBg} backdrop-blur-sm border rounded-xl p-6 transition-colors shadow-lg`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Total Users</p>
-                <p className="text-3xl font-bold text-white mt-1">
+                <p className={`${textSecondary} text-sm`}>Total Users</p>
+                <p className={`text-3xl font-bold ${textPrimary} mt-1`}>
                   {roleStats.total}
                 </p>
               </div>
-              <Users className="w-10 h-10 text-blue-400" />
+              <Users className="w-10 h-10 text-blue-500" />
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-purple-500/30 rounded-xl p-6">
+          <div className={`${cardBg} backdrop-blur-sm border ${isDark ? 'border-purple-500/30' : 'border-purple-300'} rounded-xl p-6 transition-colors shadow-lg`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Admins</p>
-                <p className="text-3xl font-bold text-purple-400 mt-1">
+                <p className={`${textSecondary} text-sm`}>Admins</p>
+                <p className="text-3xl font-bold text-purple-500 mt-1">
                   {roleStats.admin}
                 </p>
               </div>
-              <Shield className="w-10 h-10 text-purple-400" />
+              <Shield className="w-10 h-10 text-purple-500" />
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-blue-500/30 rounded-xl p-6">
+          <div className={`${cardBg} backdrop-blur-sm border ${isDark ? 'border-blue-500/30' : 'border-blue-300'} rounded-xl p-6 transition-colors shadow-lg`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Editors</p>
-                <p className="text-3xl font-bold text-blue-400 mt-1">
+                <p className={`${textSecondary} text-sm`}>Editors</p>
+                <p className="text-3xl font-bold text-blue-500 mt-1">
                   {roleStats.editor}
                 </p>
               </div>
-              <Edit2 className="w-10 h-10 text-blue-400" />
+              <Edit2 className="w-10 h-10 text-blue-500" />
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-green-500/30 rounded-xl p-6">
+          <div className={`${cardBg} backdrop-blur-sm border ${isDark ? 'border-green-500/30' : 'border-green-300'} rounded-xl p-6 transition-colors shadow-lg`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Viewers</p>
-                <p className="text-3xl font-bold text-green-400 mt-1">
+                <p className={`${textSecondary} text-sm`}>Viewers</p>
+                <p className="text-3xl font-bold text-green-500 mt-1">
                   {roleStats.viewer}
                 </p>
               </div>
-              <UserCheck className="w-10 h-10 text-green-400" />
+              <UserCheck className="w-10 h-10 text-green-500" />
             </div>
           </div>
         </div>
 
         {/* Search and Filter */}
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6 mb-6">
+        <div className={`${cardBg} backdrop-blur-sm border rounded-xl p-6 mb-6 transition-colors shadow-lg`}>
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${textSecondary}`} />
               <input
                 type="text"
                 placeholder="Search by username or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-slate-900/50 border border-slate-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 transition-colors"
+                className={`w-full pl-10 pr-4 py-3 ${inputBg} border rounded-lg ${textPrimary} placeholder-gray-400 focus:outline-none ${inputFocus} transition-colors`}
               />
             </div>
             <select
               value={filterRole}
               onChange={(e) => setFilterRole(e.target.value)}
-              className="px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-colors cursor-pointer"
+              className={`px-4 py-3 ${inputBg} border rounded-lg ${textPrimary} focus:outline-none ${inputFocus} transition-colors cursor-pointer`}
             >
               <option value="all">All Roles</option>
               <option value="admin">Admin</option>
@@ -283,24 +321,24 @@ export default function RBACManagement() {
         </div>
 
         {/* Users Table */}
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl overflow-hidden">
+        <div className={`${cardBg} backdrop-blur-sm border rounded-xl overflow-hidden transition-colors shadow-lg`}>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-slate-700">
-                  <th className="text-left p-4 text-gray-400 font-semibold">
+                <tr className={`border-b ${tableBorder}`}>
+                  <th className={`text-left p-4 ${textSecondary} font-semibold`}>
                     User
                   </th>
-                  <th className="text-left p-4 text-gray-400 font-semibold">
+                  <th className={`text-left p-4 ${textSecondary} font-semibold`}>
                     Email
                   </th>
-                  <th className="text-left p-4 text-gray-400 font-semibold">
+                  <th className={`text-left p-4 ${textSecondary} font-semibold`}>
                     Current Role
                   </th>
-                  <th className="text-left p-4 text-gray-400 font-semibold">
+                  <th className={`text-left p-4 ${textSecondary} font-semibold`}>
                     Created
                   </th>
-                  <th className="text-center p-4 text-gray-400 font-semibold">
+                  <th className={`text-center p-4 ${textSecondary} font-semibold`}>
                     Actions
                   </th>
                 </tr>
@@ -309,19 +347,19 @@ export default function RBACManagement() {
                 {filteredUsers.map((user) => (
                   <tr
                     key={user._id}
-                    className="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors"
+                    className={`border-b ${tableBorder} ${tableHover} transition-colors`}
                   >
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-semibold">
                           {user.username?.[0]?.toUpperCase() || "U"}
                         </div>
-                        <span className="text-white font-medium">
+                        <span className={`${textPrimary} font-medium`}>
                           {user.username || "N/A"}
                         </span>
                       </div>
                     </td>
-                    <td className="p-4 text-gray-300">{user.email || "N/A"}</td>
+                    <td className={`p-4 ${textMuted}`}>{user.email || "N/A"}</td>
                     <td className="p-4">
                       {editingUser === user._id ? (
                         <select
@@ -330,7 +368,7 @@ export default function RBACManagement() {
                             updateUserRole(user._id, e.target.value)
                           }
                           disabled={isUpdating}
-                          className="px-3 py-1 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500 disabled:opacity-50"
+                          className={`px-3 py-1 ${selectBg} border rounded-lg ${textPrimary} text-sm focus:outline-none ${inputFocus} disabled:opacity-50`}
                         >
                           <option value="admin">Admin</option>
                           <option value="editor">Editor</option>
@@ -347,7 +385,7 @@ export default function RBACManagement() {
                         </span>
                       )}
                     </td>
-                    <td className="p-4 text-gray-400 text-sm">
+                    <td className={`p-4 ${textSecondary} text-sm`}>
                       {user.created_at
                         ? new Date(user.created_at).toLocaleDateString()
                         : "N/A"}
@@ -361,7 +399,7 @@ export default function RBACManagement() {
                             )
                           }
                           disabled={isUpdating}
-                          className="p-2 bg-blue-500/20 hover:bg-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed text-blue-400 rounded-lg transition-colors"
+                          className="p-2 bg-blue-500/20 hover:bg-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed text-blue-500 rounded-lg transition-colors"
                           title="Edit Role"
                         >
                           <Edit2 className="w-4 h-4" />
@@ -369,7 +407,7 @@ export default function RBACManagement() {
                         <button
                           onClick={() => setShowDeleteConfirm(user._id)}
                           disabled={isDeleting}
-                          className="p-2 bg-red-500/20 hover:bg-red-500/30 disabled:opacity-50 disabled:cursor-not-allowed text-red-400 rounded-lg transition-colors"
+                          className="p-2 bg-red-500/20 hover:bg-red-500/30 disabled:opacity-50 disabled:cursor-not-allowed text-red-500 rounded-lg transition-colors"
                           title="Delete User"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -383,7 +421,7 @@ export default function RBACManagement() {
           </div>
 
           {filteredUsers.length === 0 && (
-            <div className="text-center py-12 text-gray-400">
+            <div className={`text-center py-12 ${textSecondary}`}>
               <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
               <p>No users found</p>
             </div>
@@ -392,12 +430,12 @@ export default function RBACManagement() {
 
         {/* Delete Confirmation Modal */}
         {showDeleteConfirm && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 max-w-md w-full mx-4">
-              <h3 className="text-xl font-bold text-white mb-3">
+          <div className={`fixed inset-0 ${modalOverlay} backdrop-blur-sm flex items-center justify-center z-50`}>
+            <div className={`${modalBg} border rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl`}>
+              <h3 className={`text-xl font-bold ${textPrimary} mb-3`}>
                 Confirm Deletion
               </h3>
-              <p className="text-gray-400 mb-6">
+              <p className={`${textSecondary} mb-6`}>
                 Are you sure you want to delete this user? This action cannot be
                 undone.
               </p>
@@ -405,14 +443,14 @@ export default function RBACManagement() {
                 <button
                   onClick={() => setShowDeleteConfirm(null)}
                   disabled={isDeleting}
-                  className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                  className={`flex-1 px-4 py-2 ${cancelButton} disabled:opacity-50 disabled:cursor-not-allowed ${textPrimary} rounded-lg transition-colors`}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => deleteUser(showDeleteConfirm)}
                   disabled={isDeleting}
-                  className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                  className={`flex-1 px-4 py-2 ${deleteButton} disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors`}
                 >
                   {isDeleting ? "Deleting..." : "Delete"}
                 </button>

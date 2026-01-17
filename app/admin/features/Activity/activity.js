@@ -32,8 +32,24 @@ export default function ActivitiesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [stats, setStats] = useState(null);
+  const [theme, setTheme] = useState("light");
 
   const itemsPerPage = 20;
+
+  // Initialize and listen for theme changes
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme") || "light";
+    setTheme(savedTheme);
+
+    const handleStorageChange = (e) => {
+      if (e.key === "theme") {
+        setTheme(e.newValue || "light");
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   const fetchActivities = async (page = 1) => {
     setLoading(true);
@@ -177,31 +193,51 @@ export default function ActivitiesPage() {
     a.click();
   };
 
+  // Theme-based styles
+  const isDark = theme === "dark";
+  const bgGradient = isDark
+    ? "from-slate-950 via-purple-950 to-slate-950"
+    : "from-blue-50 via-purple-50 to-pink-50";
+  const textPrimary = isDark ? "text-white" : "text-gray-900";
+  const textSecondary = isDark ? "text-gray-400" : "text-gray-600";
+  const textMuted = isDark ? "text-gray-300" : "text-gray-700";
+  const cardBg = isDark ? "bg-slate-800/50 border-slate-700/50" : "bg-white border-purple-200";
+  const inputBg = isDark ? "bg-slate-900/50 border-slate-700" : "bg-white border-purple-200";
+  const inputFocus = isDark ? "focus:border-purple-500" : "focus:border-purple-400";
+  const buttonPrimary = isDark ? "bg-purple-600 hover:bg-purple-700" : "bg-purple-500 hover:bg-purple-600";
+  const buttonSecondary = isDark ? "bg-green-600 hover:bg-green-700" : "bg-green-500 hover:bg-green-600";
+  const tableBorder = isDark ? "border-slate-700" : "border-purple-100";
+  const tableHover = isDark ? "hover:bg-slate-700/30" : "hover:bg-purple-50";
+  const modalBg = isDark ? "bg-slate-800 border-slate-700" : "bg-white border-purple-200";
+  const modalOverlay = isDark ? "bg-black/50" : "bg-black/30";
+  const statCardBg = isDark ? "bg-slate-800/30" : "bg-white/80";
+  const statCardBorder = isDark ? "border-slate-700/50" : "border-purple-200";
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+    <div className={`min-h-screen bg-gradient-to-br ${bgGradient} p-6 transition-colors duration-300`}>
       <div className="max-w-7xl mx-auto space-y-6">
-        <div className="bg-white/10 backdrop-blur-xl rounded-xl p-6 border border-white/20">
+        <div className={`${cardBg} backdrop-blur-xl rounded-xl p-6 border transition-colors shadow-lg`}>
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+              <h1 className={`text-3xl font-bold ${textPrimary} flex items-center gap-3`}>
                 <Activity className="w-8 h-8 text-purple-400" />
                 Activity Logs
               </h1>
-              <p className="text-gray-400 mt-1">
+              <p className={`${textSecondary} mt-1`}>
                 Track and monitor all system activities
               </p>
             </div>
             <div className="flex gap-3">
               <button
                 onClick={() => fetchActivities(currentPage)}
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white flex items-center gap-2 transition-colors"
+                className={`px-4 py-2 ${buttonPrimary} rounded-lg text-white flex items-center gap-2 transition-colors shadow-lg`}
               >
                 <RefreshCw className="w-4 h-4" />
                 Refresh
               </button>
               <button
                 onClick={exportToCSV}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white flex items-center gap-2 transition-colors"
+                className={`px-4 py-2 ${buttonSecondary} rounded-lg text-white flex items-center gap-2 transition-colors shadow-lg`}
               >
                 <Download className="w-4 h-4" />
                 Export CSV
@@ -211,19 +247,19 @@ export default function ActivitiesPage() {
 
           {stats && (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-              <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                <p className="text-gray-400 text-sm">Total (7 days)</p>
-                <p className="text-2xl font-bold text-white mt-1">
+              <div className={`${statCardBg} rounded-lg p-4 border ${statCardBorder} transition-colors`}>
+                <p className={`${textSecondary} text-sm`}>Total (7 days)</p>
+                <p className={`text-2xl font-bold ${textPrimary} mt-1`}>
                   {stats.total}
                 </p>
               </div>
               {stats.byType?.slice(0, 3).map((stat) => (
                 <div
                   key={stat._id}
-                  className="bg-white/5 rounded-lg p-4 border border-white/10"
+                  className={`${statCardBg} rounded-lg p-4 border ${statCardBorder} transition-colors`}
                 >
-                  <p className="text-gray-400 text-sm">{stat._id}</p>
-                  <p className="text-2xl font-bold text-white mt-1">
+                  <p className={`${textSecondary} text-sm`}>{stat._id}</p>
+                  <p className={`text-2xl font-bold ${textPrimary} mt-1`}>
                     {stat.count}
                   </p>
                 </div>
@@ -232,26 +268,26 @@ export default function ActivitiesPage() {
           )}
         </div>
 
-        <div className="bg-white/10 backdrop-blur-xl rounded-xl p-4 border border-white/20">
+        <div className={`${cardBg} backdrop-blur-xl rounded-xl p-4 border transition-colors shadow-lg`}>
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 ${textSecondary}`} />
               <input
                 type="text"
                 placeholder="Search activities..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-white/10 border border-white/20 rounded-lg pl-10 pr-4 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:border-purple-400"
+                className={`w-full ${inputBg} border rounded-lg pl-10 pr-4 py-2.5 ${textPrimary} placeholder-gray-400 focus:outline-none ${inputFocus} transition-colors`}
               />
             </div>
             <div className="flex gap-3">
               <select
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value)}
-                className="bg-white/10 border border-white/20 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-purple-400 min-w-[200px]"
+                className={`${inputBg} border rounded-lg px-4 py-2.5 ${textPrimary} focus:outline-none ${inputFocus} min-w-[200px] transition-colors cursor-pointer`}
               >
                 {activityTypes.map((type) => (
-                  <option key={type} value={type} className="bg-slate-800">
+                  <option key={type} value={type} className={isDark ? "bg-slate-800" : "bg-white"}>
                     {type === "all" ? "All Types" : type}
                   </option>
                 ))}
@@ -260,13 +296,13 @@ export default function ActivitiesPage() {
           </div>
         </div>
 
-        <div className="bg-white/10 backdrop-blur-xl rounded-xl border border-white/20 overflow-hidden">
+        <div className={`${cardBg} backdrop-blur-xl rounded-xl border overflow-hidden transition-colors shadow-lg`}>
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
             </div>
           ) : filteredActivities.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-gray-400">
+            <div className={`flex flex-col items-center justify-center py-20 ${textSecondary}`}>
               <Activity className="w-16 h-16 mb-4 opacity-50" />
               <p>No activities found</p>
             </div>
@@ -281,32 +317,32 @@ export default function ActivitiesPage() {
                     <col className="w-[15%]" />
                     <col className="w-[15%]" />
                   </colgroup>
-                  <thead className="bg-white/5 border-b border-white/10">
+                  <thead className={`${isDark ? 'bg-slate-800/50' : 'bg-purple-50'} border-b ${tableBorder}`}>
                     <tr>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">
+                      <th className={`px-4 py-3 text-left text-sm font-semibold ${textSecondary}`}>
                         Type
                       </th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">
+                      <th className={`px-4 py-3 text-left text-sm font-semibold ${textSecondary}`}>
                         Action
                       </th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">
+                      <th className={`px-4 py-3 text-left text-sm font-semibold ${textSecondary}`}>
                         Timestamp
                       </th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">
+                      <th className={`px-4 py-3 text-left text-sm font-semibold ${textSecondary}`}>
                         Status
                       </th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">
+                      <th className={`px-4 py-3 text-left text-sm font-semibold ${textSecondary}`}>
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/10">
+                  <tbody className={`divide-y ${tableBorder}`}>
                     {filteredActivities.map((activity) => {
                       const timeData = formatTimestamp(activity.timestamp);
                       return (
                         <tr
                           key={activity.id}
-                          className="hover:bg-white/5 transition-colors"
+                          className={`${tableHover} transition-colors`}
                         >
                           <td className="px-4 py-3">
                             <span
@@ -318,15 +354,15 @@ export default function ActivitiesPage() {
                               <span className="truncate">{activity.type}</span>
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-white text-sm truncate">
+                          <td className={`px-4 py-3 ${textPrimary} text-sm truncate`}>
                             {activity.action}
                           </td>
-                          <td className="px-4 py-3 text-gray-300 text-sm">
+                          <td className={`px-4 py-3 ${textMuted} text-sm`}>
                             <div className="flex items-center gap-2">
                               <Clock className="w-4 h-4 text-green-400 flex-shrink-0" />
                               <div className="min-w-0">
                                 <div className="truncate">{timeData.time}</div>
-                                <div className="text-xs text-gray-200 truncate">
+                                <div className={`text-xs ${textSecondary} truncate`}>
                                   {timeData.relative}
                                 </div>
                               </div>
@@ -335,7 +371,7 @@ export default function ActivitiesPage() {
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2">
                               {getStatusIcon(activity.status)}
-                              <span className="text-sm text-gray-300 capitalize truncate">
+                              <span className={`text-sm ${textMuted} capitalize truncate`}>
                                 {activity.status || "N/A"}
                               </span>
                             </div>
@@ -343,7 +379,7 @@ export default function ActivitiesPage() {
                           <td className="px-4 py-3">
                             <button
                               onClick={() => setSelectedActivity(activity)}
-                              className="px-3 py-1.5 bg-purple-600/30 hover:bg-purple-600/50 rounded-lg text-purple-300 text-sm flex items-center gap-2 transition-colors"
+                              className="px-3 py-1.5 bg-purple-500/30 hover:bg-purple-600/50 rounded-lg text-amber-600 text-sm flex items-center gap-2 transition-colors"
                             >
                               <Eye className="w-4 h-4" />
                               <span className="hidden sm:inline">Details</span>
@@ -356,15 +392,15 @@ export default function ActivitiesPage() {
                 </table>
               </div>
 
-              <div className="flex items-center justify-between px-4 py-3 bg-white/5 border-t border-white/10">
-                <p className="text-sm text-gray-400">
+              <div className={`flex items-center justify-between px-4 py-3 ${isDark ? 'bg-slate-800/30' : 'bg-purple-50'} border-t ${tableBorder} transition-colors`}>
+                <p className={`text-sm ${textSecondary}`}>
                   Page {currentPage} of {totalPages}
                 </p>
                 <div className="flex gap-2">
                   <button
                     onClick={() => fetchActivities(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 text-sm"
+                    className={`px-3 py-2 ${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-white hover:bg-gray-50'} rounded-lg ${textPrimary} disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 text-sm shadow-md border ${isDark ? 'border-slate-600' : 'border-purple-200'}`}
                   >
                     <ChevronLeft className="w-4 h-4" />
                     <span className="hidden sm:inline">Previous</span>
@@ -372,7 +408,7 @@ export default function ActivitiesPage() {
                   <button
                     onClick={() => fetchActivities(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 text-sm"
+                    className={`px-3 py-2 ${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-white hover:bg-gray-50'} rounded-lg ${textPrimary} disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 text-sm shadow-md border ${isDark ? 'border-slate-600' : 'border-purple-200'}`}
                   >
                     <span className="hidden sm:inline">Next</span>
                     <ChevronRight className="w-4 h-4" />
@@ -385,38 +421,38 @@ export default function ActivitiesPage() {
       </div>
 
       {selectedActivity && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 rounded-xl border border-white/20 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-slate-900 border-b border-white/10 p-6 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+        <div className={`fixed inset-0 ${modalOverlay} backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-colors`}>
+          <div className={`${modalBg} rounded-xl border max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl transition-colors`}>
+            <div className={`sticky top-0 ${modalBg} border-b ${tableBorder} p-6 flex items-center justify-between transition-colors`}>
+              <h2 className={`text-2xl font-bold ${textPrimary} flex items-center gap-3`}>
                 <FileText className="w-6 h-6 text-purple-400" />
                 Activity Details
               </h2>
               <button
                 onClick={() => setSelectedActivity(null)}
-                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                className={`p-2 ${isDark ? 'hover:bg-slate-700' : 'hover:bg-gray-100'} rounded-lg transition-colors`}
               >
-                <X className="w-5 h-5 text-gray-400" />
+                <X className={`w-5 h-5 ${textSecondary}`} />
               </button>
             </div>
 
             <div className="p-6 space-y-6">
               {selectedActivity.id && (
-                <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                <div className={`${isDark ? 'bg-slate-900/50' : 'bg-purple-50'} rounded-lg p-4 border ${statCardBorder} transition-colors`}>
                   <div className="flex items-center gap-2 mb-2">
-                    <Hash className="w-4 h-4 text-gray-400" />
-                    <p className="text-sm text-gray-400">Activity ID</p>
+                    <Hash className={`w-4 h-4 ${textSecondary}`} />
+                    <p className={`text-sm ${textSecondary}`}>Activity ID</p>
                   </div>
-                  <p className="text-white font-mono text-sm">
+                  <p className={`${textPrimary} font-mono text-sm`}>
                     {selectedActivity.id}
                   </p>
                 </div>
               )}
 
-              <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+              <div className={`${isDark ? 'bg-slate-900/50' : 'bg-purple-50'} rounded-lg p-4 border ${statCardBorder} transition-colors`}>
                 <div className="flex items-center gap-2 mb-2">
-                  <Tag className="w-4 h-4 text-gray-400" />
-                  <p className="text-sm text-gray-400">Type</p>
+                  <Tag className={`w-4 h-4 ${textSecondary}`} />
+                  <p className={`text-sm ${textSecondary}`}>Type</p>
                 </div>
                 <span
                   className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium border ${getTypeColor(
@@ -427,60 +463,60 @@ export default function ActivitiesPage() {
                 </span>
               </div>
 
-              <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+              <div className={`${isDark ? 'bg-slate-900/50' : 'bg-purple-50'} rounded-lg p-4 border ${statCardBorder} transition-colors`}>
                 <div className="flex items-center gap-2 mb-2">
-                  <Activity className="w-4 h-4 text-gray-400" />
-                  <p className="text-sm text-gray-400">Action</p>
+                  <Activity className={`w-4 h-4 ${textSecondary}`} />
+                  <p className={`text-sm ${textSecondary}`}>Action</p>
                 </div>
-                <p className="text-white">{selectedActivity.action}</p>
+                <p className={textPrimary}>{selectedActivity.action}</p>
               </div>
 
-              <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+              <div className={`${isDark ? 'bg-slate-900/50' : 'bg-purple-50'} rounded-lg p-4 border ${statCardBorder} transition-colors`}>
                 <div className="flex items-center gap-2 mb-2">
-                  <Calendar className="w-4 h-4 text-gray-400" />
-                  <p className="text-sm text-gray-400">Timestamp</p>
+                  <Calendar className={`w-4 h-4 ${textSecondary}`} />
+                  <p className={`text-sm ${textSecondary}`}>Timestamp</p>
                 </div>
-                <p className="text-white">
+                <p className={textPrimary}>
                   {formatTimestamp(selectedActivity.timestamp).date} at{" "}
                   {formatTimestamp(selectedActivity.timestamp).time}
                 </p>
-                <p className="text-gray-400 text-sm mt-1">
+                <p className={`${textSecondary} text-sm mt-1`}>
                   {formatTimestamp(selectedActivity.timestamp).relative}
                 </p>
               </div>
 
               {selectedActivity.userId && (
-                <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                <div className={`${isDark ? 'bg-slate-900/50' : 'bg-purple-50'} rounded-lg p-4 border ${statCardBorder} transition-colors`}>
                   <div className="flex items-center gap-2 mb-2">
-                    <User className="w-4 h-4 text-gray-400" />
-                    <p className="text-sm text-gray-400">User ID</p>
+                    <User className={`w-4 h-4 ${textSecondary}`} />
+                    <p className={`text-sm ${textSecondary}`}>User ID</p>
                   </div>
-                  <p className="text-white font-mono">
+                  <p className={`${textPrimary} font-mono`}>
                     {selectedActivity.userId}
                   </p>
                 </div>
               )}
 
               {selectedActivity.entityId && (
-                <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                <div className={`${isDark ? 'bg-slate-900/50' : 'bg-purple-50'} rounded-lg p-4 border ${statCardBorder} transition-colors`}>
                   <div className="flex items-center gap-2 mb-2">
-                    <FileText className="w-4 h-4 text-gray-400" />
-                    <p className="text-sm text-gray-400">Entity ID</p>
+                    <FileText className={`w-4 h-4 ${textSecondary}`} />
+                    <p className={`text-sm ${textSecondary}`}>Entity ID</p>
                   </div>
-                  <p className="text-white font-mono">
+                  <p className={`${textPrimary} font-mono`}>
                     {selectedActivity.entityId}
                   </p>
                 </div>
               )}
 
-              <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+              <div className={`${isDark ? 'bg-slate-900/50' : 'bg-purple-50'} rounded-lg p-4 border ${statCardBorder} transition-colors`}>
                 <div className="flex items-center gap-2 mb-2">
-                  <Info className="w-4 h-4 text-gray-400" />
-                  <p className="text-sm text-gray-400">Status</p>
+                  <Info className={`w-4 h-4 ${textSecondary}`} />
+                  <p className={`text-sm ${textSecondary}`}>Status</p>
                 </div>
                 <div className="flex items-center gap-2">
                   {getStatusIcon(selectedActivity.status)}
-                  <span className="text-white capitalize">
+                  <span className={`${textPrimary} capitalize`}>
                     {selectedActivity.status || "N/A"}
                   </span>
                 </div>
@@ -488,12 +524,12 @@ export default function ActivitiesPage() {
 
               {selectedActivity.metadata &&
                 Object.keys(selectedActivity.metadata).length > 0 && (
-                  <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                  <div className={`${isDark ? 'bg-slate-900/50' : 'bg-purple-50'} rounded-lg p-4 border ${statCardBorder} transition-colors`}>
                     <div className="flex items-center gap-2 mb-3">
-                      <FileText className="w-4 h-4 text-gray-400" />
-                      <p className="text-sm text-gray-400">Metadata</p>
+                      <FileText className={`w-4 h-4 ${textSecondary}`} />
+                      <p className={`text-sm ${textSecondary}`}>Metadata</p>
                     </div>
-                    <pre className="bg-black/30 rounded-lg p-4 text-sm text-gray-300 overflow-x-auto">
+                    <pre className={`${isDark ? 'bg-black/30' : 'bg-white'} rounded-lg p-4 text-sm ${textMuted} overflow-x-auto border ${isDark ? 'border-slate-700' : 'border-purple-200'}`}>
                       {JSON.stringify(selectedActivity.metadata, null, 2)}
                     </pre>
                   </div>

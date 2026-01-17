@@ -20,6 +20,8 @@ const AdminPage = () => {
   const [activeFeature, setActiveFeature] = useState(null);
   const [ipAddress, setIpAddress] = useState("Loading...");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [theme, setTheme] = useState("light");
+  
   const { userProfile } = useUserProfile();
   const { activities, isConnected } = useActivityStream();
 
@@ -33,6 +35,22 @@ const AdminPage = () => {
   } = useAuth();
 
   const apiFetch = useApi();
+
+  // Initialize theme
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme") || "light";
+    setTheme(savedTheme);
+    
+    // Listen for theme changes
+    const handleStorageChange = (e) => {
+      if (e.key === "theme") {
+        setTheme(e.newValue || "light");
+      }
+    };
+    
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   // Redirect if authenticated
   useEffect(() => {
@@ -114,20 +132,40 @@ const AdminPage = () => {
     }
   };
 
+  // Theme-based styles
+  const getThemeStyles = () => {
+    if (theme === "dark") {
+      return {
+        container: "bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950",
+        loading: "bg-gradient-to-br from-slate-950 to-slate-900",
+        spinner: "border-purple-400",
+        text: "text-gray-100"
+      };
+    }
+    return {
+      container: "bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50",
+      loading: "bg-gradient-to-br from-blue-100 to-purple-100",
+      spinner: "border-purple-600",
+      text: "text-gray-900"
+    };
+  };
+
+  const styles = getThemeStyles();
+
   // Loading state
   if (loading || !user || !activeFeature) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800">
+      <div className={`min-h-screen flex items-center justify-center ${styles.loading}`}>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p className="text-white text-lg">Loading Admin Panel...</p>
+          <div className={`animate-spin rounded-full h-12 w-12 border-b-2 ${styles.spinner} mx-auto mb-4`}></div>
+          <p className={`${styles.text} text-lg font-medium`}>Loading Admin Panel...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
+    <div className={`flex h-screen ${styles.container} overflow-hidden transition-colors duration-300`}>
       {/* Sidebar */}
       <AdminSidebar
         activeFeature={activeFeature}
@@ -135,6 +173,7 @@ const AdminPage = () => {
         userRole={user.role}
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
+        theme={theme}
       />
 
       {/* Main Content */}
@@ -161,6 +200,7 @@ const AdminPage = () => {
             }}
             userRole={user.role}
             onFeatureSelect={setActiveFeature}
+            theme={theme}
           />
         </main>
       </div>
