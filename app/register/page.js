@@ -25,7 +25,6 @@ const RegisterPage = () => {
   const [formData, setFormData] = useState({
     username: "",
     password: "",
-    role: "editor",
     email: "",
   });
   const [error, setError] = useState("");

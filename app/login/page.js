@@ -50,18 +50,15 @@ const LoginContent = () => {
     setError("");
 
     try {
-      const res = await fetch(
-        `/api/auth/login`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const res = await fetch(`/api/auth/login`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
       const data = await res.json();
 
@@ -187,7 +184,7 @@ const LoginContent = () => {
                     "focus:border-cyan-500/50 focus:bg-white/10 focus:ring-2 focus:ring-cyan-500/20",
                     "placeholder:text-neutral-500",
                     focusedField === "username" &&
-                      "shadow-lg shadow-cyan-500/10"
+                      "shadow-lg shadow-cyan-500/10",
                   )}
                   placeholder="Enter your username"
                 />
@@ -215,7 +212,7 @@ const LoginContent = () => {
                     "focus:border-cyan-500/50 focus:bg-white/10 focus:ring-2 focus:ring-cyan-500/20",
                     "placeholder:text-neutral-500",
                     focusedField === "password" &&
-                      "shadow-lg shadow-cyan-500/10"
+                      "shadow-lg shadow-cyan-500/10",
                   )}
                   placeholder="Enter your password"
                 />
@@ -232,6 +229,12 @@ const LoginContent = () => {
                   )}
                 </button>
               </div>
+                <button
+                  onClick={() => router.push("/login/reset")}
+                  className="text-blue-600 dark:text-blue-700 hover:text-blue-800 text-sm font-medium mb-2 cursor-pointer relative -right-32"
+                >
+                  Forgot Password ?
+                </button>
             </LabelInputContainer>
 
             {/* Error Message */}
@@ -251,7 +254,7 @@ const LoginContent = () => {
                 "bg-gradient-to-r from-cyan-600 to-indigo-600",
                 "hover:from-cyan-500 hover:to-indigo-500 hover:shadow-xl hover:shadow-cyan-500/25",
                 "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none",
-                "transform hover:scale-[1.02] active:scale-[0.98]"
+                "transform hover:scale-[1.02] active:scale-[0.98]",
               )}
             >
               <span className="relative z-10 flex items-center justify-center gap-2">

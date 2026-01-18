@@ -10,7 +10,8 @@ import {
   FilePlay,
   LayoutDashboard,
   ListCheck,
-  UserLock
+  UserLock,
+  Route,
 } from "lucide-react";
 
 // Import your feature components
@@ -22,11 +23,12 @@ import WeeklyVisitsDashboard from "../features/VisitTracker/WeeklyVisitsDashboar
 import RenderServiceDashboard from "../features/Server/backendHealthCheck";
 import Ipaddress from "../features/IpDatabase/Ipaddress";
 import ConversionPage from "../features/BinaryConverter/ConversionPage";
-import Notepad from "../features/Notepad/Notepad";
+// import Notepad from "../features/Notepad/Notepad";
 import AniListViewer from "../features/anime-list/AniListViewer";
 import DriveVideoPlayer from "../features/DVIDEO/videoPlayer";
 import RBACManagement from "../features/RBAC/page";
 import ActivitiesPage from "../features/Activity/activity";
+import RoutesDashboard from "../features/routeDashboard/page";
 
 export const adminFeatures = {
   dashboard: {
@@ -37,27 +39,28 @@ export const adminFeatures = {
     roles: ["admin"],
     description: "Overview and analytics",
   },
-  RBAC:{
-    title:"RBAC",
-    icon:UserLock,
-    gradient:"from-pink-500 to-teal-500",
-    component:RBACManagement,
-    roles:["admin"],
-    description:"Role Based Access Control"
+  RBAC: {
+    title: "RBAC",
+    icon: UserLock,
+    gradient: "from-pink-500 to-teal-500",
+    component: RBACManagement,
+    roles: ["admin"],
+    description: "Role Based Access Control",
   },
-  activity:{
-    title:"Recent Activities",
-    icon:Activity,
-    gradient:"from-indigo-500 to-blue-500",
+  activity: {
+    title: "Recent Activities",
+    icon: Activity,
+    gradient: "from-indigo-500 to-blue-500",
     component: ActivitiesPage,
-    roles:["admin"],
-    description:"Check Recent Activities"
+    roles: ["admin"],
+    description: "Check Recent Activities",
   },
   projects: {
     title: "Manage Projects",
     icon: Folder,
     gradient: "from-blue-500 to-purple-500",
-    image: "https://res.cloudinary.com/dc1fkirb4/image/upload/v1755754879/a1_cqsx8x.jpg",
+    image:
+      "https://res.cloudinary.com/dc1fkirb4/image/upload/v1755754879/a1_cqsx8x.jpg",
     component: Project,
     roles: ["admin"],
     description: "Upload and manage projects",
@@ -67,7 +70,8 @@ export const adminFeatures = {
     title: "Blog Upload",
     icon: BookOpen,
     gradient: "from-cyan-500 to-blue-500",
-    image: "https://res.cloudinary.com/dc1fkirb4/image/upload/v1756037563/write-a-great-blog-post_ivsbz9.jpg",
+    image:
+      "https://res.cloudinary.com/dc1fkirb4/image/upload/v1756037563/write-a-great-blog-post_ivsbz9.jpg",
     component: BlogUpload,
     roles: ["admin"],
     description: "Create and manage blog posts",
@@ -77,7 +81,8 @@ export const adminFeatures = {
     title: "View Messages",
     icon: MessageSquare,
     gradient: "from-indigo-500 to-blue-500",
-    image: "https://res.cloudinary.com/dc1fkirb4/image/upload/v1755754879/a2_jjgzr3.png",
+    image:
+      "https://res.cloudinary.com/dc1fkirb4/image/upload/v1755754879/a2_jjgzr3.png",
     component: ContactResponse,
     roles: ["admin"],
     description: "View contact form responses",
@@ -87,17 +92,26 @@ export const adminFeatures = {
     title: "Track Portfolio Visits",
     icon: ChartColumn,
     gradient: "from-pink-500 to-teal-500",
-    image: "https://res.cloudinary.com/dc1fkirb4/image/upload/v1765812000/17-what_cc424d55614b9ae928b5_vzjkj1.png",
+    image:
+      "https://res.cloudinary.com/dc1fkirb4/image/upload/v1765812000/17-what_cc424d55614b9ae928b5_vzjkj1.png",
     component: WeeklyVisitsDashboard,
     roles: ["admin"],
     description: "Analytics and visitor tracking",
   },
-
+  routes: {
+    title: "Routes",
+    icon: Route,
+    gradient: "from-purple-500 to-pink-500",
+    component: RoutesDashboard,
+    roles: ["admin"],
+    description: "Routes Discovery",
+  },
   render: {
     title: "Render Health Check",
     icon: Server,
     gradient: "from-blue-500 to-purple-500",
-    image: "https://res.cloudinary.com/dc1fkirb4/image/upload/v1763994657/render-dashboard_qyvptu.png",
+    image:
+      "https://res.cloudinary.com/dc1fkirb4/image/upload/v1763994657/render-dashboard_qyvptu.png",
     component: RenderServiceDashboard,
     roles: ["admin"],
     description: "Monitor backend services",
@@ -107,7 +121,8 @@ export const adminFeatures = {
     title: "IP Addresses",
     icon: Globe,
     gradient: "from-green-500 to-teal-500",
-    image: "https://res.cloudinary.com/dc1fkirb4/image/upload/v1761317160/ip-address-lookup_czcb34.jpg",
+    image:
+      "https://res.cloudinary.com/dc1fkirb4/image/upload/v1761317160/ip-address-lookup_czcb34.jpg",
     component: Ipaddress,
     roles: ["admin"],
     description: "Track IP addresses",
@@ -117,28 +132,29 @@ export const adminFeatures = {
     title: "Binary Converter",
     icon: Binary,
     gradient: "from-pink-500 to-teal-500",
-    image: "https://www.wikihow.com/images/thumb/9/96/Convert-from-Binary-to-Decimal-Step-4-Version-6.jpg/v4-460px-Convert-from-Binary-to-Decimal-Step-4-Version-6.jpg",
+    image:
+      "https://www.wikihow.com/images/thumb/9/96/Convert-from-Binary-to-Decimal-Step-4-Version-6.jpg/v4-460px-Convert-from-Binary-to-Decimal-Step-4-Version-6.jpg",
     component: ConversionPage,
-    roles: ["admin","editor"],
+    roles: ["admin", "viewer"],
     description: "Number system converter",
   },
-  alist:{
-    title:"Anime List",
-    icon:ListCheck,
-    gradient:"from-cyan-500 to-blue-500",
-    image:"",
-    component:AniListViewer,
-    roles:["admin"],
-    description:"Anime List from AniList"
+  alist: {
+    title: "Anime List",
+    icon: ListCheck,
+    gradient: "from-cyan-500 to-blue-500",
+    image: "",
+    component: AniListViewer,
+    roles: ["admin"],
+    description: "Anime List from AniList",
   },
-  dvideo:{
-    title:"Drive Videos",
-    icon:FilePlay,
-    gradient:"from-indigo-500 to-blue-500",
-    image:"",
-    component:DriveVideoPlayer,
-    roles:["admin"],
-    description:"Drive Playable Videos"
+  dvideo: {
+    title: "Drive Videos",
+    icon: FilePlay,
+    gradient: "from-indigo-500 to-blue-500",
+    image: "",
+    component: DriveVideoPlayer,
+    roles: ["admin"],
+    description: "Drive Playable Videos",
   },
 
   // notepad: {
