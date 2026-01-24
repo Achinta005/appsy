@@ -8,7 +8,7 @@ const usePortfolioApi = () => {
     // Admin
     Ai_enhance: async (plainText) => {
       const response = await apiFetch(
-        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/admin/ai-enhance`,
+        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/ai-enhance`,
         {
           method: "POST",
           headers: {
@@ -22,7 +22,7 @@ const usePortfolioApi = () => {
 
     Upload_blog: async (formData) => {
       const response = await apiFetch(
-        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/admin/upload_blog`,
+        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/upload_blog`,
         {
           method: "POST",
           headers: {
@@ -37,7 +37,7 @@ const usePortfolioApi = () => {
     // Post Notepad Documents
     Notepad: async (title, content, user) => {
       const response = await apiFetch(
-        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/admin/create_documents`,
+        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/create_documents`,
         {
           method: "POST",
           headers: {
@@ -52,7 +52,7 @@ const usePortfolioApi = () => {
     // Fetch User Notepad Documents
     FetchNotepadDocs: async (user) => {
       const response = await apiFetch(
-        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/admin/fetch_documents`,
+        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/fetch_documents`,
         {
           method: "POST",
           headers: {

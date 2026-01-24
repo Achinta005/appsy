@@ -27,19 +27,19 @@ const DATA_SOURCES = {
     transform: (data) => data,
   },
   projects: {
-    endpoint: `${process.env.NEXT_PUBLIC_SERVER_API_URL}/project/projects/count`,
+    endpoint: `${process.env.NEXT_PUBLIC_SERVER_API_URL}/project/count`,
     method: "fetch",
     pollInterval: 30000,
     transform: (data) => data,
   },
   blogPosts: {
-    endpoint: `${process.env.NEXT_PUBLIC_SERVER_API_URL}/admin/blogs/count`,
+    endpoint: `${process.env.NEXT_PUBLIC_SERVER_API_URL}/blogs/count`,
     method: "fetch",
     pollInterval: 30000,
     transform: (data) => data,
   },
   messages: {
-    endpoint: `${process.env.NEXT_PUBLIC_SERVER_API_URL}/contact/contacts/count`,
+    endpoint: `${process.env.NEXT_PUBLIC_SERVER_API_URL}/contact/count`,
     method: "fetch",
     pollInterval: 30000,
     transform: (data) => data,

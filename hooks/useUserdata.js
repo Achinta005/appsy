@@ -21,7 +21,7 @@ export default function useUserProfile(options = {}) {
   const fetchProfileImage = async () => {
     try {
       const res = await apiFetch(
-        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/users/setting/image`
+        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/setting/image`
       );
       const data = await res.json();
       
@@ -47,7 +47,7 @@ export default function useUserProfile(options = {}) {
       setError(null);
 
       const response = await apiFetch(
-        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/users/setting`,
+        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/setting`,
         {
           method: "GET",
         }
@@ -107,7 +107,7 @@ export default function useUserProfile(options = {}) {
   const updateUserProfile = async (updates) => {
     try {
       const response = await apiFetch(
-        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/users/setting/update`,
+        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/setting/update`,
         {
           method: "PATCH",
           headers: {
@@ -171,7 +171,7 @@ export default function useUserProfile(options = {}) {
       formData.append("profilePic", imageBlob, "profile.jpg");
 
       const res = await apiFetch(
-        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/users/setting/image/update`,
+        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/setting/image/update`,
         {
           method: "POST",
           body: formData,

@@ -86,7 +86,7 @@ export default function AniListViewer() {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/alist/anilist/BaseFunction/fetch`,
+        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/anime/fetch`,
         {
           method: "POST",
           headers: {
@@ -127,7 +127,7 @@ export default function AniListViewer() {
     setExporting(true);
     try {
       const res = await apiFetch(
-        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/alist/anilist/BaseFunction/fetch`,
+        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/anime/fetch`,
         {
           method: "POST",
           headers: {

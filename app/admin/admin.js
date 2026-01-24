@@ -71,7 +71,7 @@ const AdminPage = () => {
 
       try {
         const data = await apiFetch(
-          `${process.env.NEXT_PUBLIC_SERVER_API_URL}/admin/get-ip`,
+          `${process.env.NEXT_PUBLIC_SERVER_API_URL}/get-ip`,
           {
             method: "POST",
             headers: {

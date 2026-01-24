@@ -61,7 +61,6 @@ export default function RBACManagement() {
       if (!response.ok) throw new Error("Failed to fetch users");
 
       const data = await response.json();
-      console.log(data);
       setUsers(data);
       setError(null);
     } catch (err) {

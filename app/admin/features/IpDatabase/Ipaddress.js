@@ -30,7 +30,7 @@ const Ipaddress = () => {
     const getIps = async () => {
       try {
         const response = await apiFetch(
-          `${process.env.NEXT_PUBLIC_SERVER_API_URL}/admin/view-ip`
+          `${process.env.NEXT_PUBLIC_SERVER_API_URL}/view-ip`
         );
         
         if (!response.ok) {
@@ -70,7 +70,7 @@ const Ipaddress = () => {
   const handleDelete = async (ipId) => {
     try {
       const response = await apiFetch(
-        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/admin/delete-ip/${ipId}`,
+        `${process.env.NEXT_PUBLIC_SERVER_API_URL}/delete-ip/${ipId}`,
         {
           method: "DELETE",
         }

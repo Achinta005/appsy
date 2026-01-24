@@ -28,7 +28,7 @@ import AniListViewer from "../features/anime-list/AniListViewer";
 import DriveVideoPlayer from "../features/DVIDEO/videoPlayer";
 import RBACManagement from "../features/RBAC/page";
 import ActivitiesPage from "../features/Activity/activity";
-import RoutesDashboard from "../features/routeDashboard/page";
+import CombinedDashboard from "../features/routeDashboard/page";
 
 export const adminFeatures = {
   dashboard: {
@@ -102,7 +102,7 @@ export const adminFeatures = {
     title: "Routes",
     icon: Route,
     gradient: "from-purple-500 to-pink-500",
-    component: RoutesDashboard,
+    component: CombinedDashboard,
     roles: ["admin"],
     description: "Routes Discovery",
   },
