@@ -87,7 +87,7 @@ export default function AdminSidebar({
       {/* Sidebar */}
       <aside
         className={`
-          fixed lg:sticky top-0 left-0 h-screen w-72
+          fixed lg:sticky top-0 left-0 h-screen w-64
           ${sidebarBg} 
           border-r ${borderColor} flex flex-col transition-all duration-300 z-40
           ${
