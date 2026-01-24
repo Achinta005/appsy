@@ -27,23 +27,41 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const StatCard = ({ icon: Icon, title, value, gradient, isLoading, error, theme }) => {
+const StatCard = ({
+  icon: Icon,
+  title,
+  value,
+  gradient,
+  isLoading,
+  error,
+  theme,
+}) => {
   const isDark = theme === "dark";
-  const cardBg = isDark ? "bg-white/10 border-white/20 hover:border-white/30" : "bg-white border-gray-200 hover:border-purple-300";
+  const cardBg = isDark
+    ? "bg-white/10 border-white/20 hover:border-white/30"
+    : "bg-white border-gray-200 hover:border-purple-300";
   const textPrimary = isDark ? "text-white" : "text-gray-900";
   const textMuted = isDark ? "text-gray-400" : "text-gray-600";
   const valueColor = isDark ? "text-emerald-400" : "text-emerald-600";
   const errorColor = isDark ? "text-red-400" : "text-red-600";
 
   return (
-    <div className={`${cardBg} backdrop-blur-lg rounded-xl p-4 border transition-all duration-300 shadow-sm hover:shadow-md group`}>
+    <div
+      className={`${cardBg} backdrop-blur-lg rounded-xl p-4 border transition-all duration-300 shadow-sm hover:shadow-md group`}
+    >
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
             <div className={`p-2 rounded-lg ${gradient} bg-opacity-10`}>
-              <Icon className={`w-4 h-4 ${isDark ? 'text-white' : 'text-gray-700'}`} />
+              <Icon
+                className={`w-4 h-4 ${isDark ? "text-white" : "text-gray-700"}`}
+              />
             </div>
-            <p className={`text-xs font-medium ${textMuted} uppercase tracking-wide`}>{title}</p>
+            <p
+              className={`text-xs font-medium ${textMuted} uppercase tracking-wide`}
+            >
+              {title}
+            </p>
           </div>
           {isLoading ? (
             <div className="flex items-center gap-2 mt-1">
@@ -51,7 +69,9 @@ const StatCard = ({ icon: Icon, title, value, gradient, isLoading, error, theme 
               <span className={`text-sm ${textMuted}`}>Loading...</span>
             </div>
           ) : error ? (
-            <span className={`text-sm ${errorColor} font-medium`}>Failed to load</span>
+            <span className={`text-sm ${errorColor} font-medium`}>
+              Failed to load
+            </span>
           ) : (
             <h3 className={`text-2xl font-bold ${valueColor} tabular-nums`}>
               {value?.toLocaleString() || 0}
@@ -65,7 +85,9 @@ const StatCard = ({ icon: Icon, title, value, gradient, isLoading, error, theme 
 
 const ServiceStatusCard = ({ service, checking, theme }) => {
   const isDark = theme === "dark";
-  const cardBg = isDark ? "bg-white/10 border-white/20" : "bg-white border-gray-200";
+  const cardBg = isDark
+    ? "bg-white/10 border-white/20"
+    : "bg-white border-gray-200";
   const textPrimary = isDark ? "text-white" : "text-gray-900";
   const textMuted = isDark ? "text-gray-400" : "text-gray-600";
 
@@ -76,7 +98,9 @@ const ServiceStatusCard = ({ service, checking, theme }) => {
   };
 
   return (
-    <div className={`${cardBg} backdrop-blur-lg rounded-lg p-3 border transition-all shadow-sm`}>
+    <div
+      className={`${cardBg} backdrop-blur-lg rounded-lg p-3 border transition-all shadow-sm`}
+    >
       <div className="flex items-center justify-between gap-3">
         <div className="flex-1 min-w-0">
           <p className={`text-sm font-medium ${textPrimary} truncate`}>
@@ -107,7 +131,9 @@ const ServiceStatusCard = ({ service, checking, theme }) => {
 
 const VisitsGraph = ({ visits, loading, theme }) => {
   const isDark = theme === "dark";
-  const cardBg = isDark ? "bg-white/10 border-white/20" : "bg-white border-gray-200";
+  const cardBg = isDark
+    ? "bg-white/10 border-white/20"
+    : "bg-white border-gray-200";
   const textPrimary = isDark ? "text-white" : "text-gray-900";
   const textMuted = isDark ? "text-gray-400" : "text-gray-600";
   const textSecondary = isDark ? "text-gray-300" : "text-gray-700";
@@ -132,19 +158,27 @@ const VisitsGraph = ({ visits, loading, theme }) => {
     : [];
 
   return (
-    <div className={`${cardBg} backdrop-blur-lg rounded-xl p-6 border transition-all shadow-sm h-full flex flex-col`}>
+    <div
+      className={`${cardBg} backdrop-blur-lg rounded-xl p-6 border transition-all shadow-sm h-full flex flex-col`}
+    >
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 bg-opacity-10">
             <TrendingUp className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h2 className={`text-xl font-bold ${textPrimary}`}>Visits Overview</h2>
-            <p className={`text-xs ${textMuted} mt-0.5`}>Weekly traffic analytics</p>
+            <h2 className={`text-xl font-bold ${textPrimary}`}>
+              Visits Overview
+            </h2>
+            <p className={`text-xs ${textMuted} mt-0.5`}>
+              Weekly traffic analytics
+            </p>
           </div>
         </div>
         {loading && (
-          <div className={`flex items-center gap-2 text-sm ${textMuted} bg-blue-500/10 px-3 py-1.5 rounded-full`}>
+          <div
+            className={`flex items-center gap-2 text-sm ${textMuted} bg-blue-500/10 px-3 py-1.5 rounded-full`}
+          >
             <Loader2 className="w-4 h-4 animate-spin" />
             <span>Updating...</span>
           </div>
@@ -155,11 +189,15 @@ const VisitsGraph = ({ visits, loading, theme }) => {
         <div className="flex items-center justify-center gap-8 mb-4">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-blue-500 shadow-lg"></div>
-            <span className={`text-sm font-medium ${textSecondary}`}>Total Visits</span>
+            <span className={`text-sm font-medium ${textSecondary}`}>
+              Total Visits
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-lg"></div>
-            <span className={`text-sm font-medium ${textSecondary}`}>Unique IPs</span>
+            <span className={`text-sm font-medium ${textSecondary}`}>
+              Unique IPs
+            </span>
           </div>
         </div>
       )}
@@ -171,15 +209,19 @@ const VisitsGraph = ({ visits, loading, theme }) => {
               data={chartData}
               margin={{ top: 5, right: 30, left: 10, bottom: 5 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} opacity={0.5} />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke={gridColor}
+                opacity={0.5}
+              />
               <XAxis
                 dataKey="week"
                 tick={{ fill: isDark ? "#94a3b8" : "#64748b", fontSize: 12 }}
                 tickFormatter={formatWeekLabel}
                 stroke={gridColor}
               />
-              <YAxis 
-                tick={{ fill: isDark ? "#94a3b8" : "#64748b", fontSize: 12 }} 
+              <YAxis
+                tick={{ fill: isDark ? "#94a3b8" : "#64748b", fontSize: 12 }}
                 stroke={gridColor}
               />
               <Tooltip
@@ -215,11 +257,15 @@ const VisitsGraph = ({ visits, loading, theme }) => {
             </LineChart>
           </ResponsiveContainer>
         ) : (
-          <div className={`h-full flex items-center justify-center ${noDataText}`}>
+          <div
+            className={`h-full flex items-center justify-center ${noDataText}`}
+          >
             <div className="text-center">
               <Activity className="w-16 h-16 mx-auto mb-3 opacity-30" />
               <p className="text-sm font-medium">No visit data available</p>
-              <p className="text-xs mt-1 opacity-70">Data will appear here once tracked</p>
+              <p className="text-xs mt-1 opacity-70">
+                Data will appear here once tracked
+              </p>
             </div>
           </div>
         )}
@@ -256,20 +302,32 @@ export default function DashboardHome({ onFeatureSelect }) {
   }, []);
 
   const isDark = theme === "dark";
-  
+
   const bgGradient = isDark
     ? "from-slate-950 via-purple-950 to-slate-950"
     : "from-blue-50 via-purple-50 to-pink-50";
-  const cardBg = isDark ? "bg-white/10 border-white/20" : "bg-white border-gray-200";
+  const cardBg = isDark
+    ? "bg-white/10 border-white/20"
+    : "bg-white border-gray-200";
   const textPrimary = isDark ? "text-white" : "text-gray-900";
   const textMuted = isDark ? "text-gray-400" : "text-gray-600";
-  const activityBg = isDark ? "bg-white/5 hover:bg-white/10" : "bg-gray-50 hover:bg-gray-100";
-  const errorBg = isDark ? "bg-red-500/20 border-red-500/50 text-red-300" : "bg-red-50 border-red-300 text-red-700";
+  const activityBg = isDark
+    ? "bg-white/5 hover:bg-white/10"
+    : "bg-gray-50 hover:bg-gray-100";
+  const errorBg = isDark
+    ? "bg-red-500/20 border-red-500/50 text-red-300"
+    : "bg-red-50 border-red-300 text-red-700";
   const noActivityText = isDark ? "text-gray-400" : "text-gray-500";
-  
-  const scrollbarTrack = isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(139, 92, 246, 0.1)";
-  const scrollbarThumb = isDark ? "rgba(255, 255, 255, 0.2)" : "rgba(139, 92, 246, 0.3)";
-  const scrollbarThumbHover = isDark ? "rgba(255, 255, 255, 0.3)" : "rgba(139, 92, 246, 0.5)";
+
+  const scrollbarTrack = isDark
+    ? "rgba(255, 255, 255, 0.05)"
+    : "rgba(139, 92, 246, 0.1)";
+  const scrollbarThumb = isDark
+    ? "rgba(255, 255, 255, 0.2)"
+    : "rgba(139, 92, 246, 0.3)";
+  const scrollbarThumbHover = isDark
+    ? "rgba(255, 255, 255, 0.3)"
+    : "rgba(139, 92, 246, 0.5)";
 
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
@@ -294,6 +352,13 @@ export default function DashboardHome({ onFeatureSelect }) {
       MESSAGE_RECEIVED: "bg-emerald-500",
       BLOG_PUBLISHED: "bg-pink-500",
       USER_REGISTERED: "bg-amber-500",
+      ANIME_ADDED: "bg-indigo-500",
+      ANIME_UPDATED: "bg-violet-500",
+      NEW_IP_ADDED: "bg-cyan-500",
+      ROLE_UPDATE: "bg-orange-500",
+      CONTACT_POST: "bg-teal-500",
+      IP_DELETE: "bg-red-500",
+      NEW_VISITOR: "bg-green-500",
     };
     return colors[type] || "bg-gray-500";
   };
@@ -301,7 +366,9 @@ export default function DashboardHome({ onFeatureSelect }) {
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Animated Background Layer */}
-      <div className={`fixed inset-0 bg-gradient-to-br ${bgGradient} transition-all duration-300`}>
+      <div
+        className={`fixed inset-0 bg-gradient-to-br ${bgGradient} transition-all duration-300`}
+      >
         {isDark && (
           <>
             <div
@@ -329,7 +396,9 @@ export default function DashboardHome({ onFeatureSelect }) {
             backgroundSize: "50px 50px",
           }}
         ></div>
-        <div className={`absolute inset-0 ${isDark ? 'bg-gradient-to-t from-slate-900/50 to-transparent' : 'bg-gradient-to-t from-white/30 to-transparent'}`}></div>
+        <div
+          className={`absolute inset-0 ${isDark ? "bg-gradient-to-t from-slate-900/50 to-transparent" : "bg-gradient-to-t from-white/30 to-transparent"}`}
+        ></div>
       </div>
 
       {/* Main Content Container */}
@@ -387,14 +456,22 @@ export default function DashboardHome({ onFeatureSelect }) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           {/* Visits Graph - 2 columns */}
           <div className="lg:col-span-2 h-[450px]">
-            <VisitsGraph visits={data.allVisits} loading={loading.allVisits} theme={theme} />
+            <VisitsGraph
+              visits={data.allVisits}
+              loading={loading.allVisits}
+              theme={theme}
+            />
           </div>
 
           {/* Right Sidebar - 1 column */}
           <div className="space-y-4">
             {/* Service Status */}
-            <div className={`${cardBg} backdrop-blur-lg rounded-xl p-5 border transition-all shadow-sm`}>
-              <h3 className={`text-base font-bold ${textPrimary} mb-4 flex items-center gap-2`}>
+            <div
+              className={`${cardBg} backdrop-blur-lg rounded-xl p-5 border transition-all shadow-sm`}
+            >
+              <h3
+                className={`text-base font-bold ${textPrimary} mb-4 flex items-center gap-2`}
+              >
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
                 Service Status
               </h3>
@@ -411,8 +488,12 @@ export default function DashboardHome({ onFeatureSelect }) {
             </div>
 
             {/* Quick Actions */}
-            <div className={`${cardBg} backdrop-blur-lg rounded-xl p-5 border transition-all shadow-sm`}>
-              <h3 className={`text-base font-bold ${textPrimary} mb-4 flex items-center gap-2`}>
+            <div
+              className={`${cardBg} backdrop-blur-lg rounded-xl p-5 border transition-all shadow-sm`}
+            >
+              <h3
+                className={`text-base font-bold ${textPrimary} mb-4 flex items-center gap-2`}
+              >
                 <Activity className="w-4 h-4" />
                 Quick Actions
               </h3>
@@ -433,7 +514,9 @@ export default function DashboardHome({ onFeatureSelect }) {
                 </button>
                 <button
                   className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:shadow-lg transition-all transform hover:-translate-y-0.5 flex items-center justify-between group"
-                  onClick={() => onFeatureSelect && onFeatureSelect("visitTracker")}
+                  onClick={() =>
+                    onFeatureSelect && onFeatureSelect("visitTracker")
+                  }
                 >
                   <span>Check Analytics</span>
                   <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
@@ -444,15 +527,21 @@ export default function DashboardHome({ onFeatureSelect }) {
         </div>
 
         {/* Recent Activity Feed - Full Width */}
-        <div className={`${cardBg} backdrop-blur-lg rounded-xl p-6 border transition-all shadow-sm`}>
+        <div
+          className={`${cardBg} backdrop-blur-lg rounded-xl p-6 border transition-all shadow-sm`}
+        >
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 bg-opacity-10">
                 <Activity className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h2 className={`text-xl font-bold ${textPrimary}`}>Recent Activity</h2>
-                <p className={`text-xs ${textMuted} mt-0.5`}>Real-time activity feed</p>
+                <h2 className={`text-xl font-bold ${textPrimary}`}>
+                  Recent Activity
+                </h2>
+                <p className={`text-xs ${textMuted} mt-0.5`}>
+                  Real-time activity feed
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -488,21 +577,25 @@ export default function DashboardHome({ onFeatureSelect }) {
               <div className={`text-center py-12 ${noActivityText}`}>
                 <Activity className="w-16 h-16 mx-auto mb-3 opacity-30" />
                 <p className="text-sm font-medium">No recent activity</p>
-                <p className="text-xs mt-1 opacity-70">Activity will appear here in real-time</p>
+                <p className="text-xs mt-1 opacity-70">
+                  Activity will appear here in real-time
+                </p>
               </div>
             ) : (
               activities.map((activity, index) => (
                 <div
                   key={`${activity.id}-${index}`}
-                  className={`flex items-center gap-4 p-3.5 ${activityBg} rounded-xl transition-all animate-slideIn border ${isDark ? 'border-white/5' : 'border-gray-200'}`}
+                  className={`flex items-center gap-4 p-3.5 ${activityBg} rounded-xl transition-all animate-slideIn border ${isDark ? "border-white/5" : "border-gray-200"}`}
                 >
                   <div
                     className={`w-2 h-2 rounded-full ${getActivityColor(
-                      activity.type
+                      activity.type,
                     )} flex-shrink-0 shadow-lg`}
                   />
                   <div className="flex-1 min-w-0">
-                    <p className={`${textPrimary} text-sm font-medium truncate`}>
+                    <p
+                      className={`${textPrimary} text-sm font-medium truncate`}
+                    >
                       {activity.action}
                     </p>
                     <p className={`${textMuted} text-xs mt-0.5`}>
