@@ -13,9 +13,9 @@ import {
   Loader2,
   RefreshCw,
   TrendingUp,
-  Activity as ActivityIcon,
   Wifi,
   WifiOff,
+  ArrowUpRight,
 } from "lucide-react";
 import {
   LineChart,
@@ -29,31 +29,34 @@ import {
 
 const StatCard = ({ icon: Icon, title, value, gradient, isLoading, error, theme }) => {
   const isDark = theme === "dark";
-  const cardBg = isDark ? "bg-white/10 border-white/20 hover:border-white/40" : "bg-white border-purple-200 hover:border-purple-400";
+  const cardBg = isDark ? "bg-white/10 border-white/20 hover:border-white/30" : "bg-white border-gray-200 hover:border-purple-300";
   const textPrimary = isDark ? "text-white" : "text-gray-900";
   const textMuted = isDark ? "text-gray-400" : "text-gray-600";
-  const valueColor = isDark ? "text-green-500" : "text-green-600";
+  const valueColor = isDark ? "text-emerald-400" : "text-emerald-600";
   const errorColor = isDark ? "text-red-400" : "text-red-600";
 
   return (
-    <div className={`${cardBg} backdrop-blur-lg rounded-lg p-3 border transition-all shadow-lg`}>
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 flex-1">
-          <div className="flex-1 min-w-0">
-            <p className={`text-sm font-serif ${textPrimary} truncate`}>{title}</p>
-            {isLoading ? (
-              <div className="flex items-center gap-1 mt-0.5">
-                <Loader2 className={`w-3 h-3 ${textPrimary} animate-spin`} />
-                <span className={`text-xs ${textMuted}`}>...</span>
-              </div>
-            ) : error ? (
-              <span className={`text-xs ${errorColor}`}>Error</span>
-            ) : (
-              <h3 className={`text-sm font-bold ${valueColor} font-mono`}>
-                {value || 0}
-              </h3>
-            )}
+    <div className={`${cardBg} backdrop-blur-lg rounded-xl p-4 border transition-all duration-300 shadow-sm hover:shadow-md group`}>
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-2">
+            <div className={`p-2 rounded-lg ${gradient} bg-opacity-10`}>
+              <Icon className={`w-4 h-4 ${isDark ? 'text-white' : 'text-gray-700'}`} />
+            </div>
+            <p className={`text-xs font-medium ${textMuted} uppercase tracking-wide`}>{title}</p>
           </div>
+          {isLoading ? (
+            <div className="flex items-center gap-2 mt-1">
+              <Loader2 className={`w-4 h-4 ${textPrimary} animate-spin`} />
+              <span className={`text-sm ${textMuted}`}>Loading...</span>
+            </div>
+          ) : error ? (
+            <span className={`text-sm ${errorColor} font-medium`}>Failed to load</span>
+          ) : (
+            <h3 className={`text-2xl font-bold ${valueColor} tabular-nums`}>
+              {value?.toLocaleString() || 0}
+            </h3>
+          )}
         </div>
       </div>
     </div>
@@ -62,41 +65,41 @@ const StatCard = ({ icon: Icon, title, value, gradient, isLoading, error, theme 
 
 const ServiceStatusCard = ({ service, checking, theme }) => {
   const isDark = theme === "dark";
-  const cardBg = isDark ? "bg-white/10 border-white/20 hover:border-white/40" : "bg-white border-purple-200 hover:border-purple-400";
+  const cardBg = isDark ? "bg-white/10 border-white/20" : "bg-white border-gray-200";
   const textPrimary = isDark ? "text-white" : "text-gray-900";
   const textMuted = isDark ? "text-gray-400" : "text-gray-600";
 
   const getStatusColor = () => {
     if (checking) return "bg-yellow-500";
     if (!service) return "bg-gray-500";
-    return service.status === "operational" ? "bg-green-500" : "bg-red-500";
+    return service.status === "operational" ? "bg-emerald-500" : "bg-red-500";
   };
 
   return (
-    <div className={`${cardBg} backdrop-blur-lg rounded-lg p-3 border transition-all shadow-lg`}>
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 flex-1">
-          <div className="flex-1 min-w-0">
-            <p className={`text-sm font-serif ${textPrimary} truncate`}>
-              {service?.name || "Service"}
+    <div className={`${cardBg} backdrop-blur-lg rounded-lg p-3 border transition-all shadow-sm`}>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          <p className={`text-sm font-medium ${textPrimary} truncate`}>
+            {service?.name || "Service"}
+          </p>
+          {checking ? (
+            <div className="flex items-center gap-1.5 mt-1">
+              <Loader2 className={`w-3 h-3 ${textMuted} animate-spin`} />
+              <span className={`text-xs ${textMuted}`}>Checking...</span>
+            </div>
+          ) : (
+            <p className={`text-xs ${textMuted} capitalize mt-1`}>
+              {service?.type || "Unknown"}
             </p>
-            {checking ? (
-              <div className="flex items-center gap-1 mt-0.5">
-                <Loader2 className={`w-3 h-3 ${textPrimary} animate-spin`} />
-                <span className={`text-xs ${textMuted}`}>Checking...</span>
-              </div>
-            ) : (
-              <h3 className={`text-xs ${textMuted} font-mono capitalize`}>
-                {service?.type || "Unknown"}
-              </h3>
-            )}
-          </div>
+          )}
         </div>
-        <div
-          className={`w-2 h-2 rounded-full ${getStatusColor()} ${
-            checking ? "animate-pulse" : ""
-          } flex-shrink-0`}
-        />
+        <div className="flex items-center gap-2">
+          <div
+            className={`w-2.5 h-2.5 rounded-full ${getStatusColor()} ${
+              checking ? "animate-pulse" : ""
+            } shadow-lg`}
+          />
+        </div>
       </div>
     </div>
   );
@@ -104,7 +107,7 @@ const ServiceStatusCard = ({ service, checking, theme }) => {
 
 const VisitsGraph = ({ visits, loading, theme }) => {
   const isDark = theme === "dark";
-  const cardBg = isDark ? "bg-white/10 border-white/20" : "bg-white border-purple-200";
+  const cardBg = isDark ? "bg-white/10 border-white/20" : "bg-white border-gray-200";
   const textPrimary = isDark ? "text-white" : "text-gray-900";
   const textMuted = isDark ? "text-gray-400" : "text-gray-600";
   const textSecondary = isDark ? "text-gray-300" : "text-gray-700";
@@ -129,84 +132,98 @@ const VisitsGraph = ({ visits, loading, theme }) => {
     : [];
 
   return (
-    <div className={`${cardBg} backdrop-blur-lg rounded-xl p-5 border h-2/3 transition-all shadow-lg`}>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className={`text-lg font-bold ${textPrimary} flex items-center gap-2`}>
-          <TrendingUp className="w-5 h-5 text-blue-500" />
-          Visits Overview
-        </h2>
-        {loading && (
-          <div className={`flex items-center gap-2 text-sm ${textMuted}`}>
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Updating...
+    <div className={`${cardBg} backdrop-blur-lg rounded-xl p-6 border transition-all shadow-sm h-full flex flex-col`}>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 bg-opacity-10">
+            <TrendingUp className="w-5 h-5 text-white" />
           </div>
-        )}
-        {chartData.length > 0 && (
-          <div className={`mt-4 flex items-center justify-center gap-6 text-sm mr-10`}>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-              <span className={textSecondary}>Total Visits</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-green-500"></div>
-              <span className={textSecondary}>Unique IPs</span>
-            </div>
+          <div>
+            <h2 className={`text-xl font-bold ${textPrimary}`}>Visits Overview</h2>
+            <p className={`text-xs ${textMuted} mt-0.5`}>Weekly traffic analytics</p>
+          </div>
+        </div>
+        {loading && (
+          <div className={`flex items-center gap-2 text-sm ${textMuted} bg-blue-500/10 px-3 py-1.5 rounded-full`}>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span>Updating...</span>
           </div>
         )}
       </div>
 
-      {chartData.length > 0 ? (
-        <ResponsiveContainer width="100%" height={240}>
-          <LineChart
-            data={chartData}
-            margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-            <XAxis
-              dataKey="week"
-              tick={{ fill: isDark ? "#94a3b8" : "#64748b", fontSize: 12 }}
-              tickFormatter={formatWeekLabel}
-            />
-            <YAxis tick={{ fill: isDark ? "#94a3b8" : "#64748b", fontSize: 12 }} />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: tooltipBg,
-                border: `1px solid ${tooltipBorder}`,
-                borderRadius: "8px",
-                color: tooltipText,
-              }}
-              labelFormatter={(label) => `Week ${label.split("-W")[1]}`}
-              formatter={(value, name) => [
-                value,
-                name === "visits" ? "Visits" : "Unique IPs",
-              ]}
-            />
-            <Line
-              type="monotone"
-              dataKey="visits"
-              stroke="#3b82f6"
-              strokeWidth={3}
-              dot={{ fill: "#3b82f6", r: 4 }}
-              activeDot={{ r: 6 }}
-            />
-            <Line
-              type="monotone"
-              dataKey="uniqueIPs"
-              stroke="#10b981"
-              strokeWidth={2}
-              dot={{ fill: "#10b981", r: 3 }}
-              activeDot={{ r: 5 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      ) : (
-        <div className={`h-[240px] flex items-center justify-center ${noDataText}`}>
-          <div className="text-center">
-            <Activity className="w-12 h-12 mx-auto mb-2 opacity-50" />
-            <p>No visit data available</p>
+      {chartData.length > 0 && (
+        <div className="flex items-center justify-center gap-8 mb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-blue-500 shadow-lg"></div>
+            <span className={`text-sm font-medium ${textSecondary}`}>Total Visits</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-lg"></div>
+            <span className={`text-sm font-medium ${textSecondary}`}>Unique IPs</span>
           </div>
         </div>
       )}
+
+      <div className="flex-1 min-h-0">
+        {chartData.length > 0 ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={chartData}
+              margin={{ top: 5, right: 30, left: 10, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} opacity={0.5} />
+              <XAxis
+                dataKey="week"
+                tick={{ fill: isDark ? "#94a3b8" : "#64748b", fontSize: 12 }}
+                tickFormatter={formatWeekLabel}
+                stroke={gridColor}
+              />
+              <YAxis 
+                tick={{ fill: isDark ? "#94a3b8" : "#64748b", fontSize: 12 }} 
+                stroke={gridColor}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: tooltipBg,
+                  border: `1px solid ${tooltipBorder}`,
+                  borderRadius: "12px",
+                  color: tooltipText,
+                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                }}
+                labelFormatter={(label) => `Week ${label.split("-W")[1]}`}
+                formatter={(value, name) => [
+                  value,
+                  name === "visits" ? "Visits" : "Unique IPs",
+                ]}
+              />
+              <Line
+                type="monotone"
+                dataKey="visits"
+                stroke="#3b82f6"
+                strokeWidth={3}
+                dot={{ fill: "#3b82f6", r: 4 }}
+                activeDot={{ r: 6 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="uniqueIPs"
+                stroke="#10b981"
+                strokeWidth={2}
+                dot={{ fill: "#10b981", r: 3 }}
+                activeDot={{ r: 5 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className={`h-full flex items-center justify-center ${noDataText}`}>
+            <div className="text-center">
+              <Activity className="w-16 h-16 mx-auto mb-3 opacity-30" />
+              <p className="text-sm font-medium">No visit data available</p>
+              <p className="text-xs mt-1 opacity-70">Data will appear here once tracked</p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -224,7 +241,6 @@ export default function DashboardHome({ onFeatureSelect }) {
   } = useDashboardData();
   const { activities, isConnected, error, refresh } = useActivityStream();
 
-  // Initialize and listen for theme changes
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") || "light";
     setTheme(savedTheme);
@@ -241,14 +257,13 @@ export default function DashboardHome({ onFeatureSelect }) {
 
   const isDark = theme === "dark";
   
-  // Theme-based styles
   const bgGradient = isDark
     ? "from-slate-950 via-purple-950 to-slate-950"
     : "from-blue-50 via-purple-50 to-pink-50";
-  const cardBg = isDark ? "bg-white/10 border-white/20" : "bg-white border-purple-200";
+  const cardBg = isDark ? "bg-white/10 border-white/20" : "bg-white border-gray-200";
   const textPrimary = isDark ? "text-white" : "text-gray-900";
   const textMuted = isDark ? "text-gray-400" : "text-gray-600";
-  const activityBg = isDark ? "bg-white/5 hover:bg-white/10" : "bg-purple-50 hover:bg-purple-100";
+  const activityBg = isDark ? "bg-white/5 hover:bg-white/10" : "bg-gray-50 hover:bg-gray-100";
   const errorBg = isDark ? "bg-red-500/20 border-red-500/50 text-red-300" : "bg-red-50 border-red-300 text-red-700";
   const noActivityText = isDark ? "text-gray-400" : "text-gray-500";
   
@@ -256,7 +271,6 @@ export default function DashboardHome({ onFeatureSelect }) {
   const scrollbarThumb = isDark ? "rgba(255, 255, 255, 0.2)" : "rgba(139, 92, 246, 0.3)";
   const scrollbarThumbHover = isDark ? "rgba(255, 255, 255, 0.3)" : "rgba(139, 92, 246, 0.5)";
 
-  // Format timestamp
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
     const now = new Date();
@@ -275,13 +289,13 @@ export default function DashboardHome({ onFeatureSelect }) {
 
   const getActivityColor = (type) => {
     const colors = {
-      PROJECT_CREATED: "bg-blue-400",
-      PROJECT_UPDATED: "bg-purple-400",
-      MESSAGE_RECEIVED: "bg-green-400",
-      BLOG_PUBLISHED: "bg-pink-400",
-      USER_REGISTERED: "bg-yellow-400",
+      PROJECT_CREATED: "bg-blue-500",
+      PROJECT_UPDATED: "bg-purple-500",
+      MESSAGE_RECEIVED: "bg-emerald-500",
+      BLOG_PUBLISHED: "bg-pink-500",
+      USER_REGISTERED: "bg-amber-500",
     };
-    return colors[type] || "bg-gray-400";
+    return colors[type] || "bg-gray-500";
   };
 
   return (
@@ -319,165 +333,187 @@ export default function DashboardHome({ onFeatureSelect }) {
       </div>
 
       {/* Main Content Container */}
-      <div className="relative z-10 space-y-4 p-6 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-          {/* Stats Grid - Left Column */}
-          <div className="lg:col-span-1 space-y-2">
-            <StatCard
-              icon={Users}
-              title="Total Users"
-              value={data.users}
-              gradient="from-blue-500 to-purple-500"
-              isLoading={loading.users}
-              error={errors.users}
-              theme={theme}
-            />
-            <StatCard
-              icon={FolderOpen}
-              title="Projects"
-              value={data.projects}
-              gradient="from-green-500 to-teal-500"
-              isLoading={loading.projects}
-              error={errors.projects}
-              theme={theme}
-            />
-            <StatCard
-              icon={FileText}
-              title="Blog Posts"
-              value={data.blogPosts}
-              gradient="from-purple-500 to-pink-500"
-              isLoading={loading.blogPosts}
-              error={errors.blogPosts}
-              theme={theme}
-            />
-            <StatCard
-              icon={MessageSquare}
-              title="Messages"
-              value={data.messages}
-              gradient="from-orange-500 to-red-500"
-              isLoading={loading.messages}
-              error={errors.messages}
-              theme={theme}
-            />
-            <StatCard
-              icon={Eye}
-              title="This Week"
-              value={data.weeklyVisits}
-              gradient="from-pink-500 to-rose-500"
-              isLoading={loading.weeklyVisits}
-              error={errors.weeklyVisits}
-              theme={theme}
-            />
+      <div className="relative z-10 p-6 max-w-[1600px] mx-auto">
+        {/* Stats Grid - Full Width */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+          <StatCard
+            icon={Users}
+            title="Total Users"
+            value={data.users}
+            gradient="from-blue-500 to-purple-500"
+            isLoading={loading.users}
+            error={errors.users}
+            theme={theme}
+          />
+          <StatCard
+            icon={FolderOpen}
+            title="Projects"
+            value={data.projects}
+            gradient="from-emerald-500 to-teal-500"
+            isLoading={loading.projects}
+            error={errors.projects}
+            theme={theme}
+          />
+          <StatCard
+            icon={FileText}
+            title="Blog Posts"
+            value={data.blogPosts}
+            gradient="from-purple-500 to-pink-500"
+            isLoading={loading.blogPosts}
+            error={errors.blogPosts}
+            theme={theme}
+          />
+          <StatCard
+            icon={MessageSquare}
+            title="Messages"
+            value={data.messages}
+            gradient="from-orange-500 to-red-500"
+            isLoading={loading.messages}
+            error={errors.messages}
+            theme={theme}
+          />
+          <StatCard
+            icon={Eye}
+            title="This Week"
+            value={data.weeklyVisits}
+            gradient="from-pink-500 to-rose-500"
+            isLoading={loading.weeklyVisits}
+            error={errors.weeklyVisits}
+            theme={theme}
+          />
+        </div>
 
-            {/* Service Status Cards */}
-            {Object.entries(serviceHealth).map(([id, service]) => (
-              <ServiceStatusCard
-                key={id}
-                service={service}
-                checking={checkingServices[id]}
-                theme={theme}
-              />
-            ))}
-          </div>
-
-          {/* Visits Graph - Right Column */}
-          <div className="lg:col-span-3">
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          {/* Visits Graph - 2 columns */}
+          <div className="lg:col-span-2 h-[450px]">
             <VisitsGraph visits={data.allVisits} loading={loading.allVisits} theme={theme} />
           </div>
-        </div>
 
-        {/* Quick Actions Section */}
-        <div className={`${cardBg} backdrop-blur-lg rounded-xl p-5 border transition-all shadow-lg`}>
-          <h2 className={`text-lg font-bold ${textPrimary} mb-3 flex items-center gap-2`}>
-            <Activity className="w-4 h-4" />
-            Quick Actions
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <button
-              className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:shadow-lg transition-all transform hover:-translate-y-1"
-              onClick={() => onFeatureSelect && onFeatureSelect("projects")}
-            >
-              Upload Project
-            </button>
-            <button
-              className="bg-gradient-to-r from-green-500 to-teal-500 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:shadow-lg transition-all transform hover:-translate-y-1"
-              onClick={() => onFeatureSelect && onFeatureSelect("messages")}
-            >
-              View Messages
-            </button>
-            <button
-              className="bg-gradient-to-r from-pink-500 to-rose-500 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:shadow-lg transition-all transform hover:-translate-y-1"
-              onClick={() => onFeatureSelect && onFeatureSelect("visitTracker")}
-            >
-              Check Analytics
-            </button>
+          {/* Right Sidebar - 1 column */}
+          <div className="space-y-4">
+            {/* Service Status */}
+            <div className={`${cardBg} backdrop-blur-lg rounded-xl p-5 border transition-all shadow-sm`}>
+              <h3 className={`text-base font-bold ${textPrimary} mb-4 flex items-center gap-2`}>
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                Service Status
+              </h3>
+              <div className="space-y-2">
+                {Object.entries(serviceHealth).map(([id, service]) => (
+                  <ServiceStatusCard
+                    key={id}
+                    service={service}
+                    checking={checkingServices[id]}
+                    theme={theme}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className={`${cardBg} backdrop-blur-lg rounded-xl p-5 border transition-all shadow-sm`}>
+              <h3 className={`text-base font-bold ${textPrimary} mb-4 flex items-center gap-2`}>
+                <Activity className="w-4 h-4" />
+                Quick Actions
+              </h3>
+              <div className="space-y-2">
+                <button
+                  className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:shadow-lg transition-all transform hover:-translate-y-0.5 flex items-center justify-between group"
+                  onClick={() => onFeatureSelect && onFeatureSelect("projects")}
+                >
+                  <span>Upload Project</span>
+                  <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </button>
+                <button
+                  className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:shadow-lg transition-all transform hover:-translate-y-0.5 flex items-center justify-between group"
+                  onClick={() => onFeatureSelect && onFeatureSelect("messages")}
+                >
+                  <span>View Messages</span>
+                  <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </button>
+                <button
+                  className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:shadow-lg transition-all transform hover:-translate-y-0.5 flex items-center justify-between group"
+                  onClick={() => onFeatureSelect && onFeatureSelect("visitTracker")}
+                >
+                  <span>Check Analytics</span>
+                  <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Recent Activity Feed */}
-        <div className={`${cardBg} backdrop-blur-lg rounded-xl p-5 border mb-8 transition-all shadow-lg`}>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className={`text-lg font-bold ${textPrimary} flex items-center gap-2`}>
-              <ActivityIcon className="w-5 h-5" />
-              Recent Activity
-            </h2>
-            <div className="flex items-center gap-2">
+        {/* Recent Activity Feed - Full Width */}
+        <div className={`${cardBg} backdrop-blur-lg rounded-xl p-6 border transition-all shadow-sm`}>
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 bg-opacity-10">
+                <Activity className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h2 className={`text-xl font-bold ${textPrimary}`}>Recent Activity</h2>
+                <p className={`text-xs ${textMuted} mt-0.5`}>Real-time activity feed</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
               {isConnected ? (
-                <div className="flex items-center gap-1.5 text-xs text-green-500">
+                <div className="flex items-center gap-2 text-xs font-medium text-emerald-500 bg-emerald-500/10 px-3 py-1.5 rounded-full">
                   <Wifi className="w-3.5 h-3.5" />
                   <span>Live</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-1.5 text-xs text-red-500">
+                <div className="flex items-center gap-2 text-xs font-medium text-red-500 bg-red-500/10 px-3 py-1.5 rounded-full">
                   <WifiOff className="w-3.5 h-3.5" />
                   <span>Disconnected</span>
                 </div>
               )}
               <button
                 onClick={refresh}
-                className={`text-xs ${textMuted} hover:${textPrimary} transition-colors`}
+                className={`flex items-center gap-1.5 text-xs ${textMuted} hover:${textPrimary} transition-colors px-3 py-1.5 rounded-lg hover:bg-white/5`}
               >
+                <RefreshCw className="w-3.5 h-3.5" />
                 Refresh
               </button>
             </div>
           </div>
 
           {error && (
-            <div className={`mb-3 p-2 ${errorBg} border rounded text-xs`}>
+            <div className={`mb-4 p-3 ${errorBg} border rounded-lg text-sm`}>
               {error}
             </div>
           )}
 
-          <div className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar">
+          <div className="space-y-2 max-h-80 overflow-y-auto custom-scrollbar">
             {activities.length === 0 ? (
-              <div className={`text-center py-8 ${noActivityText}`}>
-                <ActivityIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">No recent activity</p>
+              <div className={`text-center py-12 ${noActivityText}`}>
+                <Activity className="w-16 h-16 mx-auto mb-3 opacity-30" />
+                <p className="text-sm font-medium">No recent activity</p>
+                <p className="text-xs mt-1 opacity-70">Activity will appear here in real-time</p>
               </div>
             ) : (
               activities.map((activity, index) => (
                 <div
                   key={`${activity.id}-${index}`}
-                  className={`flex items-center gap-3 p-2.5 ${activityBg} rounded-lg transition-all cursor-pointer animate-slideIn`}
+                  className={`flex items-center gap-4 p-3.5 ${activityBg} rounded-xl transition-all animate-slideIn border ${isDark ? 'border-white/5' : 'border-gray-200'}`}
                 >
                   <div
-                    className={`w-1.5 h-1.5 rounded-full ${getActivityColor(
+                    className={`w-2 h-2 rounded-full ${getActivityColor(
                       activity.type
-                    )} flex-shrink-0`}
+                    )} flex-shrink-0 shadow-lg`}
                   />
                   <div className="flex-1 min-w-0">
-                    <p className={`${textPrimary} text-sm truncate`}>
+                    <p className={`${textPrimary} text-sm font-medium truncate`}>
                       {activity.action}
                     </p>
-                    <p className={`${textMuted} text-xs`}>
+                    <p className={`${textMuted} text-xs mt-0.5`}>
                       {formatTimestamp(activity.timestamp)}
                     </p>
                   </div>
                   {isConnected && index === 0 && (
                     <div className="flex-shrink-0">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                      <span className="relative flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                       </span>
                     </div>
                   )}
