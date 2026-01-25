@@ -16,7 +16,7 @@ import {
 
 // Import your feature components
 import DashboardHome from "../features/dashboard/DashboardHome";
-import Project from "../features/ProjectUpload/Project";
+import ProjectManagerDashboard from "../features/ProjectManager/Project";
 import { BlogUpload } from "../features/BlogUpload/BlogUpload";
 import ContactResponse from "../features/PortfolioResponses/ContactResponse";
 import WeeklyVisitsDashboard from "../features/VisitTracker/WeeklyVisitsDashboard";
@@ -61,7 +61,7 @@ export const adminFeatures = {
     gradient: "from-blue-500 to-purple-500",
     image:
       "https://res.cloudinary.com/dc1fkirb4/image/upload/v1755754879/a1_cqsx8x.jpg",
-    component: Project,
+    component: ProjectManagerDashboard,
     roles: ["admin"],
     description: "Upload and manage projects",
   },
