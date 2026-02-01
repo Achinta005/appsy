@@ -1,12 +1,13 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./context/authContext";
-import { 
-  Shield, 
-  BarChart3, 
-  Users, 
-  Settings, 
+import CustomLoader from "@/components/ui/CustomLoader";
+import {
+  Shield,
+  BarChart3,
+  Users,
+  Settings,
   Zap,
   ArrowRight,
   Lock,
@@ -14,12 +15,13 @@ import {
   Activity,
   CheckCircle,
   Layers,
-  Terminal
+  Terminal,
 } from "lucide-react";
 
 export default function HomePage() {
   const { isAuthenticated, isAuthLoading } = useAuth();
   const router = useRouter();
+  const [isContentReady, setIsContentReady] = useState(false);
 
   useEffect(() => {
     if (!isAuthLoading && isAuthenticated) {
@@ -27,15 +29,54 @@ export default function HomePage() {
     }
   }, [isAuthenticated, isAuthLoading]);
 
-  if (isAuthLoading) return null;
+  // Detect when component and content are fully mounted and rendered
+  useEffect(() => {
+    // Check if document is already loaded
+    if (document.readyState === "complete") {
+      setIsContentReady(true);
+    } else {
+      // Wait for window load event
+      const handleLoad = () => {
+        setIsContentReady(true);
+      };
+
+      window.addEventListener("load", handleLoad);
+
+      // Fallback: Also set ready after a short delay as backup
+      const fallbackTimer = setTimeout(() => {
+        setIsContentReady(true);
+      }, 1000);
+
+      return () => {
+        window.removeEventListener("load", handleLoad);
+        clearTimeout(fallbackTimer);
+      };
+    }
+  }, []);
+
+  // Show loader while auth is loading OR content is not ready
+  if (isAuthLoading || !isContentReady) {
+    return (
+      <CustomLoader
+        header="Loading Admin Panel"
+        subheader="Preparing your dashboard experience..."
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }}></div>
-        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "0.5s" }}></div>
+        <div
+          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl animate-pulse"
+          style={{ animationDelay: "1s" }}
+        ></div>
+        <div
+          className="absolute top-1/2 left-1/2 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"
+          style={{ animationDelay: "0.5s" }}
+        ></div>
       </div>
 
       <div className="relative z-10">
@@ -59,8 +100,8 @@ export default function HomePage() {
 
             {/* Subheading */}
             <p className="text-xl md:text-2xl text-indigo-200 mb-12 max-w-3xl mx-auto leading-relaxed">
-              Manage your entire system from one powerful interface. 
-              Monitor, analyze, and control with real-time insights.
+              Manage your entire system from one powerful interface. Monitor,
+              analyze, and control with real-time insights.
             </p>
 
             {/* CTA Buttons */}
@@ -91,7 +132,8 @@ export default function HomePage() {
                 Advanced Analytics
               </h3>
               <p className="text-indigo-200 leading-relaxed">
-                Real-time dashboards with comprehensive metrics and insights for data-driven decisions.
+                Real-time dashboards with comprehensive metrics and insights for
+                data-driven decisions.
               </p>
             </div>
 
@@ -103,7 +145,8 @@ export default function HomePage() {
                 User Management
               </h3>
               <p className="text-indigo-200 leading-relaxed">
-                Complete control over user accounts, permissions, and access levels from one place.
+                Complete control over user accounts, permissions, and access
+                levels from one place.
               </p>
             </div>
 
@@ -115,7 +158,8 @@ export default function HomePage() {
                 Enterprise Security
               </h3>
               <p className="text-indigo-200 leading-relaxed">
-                Bank-level encryption and security protocols to keep your data safe and compliant.
+                Bank-level encryption and security protocols to keep your data
+                safe and compliant.
               </p>
             </div>
           </div>
@@ -206,8 +250,13 @@ export default function HomePage() {
                     <Settings className="w-6 h-6 text-indigo-300" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white mb-2">System Configuration</h3>
-                    <p className="text-indigo-200 text-sm">Configure system settings, API endpoints, and integration parameters with ease.</p>
+                    <h3 className="text-lg font-bold text-white mb-2">
+                      System Configuration
+                    </h3>
+                    <p className="text-indigo-200 text-sm">
+                      Configure system settings, API endpoints, and integration
+                      parameters with ease.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -218,8 +267,13 @@ export default function HomePage() {
                     <Layers className="w-6 h-6 text-cyan-300" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white mb-2">Multi-Layer Access</h3>
-                    <p className="text-indigo-200 text-sm">Granular permission controls with role-based access management.</p>
+                    <h3 className="text-lg font-bold text-white mb-2">
+                      Multi-Layer Access
+                    </h3>
+                    <p className="text-indigo-200 text-sm">
+                      Granular permission controls with role-based access
+                      management.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -230,8 +284,13 @@ export default function HomePage() {
                     <Terminal className="w-6 h-6 text-blue-300" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white mb-2">API Management</h3>
-                    <p className="text-indigo-200 text-sm">Full API control with rate limiting, monitoring, and documentation.</p>
+                    <h3 className="text-lg font-bold text-white mb-2">
+                      API Management
+                    </h3>
+                    <p className="text-indigo-200 text-sm">
+                      Full API control with rate limiting, monitoring, and
+                      documentation.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -242,8 +301,13 @@ export default function HomePage() {
                     <Activity className="w-6 h-6 text-indigo-300" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white mb-2">Real-Time Monitoring</h3>
-                    <p className="text-indigo-200 text-sm">Live system health metrics, alerts, and performance tracking.</p>
+                    <h3 className="text-lg font-bold text-white mb-2">
+                      Real-Time Monitoring
+                    </h3>
+                    <p className="text-indigo-200 text-sm">
+                      Live system health metrics, alerts, and performance
+                      tracking.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -261,7 +325,7 @@ export default function HomePage() {
             <a
               href="/register"
               className="inline-flex items-center gap-2 px-10 py-5 bg-gradient-to-r from-indigo-600 to-cyan-600 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-cyan-700 transition-all hover:shadow-2xl hover:scale-105 text-lg"
-              >
+            >
               Get Admin Access
               <Shield className="w-5 h-5" />
             </a>
