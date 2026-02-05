@@ -12,7 +12,7 @@ import {
   Activity,
   Moon,
   Sun,
-  Settings
+  Settings,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import useUserProfile from "@/hooks/useUserdata";
@@ -85,16 +85,22 @@ export default function AdminHeader({
   const unreadCount = lastViewedActivityId
     ? activities.filter((activity) => {
         const lastViewedIndex = activities.findIndex(
-          (a) => (a._id || a.id) === lastViewedActivityId
+          (a) => (a._id || a.id) === lastViewedActivityId,
         );
         const activityIndex = activities.findIndex(
-          (a) => (a._id || a.id) === (activity._id || activity.id)
+          (a) => (a._id || a.id) === (activity._id || activity.id),
         );
         return lastViewedIndex !== -1 && activityIndex < lastViewedIndex;
       }).length
     : 0;
 
-  const recentActivities = activities.slice(0, 5);
+  const excludedTypes = ["ANIME_ADDED", "ANIME_UPDATED", "ANIME_REMOVED"];
+
+  const filteredActivities = activities.filter(
+    (activity) => !excludedTypes.includes(activity.type),
+  );
+
+  const recentActivities = filteredActivities.slice(0, 5);
 
   const handleNotificationClick = () => {
     setShowNotifications(!showNotifications);
@@ -118,10 +124,12 @@ export default function AdminHeader({
     setTheme(newTheme);
 
     // Dispatch storage event for other components
-    window.dispatchEvent(new StorageEvent("storage", {
-      key: "theme",
-      newValue: newTheme,
-    }));
+    window.dispatchEvent(
+      new StorageEvent("storage", {
+        key: "theme",
+        newValue: newTheme,
+      }),
+    );
 
     // Update user profile in database
     try {
@@ -160,22 +168,30 @@ export default function AdminHeader({
   const headerStyles = isDark
     ? "bg-gradient-to-r from-slate-900/95 via-purple-900/95 to-slate-900/95 border-white/10"
     : "bg-gradient-to-r from-white/95 via-purple-100/95 to-white/95 border-purple-200/50 shadow-lg";
-  
+
   const textColor = isDark ? "text-white" : "text-gray-900";
   const textMuted = isDark ? "text-gray-300" : "text-gray-600";
   const iconColor = isDark ? "text-gray-300" : "text-gray-700";
   const bgHover = isDark ? "hover:bg-white/10" : "hover:bg-purple-100/50";
-  const inputBg = isDark ? "bg-white/10 border-white/20" : "bg-white border-purple-200";
-  const dropdownBg = isDark ? "bg-slate-900/98 border-white/20" : "bg-white border-purple-200";
+  const inputBg = isDark
+    ? "bg-white/10 border-white/20"
+    : "bg-white border-purple-200";
+  const dropdownBg = isDark
+    ? "bg-slate-900/98 border-white/20"
+    : "bg-white border-purple-200";
 
   return (
-    <header className={`sticky top-0 z-30 ${headerStyles} backdrop-blur-xl border-b transition-all duration-300`}>
+    <header
+      className={`sticky top-0 z-30 ${headerStyles} backdrop-blur-xl border-b transition-all duration-300`}
+    >
       <div className="px-4 sm:px-6 py-2">
         <div className="flex items-center justify-between gap-4">
           {/* Right Section */}
           <div className="flex items-center gap-2 sm:gap-4 ml-auto">
             {/* IP Address */}
-            <div className={`hidden sm:flex items-center gap-2 ${inputBg} rounded-lg px-3 py-1.5 border transition-colors`}>
+            <div
+              className={`hidden sm:flex items-center gap-2 ${inputBg} rounded-lg px-3 py-1.5 border transition-colors`}
+            >
               <Wifi className="w-4 h-4 text-green-500 flex-shrink-0" />
               <span className={`text-xs ${textMuted}`}>IP:</span>
               <span className="text-xs text-green-500 font-mono">
@@ -201,8 +217,12 @@ export default function AdminHeader({
               </button>
 
               {showNotifications && (
-                <div className={`absolute right-0 mt-2 w-80 ${dropdownBg} rounded-xl shadow-2xl backdrop-blur-xl overflow-hidden animate-slideDown`}>
-                  <div className={`p-4 border-b ${isDark ? 'border-white/10 bg-purple-900/20' : 'border-purple-200 bg-purple-50'} flex items-center justify-between`}>
+                <div
+                  className={`absolute right-0 mt-2 w-80 ${dropdownBg} rounded-xl shadow-2xl backdrop-blur-xl overflow-hidden animate-slideDown`}
+                >
+                  <div
+                    className={`p-4 border-b ${isDark ? "border-white/10 bg-purple-900/20" : "border-purple-200 bg-purple-50"} flex items-center justify-between`}
+                  >
                     <div className="flex items-center gap-2">
                       <Activity className="w-5 h-5 text-purple-500" />
                       <h3 className={`${textColor} font-semibold`}>
@@ -230,11 +250,11 @@ export default function AdminHeader({
                         {recentActivities.map((activity, index) => (
                           <div
                             key={`${activity.id || activity._id}-${index}`}
-                            className={`flex items-center gap-3 p-2.5 ${isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-purple-50 hover:bg-purple-100'} rounded-lg transition-all cursor-pointer`}
+                            className={`flex items-center gap-3 p-2.5 ${isDark ? "bg-white/5 hover:bg-white/10" : "bg-purple-50 hover:bg-purple-100"} rounded-lg transition-all cursor-pointer`}
                           >
                             <div
                               className={`w-1.5 h-1.5 rounded-full ${getActivityColor(
-                                activity.type
+                                activity.type,
                               )} flex-shrink-0`}
                             />
                             <div className="flex-1 min-w-0">
@@ -250,7 +270,9 @@ export default function AdminHeader({
                       </div>
                     )}
                   </div>
-                  <div className={`p-3 border-t ${isDark ? 'border-white/10 bg-white/5' : 'border-purple-200 bg-purple-50'}`}>
+                  <div
+                    className={`p-3 border-t ${isDark ? "border-white/10 bg-white/5" : "border-purple-200 bg-purple-50"}`}
+                  >
                     <button
                       className="w-full text-center text-sm text-purple-500 hover:text-purple-600 font-medium transition-colors"
                       onClick={() => {
@@ -269,7 +291,11 @@ export default function AdminHeader({
             <button
               onClick={toggleTheme}
               className={`hidden sm:block p-2 ${bgHover} rounded-lg transition-colors`}
-              title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              title={
+                theme === "dark"
+                  ? "Switch to light mode"
+                  : "Switch to dark mode"
+              }
             >
               {theme === "dark" ? (
                 <Sun className="w-5 h-5 text-yellow-400" />
@@ -304,8 +330,12 @@ export default function AdminHeader({
               </button>
 
               {showProfile && userProfile && (
-                <div className={`absolute right-0 mt-2 w-80 ${dropdownBg} rounded-xl shadow-2xl backdrop-blur-xl overflow-hidden animate-slideDown`}>
-                  <div className={`p-4 ${isDark ? 'bg-gradient-to-br from-purple-600/20 to-pink-600/20 border-b border-white/10' : 'bg-gradient-to-br from-purple-100 to-pink-100 border-b border-purple-200'}`}>
+                <div
+                  className={`absolute right-0 mt-2 w-80 ${dropdownBg} rounded-xl shadow-2xl backdrop-blur-xl overflow-hidden animate-slideDown`}
+                >
+                  <div
+                    className={`p-4 ${isDark ? "bg-gradient-to-br from-purple-600/20 to-pink-600/20 border-b border-white/10" : "bg-gradient-to-br from-purple-100 to-pink-100 border-b border-purple-200"}`}
+                  >
                     <div className="flex items-start gap-4">
                       <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
                         {!userProfile.avatar ? (
@@ -331,17 +361,13 @@ export default function AdminHeader({
                     {userProfile.email && (
                       <div className="flex items-center gap-3 text-sm">
                         <Mail className="w-4 h-4 text-gray-400" />
-                        <span className={textMuted}>
-                          {userProfile.email}
-                        </span>
+                        <span className={textMuted}>{userProfile.email}</span>
                       </div>
                     )}
                     {userProfile.phone && (
                       <div className="flex items-center gap-3 text-sm">
                         <Wifi className="w-4 h-4 text-gray-400" />
-                        <span className={textMuted}>
-                          {userProfile.phone}
-                        </span>
+                        <span className={textMuted}>{userProfile.phone}</span>
                       </div>
                     )}
                     {userProfile.joinedDate && (
@@ -362,14 +388,18 @@ export default function AdminHeader({
                     )}
 
                     {userProfile.bio && (
-                      <div className={`pt-3 border-t ${isDark ? 'border-white/10' : 'border-purple-200'}`}>
+                      <div
+                        className={`pt-3 border-t ${isDark ? "border-white/10" : "border-purple-200"}`}
+                      >
                         <p className="text-sm text-gray-400 italic">
                           &quot;{userProfile.bio}&quot;
                         </p>
                       </div>
                     )}
 
-                    <div className={`pt-3 border-t ${isDark ? 'border-white/10' : 'border-purple-200'} grid grid-cols-2 gap-2`}>
+                    <div
+                      className={`pt-3 border-t ${isDark ? "border-white/10" : "border-purple-200"} grid grid-cols-2 gap-2`}
+                    >
                       <button
                         onClick={() => router.push("/admin/user/profile")}
                         className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm transition-colors flex items-center justify-center gap-2"
@@ -402,7 +432,9 @@ export default function AdminHeader({
         </div>
 
         {/* Mobile IP Address */}
-        <div className={`sm:hidden mt-3 flex items-center gap-2 ${inputBg} rounded-lg px-3 py-2 border transition-colors`}>
+        <div
+          className={`sm:hidden mt-3 flex items-center gap-2 ${inputBg} rounded-lg px-3 py-2 border transition-colors`}
+        >
           <Wifi className="w-3 h-3 text-green-500 flex-shrink-0" />
           <span className={`text-xs ${textMuted}`}>IP:</span>
           <span className="text-xs text-green-500 font-mono">{ipAddress}</span>

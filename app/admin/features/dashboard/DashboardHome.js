@@ -352,8 +352,6 @@ export default function DashboardHome({ onFeatureSelect }) {
       MESSAGE_RECEIVED: "bg-emerald-500",
       BLOG_PUBLISHED: "bg-pink-500",
       USER_REGISTERED: "bg-amber-500",
-      ANIME_ADDED: "bg-indigo-500",
-      ANIME_UPDATED: "bg-violet-500",
       NEW_IP_ADDED: "bg-cyan-500",
       ROLE_UPDATE: "bg-orange-500",
       CONTACT_POST: "bg-teal-500",
@@ -362,6 +360,12 @@ export default function DashboardHome({ onFeatureSelect }) {
     };
     return colors[type] || "bg-gray-500";
   };
+
+  const excludedTypes = ["ANIME_ADDED", "ANIME_UPDATED", "ANIME_REMOVED"];
+
+  const filteredActivities = activities.filter(
+    (activity) => !excludedTypes.includes(activity.type),
+  );
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -573,7 +577,7 @@ export default function DashboardHome({ onFeatureSelect }) {
           )}
 
           <div className="space-y-2 max-h-80 overflow-y-auto custom-scrollbar">
-            {activities.length === 0 ? (
+            {filteredActivities.length === 0 ? (
               <div className={`text-center py-12 ${noActivityText}`}>
                 <Activity className="w-16 h-16 mx-auto mb-3 opacity-30" />
                 <p className="text-sm font-medium">No recent activity</p>
@@ -582,7 +586,7 @@ export default function DashboardHome({ onFeatureSelect }) {
                 </p>
               </div>
             ) : (
-              activities.map((activity, index) => (
+              filteredActivities.map((activity, index) => (
                 <div
                   key={`${activity.id}-${index}`}
                   className={`flex items-center gap-4 p-3.5 ${activityBg} rounded-xl transition-all animate-slideIn border ${isDark ? "border-white/5" : "border-gray-200"}`}
