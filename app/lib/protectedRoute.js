@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   VerifyingLoader,
   UnauthorizedLoader,
-} from "@/components/ui/authLoader";
+} from "@/components/ui/AuthLoader";
 
 export default function ProtectedRoute({ children }) {
   const { isAuthenticated, isAuthLoading } = useAuth();
