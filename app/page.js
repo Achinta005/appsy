@@ -1,5 +1,5 @@
+// app/page.js
 "use client";
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./context/authContext";
 import CustomLoader from "@/components/ui/CustomLoader";
@@ -21,47 +21,19 @@ import {
 export default function HomePage() {
   const { isAuthenticated, isAuthLoading } = useAuth();
   const router = useRouter();
-  const [isContentReady, setIsContentReady] = useState(false);
 
-  useEffect(() => {
-    if (!isAuthLoading && isAuthenticated) {
-      router.replace("/admin");
-    }
-  }, [isAuthenticated, isAuthLoading]);
-
-  // Detect when component and content are fully mounted and rendered
-  useEffect(() => {
-    // Check if document is already loaded
-    if (document.readyState === "complete") {
-      setIsContentReady(true);
+  // Handle Admin Login click
+  const handleAdminLogin = () => {
+    if (isAuthenticated) {
+      router.push("/admin");
     } else {
-      // Wait for window load event
-      const handleLoad = () => {
-        setIsContentReady(true);
-      };
-
-      window.addEventListener("load", handleLoad);
-
-      // Fallback: Also set ready after a short delay as backup
-      const fallbackTimer = setTimeout(() => {
-        setIsContentReady(true);
-      }, 1000);
-
-      return () => {
-        window.removeEventListener("load", handleLoad);
-        clearTimeout(fallbackTimer);
-      };
+      router.push("/login");
     }
-  }, []);
+  };
 
-  // Show loader while auth is loading OR content is not ready
-  if (isAuthLoading || !isContentReady) {
-    return (
-      <CustomLoader
-        header="Loading Admin Panel"
-        subheader="Preparing your dashboard experience..."
-      />
-    );
+  // Show loader ONLY while auth is loading
+  if (isAuthLoading) {
+    return <CustomLoader header="Loading" subheader="Please wait..." />;
   }
 
   return (
@@ -113,12 +85,12 @@ export default function HomePage() {
                 Get Started
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </a>
-              <a
-                href="/login"
-                className="px-8 py-4 bg-white/10 backdrop-blur-lg text-white font-semibold rounded-xl hover:bg-white/20 transition-all border-2 border-white/20 hover:border-white/40 flex items-center gap-2 text-lg"
+              <button
+                onClick={handleAdminLogin}
+                className="px-8 py-4 bg-white/10 backdrop-blur-lg text-white font-semibold rounded-xl hover:bg-white/20 transition-all border-2 border-white/20 hover:border-white/40 flex items-center gap-2 text-lg cursor-pointer"
               >
                 Admin Login
-              </a>
+              </button>
             </div>
           </div>
 
