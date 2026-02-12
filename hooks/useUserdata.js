@@ -116,7 +116,6 @@ export default function useUserProfile(options = {}) {
         emailAlerts: preferences.emailNotifications,
         profileVisibility: preferences.visibility,
       };
-      console.log(mappedProfile);
       setUserProfile(mappedProfile);
 
       if (includeImage && mappedProfile.avatar) {
