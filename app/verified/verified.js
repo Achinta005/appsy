@@ -1,74 +1,70 @@
-'use client';
+"use client";
 
-import { useEffect, useState, Suspense } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState, Suspense } from "react";
+import { useRouter } from "next/navigation";
 
 function VerifiedContent() {
   const router = useRouter();
-  const [status, setStatus] = useState('verifying');
-  const [message, setMessage] = useState('');
+  const [status, setStatus] = useState("verifying");
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // Parse tokens from URL hash
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        
-        const type = hashParams.get('type');
-        const access_token = hashParams.get('access_token');
-        const refresh_token = hashParams.get('refresh_token');
+        // Parse tokens from URL hash (Supabase OAuth/Magic Link callback)
+        const hashParams = new URLSearchParams(
+          window.location.hash.substring(1),
+        );
 
-        console.log('Parsed tokens:', { 
-          type, 
-          access_token: access_token?.substring(0, 20) + '...', 
-          refresh_token: refresh_token?.substring(0, 20) + '...'
-        });
+        const type = hashParams.get("type");
+        const access_token = hashParams.get("access_token");
 
-        if (!access_token || !refresh_token) {
-          setStatus('error');
-          setMessage('Missing authentication tokens');
+        if (!access_token) {
+          setStatus("error");
+          setMessage("Missing authentication token");
           return;
         }
 
-        // Send tokens to YOUR backend to handle securely
-        const response = await fetch('/api/auth/set-session', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+        const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API_URL}/auth/verify-callback`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             access_token,
-            refresh_token,
-            type
+            type,
           }),
         });
 
         if (!response.ok) {
           const errorData = await response.json();
-          setStatus('error');
-          setMessage(errorData.message || 'Authentication failed');
+          console.error("❌ Session setup failed:", errorData);
+          setStatus("error");
+          setMessage(errorData.message || "Authentication failed");
           return;
         }
 
         const data = await response.json();
-        console.log('Session set successfully via backend:', data);
 
         // Success!
-        setStatus('success');
-        setMessage(type === 'signup' ? 'Email verified successfully!' : 'Authentication successful!');
+        setStatus("success");
+        setMessage(
+          type === "signup"
+            ? "Email verified successfully!"
+            : type === "recovery"
+              ? "Password reset successful!"
+              : "Authentication successful!",
+        );
 
-        // Clean up URL
-        window.history.replaceState(null, '', window.location.pathname);
+        // Clean up URL hash
+        window.history.replaceState(null, "", window.location.pathname);
 
         // Redirect after 2 seconds
         setTimeout(() => {
-          router.push('/dashboard');
+          router.push("/login");
         }, 2000);
-
       } catch (err) {
-        console.error('Unexpected error:', err);
-        setStatus('error');
-        setMessage('An unexpected error occurred');
+        console.error("💥 Unexpected error:", err);
+        setStatus("error");
+        setMessage("An unexpected error occurred. Please try again.");
       }
     };
 
@@ -78,7 +74,7 @@ function VerifiedContent() {
   return (
     <div className="verified-container">
       <div className="verified-card">
-        {status === 'verifying' && (
+        {status === "verifying" && (
           <>
             <div className="spinner"></div>
             <h1>Verifying your account...</h1>
@@ -86,24 +82,36 @@ function VerifiedContent() {
           </>
         )}
 
-        {status === 'success' && (
+        {status === "success" && (
           <>
             <div className="success-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                 <polyline points="22 4 12 14.01 9 11.01"></polyline>
               </svg>
             </div>
             <h1>Success!</h1>
             <p>{message}</p>
-            <p className="redirect-text">Redirecting you to your dashboard...</p>
+            <p className="redirect-text">
+              Redirecting you to your dashboard...
+            </p>
           </>
         )}
 
-        {status === 'error' && (
+        {status === "error" && (
           <>
             <div className="error-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="15" y1="9" x2="9" y2="15"></line>
                 <line x1="9" y1="9" x2="15" y2="15"></line>
@@ -111,7 +119,10 @@ function VerifiedContent() {
             </div>
             <h1>Verification Failed</h1>
             <p>{message}</p>
-            <button onClick={() => router.push('/login')} className="retry-button">
+            <button
+              onClick={() => router.push("/login")}
+              className="retry-button"
+            >
               Go to Login
             </button>
           </>
@@ -126,8 +137,10 @@ function VerifiedContent() {
           justify-content: center;
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           padding: 20px;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-            'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+          font-family:
+            -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+            "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+            sans-serif;
         }
 
         .verified-card {
@@ -268,33 +281,41 @@ function VerifiedContent() {
 
 export default function VerifiedPage() {
   return (
-    <Suspense fallback={
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-      }}>
-        <div style={{
-          background: 'white',
-          borderRadius: '16px',
-          padding: '48px 40px',
-          textAlign: 'center'
-        }}>
-          <div style={{
-            margin: '0 auto 24px',
-            width: '48px',
-            height: '48px',
-            border: '4px solid #f3f4f6',
-            borderTopColor: '#667eea',
-            borderRadius: '50%',
-            animation: 'spin 0.8s linear infinite'
-          }}></div>
-          <h1>Loading...</h1>
+    <Suspense
+      fallback={
+        <div
+          style={{
+            minHeight: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+          }}
+        >
+          <div
+            style={{
+              background: "white",
+              borderRadius: "16px",
+              padding: "48px 40px",
+              textAlign: "center",
+            }}
+          >
+            <div
+              style={{
+                margin: "0 auto 24px",
+                width: "48px",
+                height: "48px",
+                border: "4px solid #f3f4f6",
+                borderTopColor: "#667eea",
+                borderRadius: "50%",
+                animation: "spin 0.8s linear infinite",
+              }}
+            ></div>
+            <h1>Loading...</h1>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <VerifiedContent />
     </Suspense>
   );

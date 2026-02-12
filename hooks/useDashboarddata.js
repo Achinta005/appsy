@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useAuth } from "@/app/context/authContext";
+import { useAuth } from "@/app/(protected)/context/authContext";
 import useApi from "@/services/authservices";
 
 // Service configuration for health checks
@@ -18,30 +18,31 @@ const HEALTH_SERVICES = [
   },
 ];
 
-// Configuration for each data source
+const FIVE_MINUTES = 5 * 60 * 1000;
 const DATA_SOURCES = {
   users: {
     endpoint: `${process.env.NEXT_PUBLIC_SERVER_API_URL}/auth/users/count`,
     method: "fetch",
-    pollInterval: 30000,
-    transform: (data) => data,
+    pollInterval: FIVE_MINUTES,
+    transform: (res) => res?.data?.pagination?.total ?? 0,
   },
+
   projects: {
     endpoint: `${process.env.NEXT_PUBLIC_SERVER_API_URL}/project/count`,
     method: "fetch",
-    pollInterval: 30000,
+    pollInterval: FIVE_MINUTES,
     transform: (data) => data,
   },
   blogPosts: {
     endpoint: `${process.env.NEXT_PUBLIC_SERVER_API_URL}/blogs/count`,
     method: "fetch",
-    pollInterval: 30000,
+    pollInterval: FIVE_MINUTES,
     transform: (data) => data,
   },
   messages: {
     endpoint: `${process.env.NEXT_PUBLIC_SERVER_API_URL}/contact/count`,
     method: "fetch",
-    pollInterval: 30000,
+    pollInterval: FIVE_MINUTES,
     transform: (data) => data,
   },
   weeklyVisits: {
@@ -117,7 +118,7 @@ export function useDashboardData() {
   // Check all services
   const checkAllServices = useCallback(async () => {
     const results = await Promise.all(
-      HEALTH_SERVICES.map((service) => checkServiceHealth(service))
+      HEALTH_SERVICES.map((service) => checkServiceHealth(service)),
     );
     return results;
   }, [checkServiceHealth]);
@@ -146,14 +147,18 @@ export function useDashboardData() {
           },
         });
 
+
         if (!response.ok) {
           throw new Error(`Failed to fetch ${key}`);
         }
 
         const result = await response.json();
+
+
         const transformedData = config.transform
           ? config.transform(result)
           : result;
+
 
         setData((prev) => ({ ...prev, [key]: transformedData }));
       } catch (error) {
@@ -163,7 +168,7 @@ export function useDashboardData() {
         setLoading((prev) => ({ ...prev, [key]: false }));
       }
     },
-    [apiFetch]
+    [apiFetch],
   );
 
   // Setup SSE connection for real-time data (NO AUTH - SSE doesn't support headers well)
@@ -203,7 +208,6 @@ export function useDashboardData() {
 
   // Initialize all data sources and health checks
   useEffect(() => {
-    // Initial health check for all services (runs without auth requirement)
     checkAllServices();
 
     // Setup health check polling (every 2 minutes)
@@ -215,7 +219,7 @@ export function useDashboardData() {
       clearInterval(healthCheckInterval);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run once on mount for health checks
+  }, []);
 
   // Separate effect for authenticated data fetching
   useEffect(() => {
@@ -256,7 +260,7 @@ export function useDashboardData() {
       });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accessToken]); // Only re-run when accessToken changes
+  }, [accessToken]);
 
   // Manual refresh function
   const refresh = useCallback(
@@ -266,7 +270,7 @@ export function useDashboardData() {
         fetchData(key, config);
       }
     },
-    [fetchData]
+    [fetchData],
   );
 
   // Refresh all fetch-based sources
