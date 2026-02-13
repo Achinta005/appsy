@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(req) {
   const backendRes = await fetch(
-    `${process.env.RENDER_API_URL}/auth/logout`,
+    `${process.env.NEXT_PUBLIC_SERVER_API_URL}/auth/logout`,
     {
       method: "POST",
       headers: {

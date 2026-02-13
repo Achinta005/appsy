@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 export async function POST(req) {
   try {
     const backendRes = await fetch(
-      `${process.env.RENDER_API_URL}/auth/refresh`,
+      `${process.env.NEXT_PUBLIC_SERVER_API_URL}/auth/refresh`,
       {
         method: "POST",
         headers: {
