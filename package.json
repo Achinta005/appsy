@@ -1,6 +1,6 @@
 {
   "name": "admin",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Admin Desktop App",
   "main": "main.js",
   "author": "Achinta",
@@ -58,7 +58,8 @@
         "provider": "github",
         "owner": "Achinta005",
         "repo": "appsy",
-        "private": false
+        "private": false,
+        "releaseType": "release"
       }
     ]
   }

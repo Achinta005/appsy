@@ -1165,7 +1165,7 @@ export default function EnhancedDashboard({ onFeatureSelect }) {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className={`text-3xl font-bold ${textPrimary} mb-2`}>
-              Analytics Dashboard(v2)
+              Analytics Dashboard
             </h1>
             <p className={`text-sm ${textMuted}`}>
               Comprehensive system metrics and insights
