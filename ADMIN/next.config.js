@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 module.exports = {
-  
+   skipTrailingSlashRedirect: true,
+  trailingSlash: false,
   images: {
     unoptimized: true,
     remotePatterns: [

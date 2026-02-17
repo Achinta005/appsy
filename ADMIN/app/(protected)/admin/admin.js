@@ -114,6 +114,7 @@ const AdminPage = () => {
 
   // Logout handler
   const handleLogout = async () => {
+    window.electron?.clearCredentials();
     try {
       const res = await apiFetch("/api/auth/logout", {
         method: "POST",

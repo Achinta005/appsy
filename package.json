@@ -1,6 +1,6 @@
 {
   "name": "admin",
-  "version": "1.0.2",
+  "version": "1.0.5",
   "description": "Admin Desktop App",
   "main": "main.js",
   "author": "Achinta",
@@ -13,18 +13,19 @@
     "publish": "electron-builder --publish always"
   },
   "dependencies": {
+    "electron-updater": "^6.1.7",
     "next": "^14.0.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "electron-updater": "^6.1.7"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "electron": "^40.4.1",
-    "electron-builder": "^26.7.0"
+    "electron-builder": "^26.7.0",
+    "electron-reload": "^2.0.0-alpha.1"
   },
   "build": {
     "appId": "com.achinta.appsy",
-    "productName": "Appsy Admin",
+    "productName": "Admin",
     "directories": {
       "output": "dist"
     },
@@ -42,7 +43,9 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "build/icon.ico"

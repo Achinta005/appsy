@@ -13,6 +13,10 @@ import {
   Moon,
   Sun,
   Settings,
+  Minus,
+  Maximize2,
+  Minimize2,
+  X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import useUserProfile from "@/hooks/useUserdata";
@@ -31,23 +35,29 @@ export default function AdminHeader({
   const [lastViewedActivityId, setLastViewedActivityId] = useState(null);
   const [theme, setTheme] = useState("light");
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isMaximized, setIsMaximized] = useState(false);
 
   const notifRef = useRef(null);
   const profileRef = useRef(null);
   const router = useRouter();
   const { updateUserProfile } = useUserProfile();
 
-  // Initialize theme from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.electron?.onWindowState) {
+      window.electron.onWindowState((state) => {
+        setIsMaximized(state.isMaximized);
+      });
+    }
+  }, []);
+
   useEffect(() => {
     const localTheme = localStorage.getItem("theme") || "light";
     setTheme(localTheme);
   }, []);
 
-  // Sync theme between localStorage and userProfile (only when not actively toggling)
   useEffect(() => {
     if (userProfile && !isSyncing) {
       const localTheme = localStorage.getItem("theme") || "light";
-
       if (localTheme !== userProfile.theme) {
         setIsSyncing(true);
         updateUserProfile({ NewTheme: localTheme }).finally(() => {
@@ -57,7 +67,6 @@ export default function AdminHeader({
     }
   }, [userProfile?.theme]);
 
-  // Mark notifications as viewed when opened
   useEffect(() => {
     if (showNotifications && activities.length > 0 && !lastViewedActivityId) {
       const latestActivityId = activities[0]._id || activities[0].id;
@@ -65,7 +74,6 @@ export default function AdminHeader({
     }
   }, [showNotifications, activities, lastViewedActivityId]);
 
-  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (notifRef.current && !notifRef.current.contains(event.target)) {
@@ -75,12 +83,10 @@ export default function AdminHeader({
         setShowProfile(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Calculate unread notifications
   const unreadCount = lastViewedActivityId
     ? activities.filter((activity) => {
         const lastViewedIndex = activities.findIndex(
@@ -94,11 +100,9 @@ export default function AdminHeader({
     : 0;
 
   const excludedTypes = ["ANIME_ADDED", "ANIME_UPDATED", "ANIME_REMOVED"];
-
   const filteredActivities = activities.filter(
     (activity) => !excludedTypes.includes(activity.type),
   );
-
   const recentActivities = filteredActivities.slice(0, 5);
 
   const handleNotificationClick = () => {
@@ -112,25 +116,12 @@ export default function AdminHeader({
   const toggleTheme = async () => {
     const currentTheme = localStorage.getItem("theme") || "light";
     const newTheme = currentTheme === "dark" ? "light" : "dark";
-
-    // Set syncing flag to prevent useEffect from interfering
     setIsSyncing(true);
-
-    // Update localStorage
     localStorage.setItem("theme", newTheme);
-
-    // Update local state for immediate UI feedback
     setTheme(newTheme);
-
-    // Dispatch storage event for other components
     window.dispatchEvent(
-      new StorageEvent("storage", {
-        key: "theme",
-        newValue: newTheme,
-      }),
+      new StorageEvent("storage", { key: "theme", newValue: newTheme }),
     );
-
-    // Update user profile in database
     try {
       await updateUserProfile({ NewTheme: newTheme });
     } finally {
@@ -155,22 +146,19 @@ export default function AdminHeader({
     const diff = now - date;
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
-
     if (minutes < 1) return "Just now";
     if (minutes < 60) return `${minutes}m ago`;
     if (hours < 24) return `${hours}h ago`;
     return date.toLocaleDateString();
   };
 
-  // Theme-based styles
   const isDark = theme === "dark";
   const headerStyles = isDark
     ? "bg-gradient-to-r from-slate-900/95 via-purple-900/95 to-slate-900/95 border-white/10"
     : "bg-gradient-to-r from-white/95 via-purple-100/95 to-white/95 border-purple-200/50 shadow-lg";
-
   const textColor = isDark ? "text-white" : "text-gray-900";
   const textMuted = isDark ? "text-gray-300" : "text-gray-600";
-  const iconColor = isDark ? "text-gray-300" : "text-gray-700";
+  const iconColor = isDark ? "text-gray-300" : "text-gray-600";
   const bgHover = isDark ? "hover:bg-white/10" : "hover:bg-purple-100/50";
   const inputBg = isDark
     ? "bg-white/10 border-white/20"
@@ -178,15 +166,26 @@ export default function AdminHeader({
   const dropdownBg = isDark
     ? "bg-slate-900/98 border-white/20"
     : "bg-white border-purple-200";
+  const divider = isDark ? "border-white/10" : "border-purple-200";
 
   return (
     <header
       className={`sticky top-0 z-30 ${headerStyles} backdrop-blur-xl border-b transition-all duration-300`}
+      style={{ WebkitAppRegion: "drag" }}
     >
+      {/* ADD HERE ↓ */}
+      <div
+        className="absolute top-0 left-0 w-16 h-full lg:hidden"
+        style={{ WebkitAppRegion: "no-drag" }}
+      />
+      {/* ADD HERE ↑ */}
+
       <div className="px-4 sm:px-6 py-2">
         <div className="flex items-center justify-between gap-4">
-          {/* Right Section */}
-          <div className="flex items-center gap-2 sm:gap-4 ml-auto">
+          <div
+            className="flex items-center gap-2 sm:gap-3 ml-auto"
+            style={{ WebkitAppRegion: "no-drag" }}
+          >
             {/* IP Address */}
             <div
               className={`hidden sm:flex items-center gap-2 ${inputBg} rounded-lg px-3 py-1.5 border transition-colors`}
@@ -217,7 +216,7 @@ export default function AdminHeader({
 
               {showNotifications && (
                 <div
-                  className={`absolute right-0 mt-2 w-80 ${dropdownBg} rounded-xl shadow-2xl backdrop-blur-xl overflow-hidden animate-slideDown`}
+                  className={`absolute right-0 mt-2 w-80 ${dropdownBg} rounded-xl shadow-2xl backdrop-blur-xl overflow-hidden animate-slideDown border`}
                 >
                   <div
                     className={`p-4 border-b ${isDark ? "border-white/10 bg-purple-900/20" : "border-purple-200 bg-purple-50"} flex items-center justify-between`}
@@ -252,9 +251,7 @@ export default function AdminHeader({
                             className={`flex items-center gap-3 p-2.5 ${isDark ? "bg-white/5 hover:bg-white/10" : "bg-purple-50 hover:bg-purple-100"} rounded-lg transition-all cursor-pointer`}
                           >
                             <div
-                              className={`w-1.5 h-1.5 rounded-full ${getActivityColor(
-                                activity.type,
-                              )} flex-shrink-0`}
+                              className={`w-1.5 h-1.5 rounded-full ${getActivityColor(activity.type)} flex-shrink-0`}
                             />
                             <div className="flex-1 min-w-0">
                               <p className={`${textColor} text-sm truncate`}>
@@ -289,7 +286,7 @@ export default function AdminHeader({
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className={`hidden sm:block p-2 ${bgHover} rounded-lg transition-colors`}
+              className={`hidden sm:flex p-2 ${bgHover} rounded-lg transition-colors`}
               title={
                 theme === "dark"
                   ? "Switch to light mode"
@@ -315,14 +312,14 @@ export default function AdminHeader({
                   </p>
                   <p className="text-xs text-purple-500">{user.role}</p>
                 </div>
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0 shadow-lg">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0 shadow-lg overflow-hidden">
                   {!userProfile?.avatar ? (
                     <User className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   ) : (
                     <img
                       src={userProfile.avatar}
                       alt="User avatar"
-                      className="w-full h-full object-cover rounded-full"
+                      className="w-full h-full object-cover"
                     />
                   )}
                 </div>
@@ -330,20 +327,20 @@ export default function AdminHeader({
 
               {showProfile && userProfile && (
                 <div
-                  className={`absolute right-0 mt-2 w-80 ${dropdownBg} rounded-xl shadow-2xl backdrop-blur-xl overflow-hidden animate-slideDown`}
+                  className={`absolute right-0 mt-2 w-80 ${dropdownBg} rounded-xl shadow-2xl backdrop-blur-xl overflow-hidden animate-slideDown border`}
                 >
                   <div
                     className={`p-4 ${isDark ? "bg-gradient-to-br from-purple-600/20 to-pink-600/20 border-b border-white/10" : "bg-gradient-to-br from-purple-100 to-pink-100 border-b border-purple-200"}`}
                   >
                     <div className="flex items-start gap-4">
-                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg overflow-hidden">
                         {!userProfile.avatar ? (
                           <User className="w-8 h-8 text-white" />
                         ) : (
                           <img
                             src={userProfile.avatar}
                             alt="User avatar"
-                            className="w-full h-full object-cover rounded-full"
+                            className="w-full h-full object-cover"
                           />
                         )}
                       </div>
@@ -359,19 +356,19 @@ export default function AdminHeader({
                   <div className="p-4 space-y-3">
                     {userProfile.email && (
                       <div className="flex items-center gap-3 text-sm">
-                        <Mail className="w-4 h-4 text-gray-400" />
+                        <Mail className="w-4 h-4 text-gray-400 flex-shrink-0" />
                         <span className={textMuted}>{userProfile.email}</span>
                       </div>
                     )}
                     {userProfile.phone && (
                       <div className="flex items-center gap-3 text-sm">
-                        <Wifi className="w-4 h-4 text-gray-400" />
+                        <Wifi className="w-4 h-4 text-gray-400 flex-shrink-0" />
                         <span className={textMuted}>{userProfile.phone}</span>
                       </div>
                     )}
                     {userProfile.joinedDate && (
                       <div className="flex items-center gap-3 text-sm">
-                        <Clock className="w-4 h-4 text-gray-400" />
+                        <Clock className="w-4 h-4 text-gray-400 flex-shrink-0" />
                         <span className={textMuted}>
                           Joined {userProfile.joinedDate}
                         </span>
@@ -379,17 +376,14 @@ export default function AdminHeader({
                     )}
                     {userProfile.lastLogin && (
                       <div className="flex items-center gap-3 text-sm">
-                        <Eye className="w-4 h-4 text-gray-400" />
+                        <Eye className="w-4 h-4 text-gray-400 flex-shrink-0" />
                         <span className={textMuted}>
                           Last login {userProfile.lastLogin}
                         </span>
                       </div>
                     )}
-
                     {userProfile.bio && (
-                      <div
-                        className={`pt-3 border-t ${isDark ? "border-white/10" : "border-purple-200"}`}
-                      >
+                      <div className={`pt-3 border-t ${divider}`}>
                         <p className="text-sm text-gray-400 italic">
                           &quot;{userProfile.bio}&quot;
                         </p>
@@ -397,7 +391,7 @@ export default function AdminHeader({
                     )}
 
                     <div
-                      className={`pt-3 border-t ${isDark ? "border-white/10" : "border-purple-200"} grid grid-cols-2 gap-2`}
+                      className={`pt-3 border-t ${divider} grid grid-cols-2 gap-2`}
                     >
                       <button
                         onClick={() => router.push("/admin/user/profile")}
@@ -411,22 +405,71 @@ export default function AdminHeader({
                         className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm transition-colors flex items-center justify-center gap-2"
                       >
                         <Settings className="w-4 h-4" />
-                        Edit Settings
+                        Settings
                       </button>
                     </div>
+
+                    {/* Logout inside profile */}
+                    <button
+                      onClick={() => {
+                        setShowProfile(false);
+                        onLogout();
+                      }}
+                      className={`w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 border
+                        ${
+                          isDark
+                            ? "bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-400 hover:text-red-300"
+                            : "bg-red-50 hover:bg-red-100 border-red-200 text-red-600 hover:text-red-700"
+                        }`}
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign Out
+                    </button>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Logout Button */}
-            <button
-              onClick={onLogout}
-              className="p-2 bg-red-500/20 hover:bg-red-500/30 rounded-lg transition-all active:scale-95"
-              title="Logout"
+            {/* Window Controls */}
+            <div
+              className={`hidden sm:flex items-center gap-0.5 ml-1 pl-3 border-l ${divider}`}
             >
-              <LogOut className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
-            </button>
+              <button
+                onClick={() => window.electron?.minimizeWindow()}
+                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-90 group ${bgHover}`}
+                title="Minimize"
+              >
+                <Minus
+                  className={`w-3.5 h-3.5 ${iconColor} group-hover:text-purple-500 transition-colors`}
+                />
+              </button>
+
+              <button
+                onClick={() => window.electron?.maximizeWindow()}
+                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-90 group ${bgHover}`}
+                title={isMaximized ? "Restore" : "Maximize"}
+              >
+                {isMaximized ? (
+                  <Minimize2
+                    className={`w-3.5 h-3.5 ${iconColor} group-hover:text-purple-500 transition-colors`}
+                  />
+                ) : (
+                  <Maximize2
+                    className={`w-3.5 h-3.5 ${iconColor} group-hover:text-purple-500 transition-colors`}
+                  />
+                )}
+              </button>
+
+              <button
+                onClick={() => window.electron?.closeWindow()}
+                className="w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-90 group hover:bg-red-500/15"
+                title="Close"
+              >
+                <X
+                  className={`w-3.5 h-3.5 ${iconColor} group-hover:text-red-500 transition-colors`}
+                />
+              </button>
+            </div>
           </div>
         </div>
 

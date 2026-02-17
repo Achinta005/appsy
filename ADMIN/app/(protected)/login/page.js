@@ -6,6 +6,7 @@ import * as THREE from "three";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { cn } from "../lib/util";
+import Link from "next/link";
 import {
   IconEye,
   IconEyeOff,
@@ -15,7 +16,9 @@ import {
   IconAlertCircle,
   IconCheck,
   IconX,
+  IconArrowLeft,
 } from "@tabler/icons-react";
+import { Minus, Maximize2, X } from "lucide-react";
 import { useAuth } from "../context/authContext";
 import React, { Suspense } from "react";
 
@@ -40,13 +43,28 @@ const LoginContent = () => {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState("");
+  const [savedCredentials, setSavedCredentials] = useState(null);
+  const [rememberMe, setRememberMe] = useState(false);
 
-  // ✅ Already logged in → go to admin
   useEffect(() => {
     if (!isAuthLoading && isAuthenticated) router.replace("/admin");
   }, [isAuthenticated, isAuthLoading, router]);
 
-  // Validation functions
+  useEffect(() => {
+    const loadCredentials = async () => {
+      const creds = await window.electron?.getCredentials();
+      if (creds) {
+        setSavedCredentials(creds);
+        setFormData({
+          email: creds.email,
+          password: creds.password,
+        });
+        setRememberMe(true);
+      }
+    };
+    loadCredentials();
+  }, []);
+
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email) return "Email is required";
@@ -74,30 +92,16 @@ const LoginContent = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setError("");
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    // Validate on change if field has been touched
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (touched[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: validateField(name, value),
-      }));
+      setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
     }
   };
 
   const handleBlur = (e) => {
     const { name, value } = e.target;
-    setTouched((prev) => ({
-      ...prev,
-      [name]: true,
-    }));
-    setErrors((prev) => ({
-      ...prev,
-      [name]: validateField(name, value),
-    }));
+    setTouched((prev) => ({ ...prev, [name]: true }));
+    setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
     setFocusedField("");
   };
 
@@ -110,20 +114,14 @@ const LoginContent = () => {
       email: validateEmail(formData.email),
       password: validatePassword(formData.password),
     };
-
     setErrors(newErrors);
-    setTouched({
-      email: true,
-      password: true,
-    });
-
+    setTouched({ email: true, password: true });
     return !Object.values(newErrors).some((error) => error !== "");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate all fields
     if (!validateForm()) {
       setError("Please fix the errors before submitting");
       return;
@@ -133,7 +131,6 @@ const LoginContent = () => {
     setError("");
 
     try {
-      // Normalize email to match backend processing
       const normalizedData = {
         email: formData.email.toLowerCase().trim(),
         password: formData.password,
@@ -157,12 +154,19 @@ const LoginContent = () => {
         return;
       }
 
-      // Successful login
       if (data.data.session) {
         setAccessToken(data.data.session.access_token);
         setIsAuthenticated(true);
 
-        // Add a small delay for better UX
+        if (rememberMe) {
+          window.electron?.saveCredentials({
+            email: normalizedData.email,
+            password: normalizedData.password,
+          });
+        } else {
+          window.electron?.clearCredentials();
+        }
+
         setTimeout(() => {
           router.push("/admin");
         }, 300);
@@ -213,10 +217,7 @@ const LoginContent = () => {
     };
 
     loadVanta();
-
-    return () => {
-      if (effect) effect.destroy();
-    };
+    return () => { if (effect) effect.destroy(); };
   }, []);
 
   return (
@@ -224,7 +225,45 @@ const LoginContent = () => {
       <div ref={vantaRef} className="fixed inset-0 -z-10 pointer-events-none" />
 
       <div className="min-h-screen w-full flex items-center justify-center p-4 relative">
-        {/* Floating elements for visual interest */}
+        <div
+          className="fixed top-0 left-0 right-32 h-10 z-40"
+          style={{ WebkitAppRegion: "drag" }}
+        />
+        <div
+          className="fixed top-0 right-0 z-50 flex items-center gap-0.5 p-1"
+          style={{ WebkitAppRegion: "no-drag" }}
+        >
+          <button
+            onClick={() => window.electron?.minimizeWindow()}
+            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-90 group hover:bg-white/10"
+            title="Minimize"
+          >
+            <Minus className="w-3.5 h-3.5 text-white/50 group-hover:text-white transition-colors" />
+          </button>
+          <button
+            onClick={() => window.electron?.maximizeWindow()}
+            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-90 group hover:bg-white/10"
+            title="Maximize"
+          >
+            <Maximize2 className="w-3.5 h-3.5 text-white/50 group-hover:text-white transition-colors" />
+          </button>
+          <button
+            onClick={() => window.electron?.closeWindow()}
+            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-90 group hover:bg-red-500/20"
+            title="Close"
+          >
+            <X className="w-3.5 h-3.5 text-white/50 group-hover:text-red-400 transition-colors" />
+          </button>
+        </div>
+
+        <Link
+          href="/"
+          className="absolute top-6 left-6 flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white rounded-lg transition-all duration-300 hover:scale-105 group"
+        >
+          <IconArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          Home
+        </Link>
+
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-10 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-float"></div>
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-float animation-delay-2000"></div>
@@ -232,7 +271,6 @@ const LoginContent = () => {
         </div>
 
         <div className="relative z-10 w-full max-w-md">
-          {/* Header Section */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-indigo-500/20 border border-cyan-500/30 mb-4 backdrop-blur-sm">
               <IconShield className="w-8 h-8 text-cyan-400" />
@@ -245,14 +283,20 @@ const LoginContent = () => {
             </p>
           </div>
 
-          {/* Login Form */}
           <form
             onSubmit={handleSubmit}
             className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-8 shadow-2xl space-y-6 relative overflow-hidden"
             noValidate
           >
-            {/* Gradient overlay on focus */}
             <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-indigo-500/5 opacity-0 transition-opacity duration-500 pointer-events-none group-focus-within:opacity-100"></div>
+
+            {/* Saved credentials indicator */}
+            {savedCredentials && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-cyan-500/10 border border-cyan-500/20 rounded-lg">
+                <IconCheck className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
+                <p className="text-xs text-cyan-400">Credentials loaded</p>
+              </div>
+            )}
 
             {/* Email Field */}
             <LabelInputContainer>
@@ -277,15 +321,11 @@ const LoginContent = () => {
                     errors.email && touched.email
                       ? "border-red-500/50 focus:border-red-500/50 focus:ring-red-500/20"
                       : "border-white/10 focus:border-cyan-500/50 focus:ring-cyan-500/20",
-                    focusedField === "email" &&
-                      !errors.email &&
-                      "shadow-lg shadow-cyan-500/10",
+                    focusedField === "email" && !errors.email && "shadow-lg shadow-cyan-500/10",
                   )}
                   placeholder="Enter your email"
                   aria-invalid={errors.email && touched.email}
-                  aria-describedby={
-                    errors.email && touched.email ? "email-error" : undefined
-                  }
+                  aria-describedby={errors.email && touched.email ? "email-error" : undefined}
                 />
                 {errors.email && touched.email && (
                   <IconX className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-red-400" />
@@ -295,10 +335,7 @@ const LoginContent = () => {
                 )}
               </div>
               {errors.email && touched.email && (
-                <p
-                  id="email-error"
-                  className="text-xs text-red-400 flex items-center gap-1 mt-1"
-                >
+                <p id="email-error" className="text-xs text-red-400 flex items-center gap-1 mt-1">
                   <IconAlertCircle className="w-3 h-3" />
                   {errors.email}
                 </p>
@@ -328,17 +365,11 @@ const LoginContent = () => {
                     errors.password && touched.password
                       ? "border-red-500/50 focus:border-red-500/50 focus:ring-red-500/20"
                       : "border-white/10 focus:border-cyan-500/50 focus:ring-cyan-500/20",
-                    focusedField === "password" &&
-                      !errors.password &&
-                      "shadow-lg shadow-cyan-500/10",
+                    focusedField === "password" && !errors.password && "shadow-lg shadow-cyan-500/10",
                   )}
                   placeholder="Enter your password"
                   aria-invalid={errors.password && touched.password}
-                  aria-describedby={
-                    errors.password && touched.password
-                      ? "password-error"
-                      : undefined
-                  }
+                  aria-describedby={errors.password && touched.password ? "password-error" : undefined}
                 />
                 <button
                   type="button"
@@ -355,10 +386,7 @@ const LoginContent = () => {
               </div>
               <div className="flex items-center justify-between">
                 {errors.password && touched.password ? (
-                  <p
-                    id="password-error"
-                    className="text-xs text-red-400 flex items-center gap-1 mt-1"
-                  >
+                  <p id="password-error" className="text-xs text-red-400 flex items-center gap-1 mt-1">
                     <IconAlertCircle className="w-3 h-3" />
                     {errors.password}
                   </p>
@@ -383,6 +411,20 @@ const LoginContent = () => {
                 <p>{error}</p>
               </div>
             )}
+
+            {/* Remember Me */}
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="rememberMe"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 accent-cyan-500"
+              />
+              <label htmlFor="rememberMe" className="text-sm text-neutral-400">
+                Remember me
+              </label>
+            </div>
 
             {/* Submit Button */}
             <button
@@ -415,9 +457,7 @@ const LoginContent = () => {
             {/* Divider */}
             <div className="flex items-center gap-4 my-2">
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-              <span className="text-xs text-neutral-500 uppercase tracking-widest font-medium">
-                Or
-              </span>
+              <span className="text-xs text-neutral-500 uppercase tracking-widest font-medium">Or</span>
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
             </div>
 
@@ -442,64 +482,29 @@ const LoginContent = () => {
             <div className="flex items-center justify-center gap-4 text-xs text-neutral-600">
               <span>© 2026 Admin Panel</span>
               <span>•</span>
-              <a href="#" className="hover:text-cyan-400 transition-colors">
-                Privacy
-              </a>
+              <a href="#" className="hover:text-cyan-400 transition-colors">Privacy</a>
               <span>•</span>
-              <a href="#" className="hover:text-cyan-400 transition-colors">
-                Terms
-              </a>
+              <a href="#" className="hover:text-cyan-400 transition-colors">Terms</a>
             </div>
           </div>
         </div>
 
         <style jsx>{`
           @keyframes float {
-            0%,
-            100% {
-              transform: translateY(0px) translateX(0px);
-            }
-            25% {
-              transform: translateY(-20px) translateX(10px);
-            }
-            50% {
-              transform: translateY(-30px) translateX(-10px);
-            }
-            75% {
-              transform: translateY(-15px) translateX(15px);
-            }
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            25% { transform: translateY(-20px) translateX(10px); }
+            50% { transform: translateY(-30px) translateX(-10px); }
+            75% { transform: translateY(-15px) translateX(15px); }
           }
           @keyframes shake {
-            0%,
-            100% {
-              transform: translateX(0);
-            }
-            10%,
-            30%,
-            50%,
-            70%,
-            90% {
-              transform: translateX(-4px);
-            }
-            20%,
-            40%,
-            60%,
-            80% {
-              transform: translateX(4px);
-            }
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+            20%, 40%, 60%, 80% { transform: translateX(4px); }
           }
-          .animate-float {
-            animation: float 20s ease-in-out infinite;
-          }
-          .animation-delay-2000 {
-            animation-delay: 2000ms;
-          }
-          .animation-delay-4000 {
-            animation-delay: 4000ms;
-          }
-          .animate-shake {
-            animation: shake 0.5s ease-in-out;
-          }
+          .animate-float { animation: float 20s ease-in-out infinite; }
+          .animation-delay-2000 { animation-delay: 2000ms; }
+          .animation-delay-4000 { animation-delay: 4000ms; }
+          .animate-shake { animation: shake 0.5s ease-in-out; }
         `}</style>
       </div>
     </>
@@ -521,9 +526,7 @@ function LoginPageWrapper() {
         <div className="min-h-screen w-full bg-black flex items-center justify-center">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-neutral-400 font-medium">
-              Loading secure portal...
-            </p>
+            <p className="text-neutral-400 font-medium">Loading secure portal...</p>
           </div>
         </div>
       }

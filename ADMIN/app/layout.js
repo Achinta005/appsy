@@ -2,7 +2,7 @@ import "./globals.css";
 import UpdateStatus from "@/components/UpdateStatus";
 
 export const metadata = {
-  title: "ADMIN PANEL",
+  title: "",
   description: "Secure Access Only",
 };
 

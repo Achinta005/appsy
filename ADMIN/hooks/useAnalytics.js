@@ -58,6 +58,7 @@ export const useAnalytics = (days = 30) => {
         `${process.env.NEXT_PUBLIC_SERVER_API_URL}/analytics/dashboard?days=${days}`,
       );
       const metrics = await res.json();
+      console.log("dashboard Metrics",metrics)
       setData((prev) => ({ ...prev, dashboardMetrics: metrics.data }));
     } catch (error) {
       setErrors((prev) => ({ ...prev, dashboardMetrics: error.message }));

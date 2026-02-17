@@ -30,7 +30,7 @@ export default function AdminSidebar({
   }, []);
 
   const filteredFeatures = Object.entries(adminFeatures).filter(
-    ([_, feature]) => feature.roles.includes(userRole)
+    ([_, feature]) => feature.roles.includes(userRole),
   );
 
   // Theme-based styles
@@ -68,6 +68,7 @@ export default function AdminSidebar({
       <button
         onClick={() => setIsMobileOpen(!isMobileOpen)}
         className={`lg:hidden fixed top-4 left-4 z-50 p-2 ${mobileBtnBg} text-white rounded-lg shadow-lg transition-colors`}
+        style={{ WebkitAppRegion: "no-drag" }}
       >
         {isMobileOpen ? (
           <X className="w-6 h-6" />
@@ -172,8 +173,8 @@ export default function AdminSidebar({
                     isActive
                       ? "text-white"
                       : isDark
-                      ? "text-gray-400 group-hover:text-white"
-                      : "text-gray-500 group-hover:text-gray-900"
+                        ? "text-gray-400 group-hover:text-white"
+                        : "text-gray-500 group-hover:text-gray-900"
                   }`}
                 />
 

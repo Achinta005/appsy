@@ -3,7 +3,7 @@ const { parse } = require('url');
 const next = require('next');
 const path = require('path');
 
-const dev = false; // Always production mode for Electron
+const dev = false;
 const hostname = 'localhost';
 const port = 3000;
 

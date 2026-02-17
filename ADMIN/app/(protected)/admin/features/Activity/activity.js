@@ -85,6 +85,7 @@ export default function ActivitiesPage() {
       );
       if (response.ok) {
         const data = await response.json();
+        
         setStats(data);
       }
     } catch (error) {

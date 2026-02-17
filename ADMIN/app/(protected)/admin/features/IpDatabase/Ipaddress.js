@@ -48,7 +48,7 @@ const Ipaddress = () => {
       }
     };
     getIps();
-  }, [apiFetch]);
+  }, []);
 
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return "N/A";

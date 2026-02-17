@@ -16,6 +16,9 @@ import {
   CheckCircle,
   Layers,
   Terminal,
+  Minus,
+  Maximize2,
+  X,
 } from "lucide-react";
 
 export default function HomePage() {
@@ -24,7 +27,7 @@ export default function HomePage() {
 
   // Handle Admin Login click
   const handleAdminLogin = () => {
-    console.log("api",process.env.NEXT_PUBLIC_SERVER_API_URL)
+    console.log("api", process.env.NEXT_PUBLIC_SERVER_API_URL);
     if (isAuthenticated) {
       router.push("/admin");
     } else {
@@ -39,6 +42,42 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 relative overflow-hidden">
+      {/* Thin draggable strip at top - only empty area */}
+      <div
+        className="fixed top-0 left-0 right-32 h-10 z-40"
+        style={{ WebkitAppRegion: "drag" }}
+      />
+
+      {/* Window Controls - no-drag */}
+      <div
+        className="fixed top-0 right-0 z-50 flex items-center gap-0.5 p-1"
+        style={{ WebkitAppRegion: "no-drag" }}
+      >
+        <button
+          onClick={() => window.electron?.minimizeWindow()}
+          className="w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-90 group hover:bg-white/10"
+          title="Minimize"
+        >
+          <Minus className="w-3.5 h-3.5 text-white/50 group-hover:text-white transition-colors" />
+        </button>
+
+        <button
+          onClick={() => window.electron?.maximizeWindow()}
+          className="w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-90 group hover:bg-white/10"
+          title="Maximize"
+        >
+          <Maximize2 className="w-3.5 h-3.5 text-white/50 group-hover:text-white transition-colors" />
+        </button>
+
+        <button
+          onClick={() => window.electron?.closeWindow()}
+          className="w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-90 group hover:bg-red-500/20"
+          title="Close"
+        >
+          <X className="w-3.5 h-3.5 text-white/50 group-hover:text-red-400 transition-colors" />
+        </button>
+      </div>
+
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse"></div>
@@ -56,7 +95,6 @@ export default function HomePage() {
         {/* Hero Section */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
           <div className="text-center mb-16">
-            {/* Logo/Icon */}
             <div className="inline-flex items-center justify-center gap-3 mb-6">
               <div className="relative">
                 <Shield className="w-16 h-16 text-cyan-400 animate-pulse" />
@@ -64,20 +102,17 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Main Heading */}
             <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-cyan-200 to-indigo-200 bg-clip-text text-transparent">
               Admin Dashboard
               <br />
               <span className="text-4xl md:text-6xl">Centralized Control</span>
             </h1>
 
-            {/* Subheading */}
             <p className="text-xl md:text-2xl text-indigo-200 mb-12 max-w-3xl mx-auto leading-relaxed">
               Manage your entire system from one powerful interface. Monitor,
               analyze, and control with real-time insights.
             </p>
 
-            {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <a
                 href="/register"
@@ -142,7 +177,6 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold text-center text-white mb-12">
               How It Works
             </h2>
-
             <div className="grid md:grid-cols-3 gap-8">
               <div className="text-center">
                 <div className="bg-gradient-to-br from-indigo-500 to-cyan-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-2xl shadow-lg">
@@ -192,7 +226,6 @@ export default function HomePage() {
                 </div>
                 <p className="text-indigo-200">System Uptime</p>
               </div>
-
               <div>
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <Database className="w-6 h-6 text-cyan-300" />
@@ -200,7 +233,6 @@ export default function HomePage() {
                 </div>
                 <p className="text-indigo-200">Records Processed</p>
               </div>
-
               <div>
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <CheckCircle className="w-6 h-6 text-blue-300" />

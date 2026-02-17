@@ -1121,6 +1121,8 @@ export default function EnhancedDashboard({ onFeatureSelect }) {
   const unresolvedSecurityEvents =
     analyticsData.dashboardMetrics?.security?.unresolved?.[0]?.count || 0;
 
+    
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Animated Background Layer */}

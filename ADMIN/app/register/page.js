@@ -4,10 +4,9 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import * as THREE from "three";
-import { cn } from "../lib/util";
+import { cn } from "../(protected)/lib/util";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import useApi from "@/services/authservices";
 import {
   IconEye,
   IconEyeOff,
@@ -21,6 +20,7 @@ import {
   IconSparkles,
   IconX,
 } from "@tabler/icons-react";
+import { Minus, Maximize2, X } from "lucide-react";
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -44,7 +44,6 @@ const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState("");
   const router = useRouter();
-  const apiFetch = useApi();
 
   // Validation functions matching backend rules
   const validateEmail = (email) => {
@@ -160,7 +159,7 @@ const RegisterPage = () => {
         fullName: formData.fullName.trim(),
       };
 
-      const response = await apiFetch(
+      const response = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_API_URL}/auth/register`,
         {
           method: "POST",
@@ -249,7 +248,39 @@ const RegisterPage = () => {
   return (
     <>
       <div ref={vantaRef} className="fixed inset-0 -z-10 pointer-events-none" />
+        <div
+          className="fixed top-0 left-0 right-32 h-10 z-40"
+          style={{ WebkitAppRegion: "drag" }}
+        />
+        {/* Window Controls - no-drag */}
+        <div
+          className="fixed top-0 right-0 z-50 flex items-center gap-0.5 p-1"
+          style={{ WebkitAppRegion: "no-drag" }}
+        >
+          <button
+            onClick={() => window.electron?.minimizeWindow()}
+            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-90 group hover:bg-white/10"
+            title="Minimize"
+          >
+            <Minus className="w-3.5 h-3.5 text-white/50 group-hover:text-white transition-colors" />
+          </button>
 
+          <button
+            onClick={() => window.electron?.maximizeWindow()}
+            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-90 group hover:bg-white/10"
+            title="Maximize"
+          >
+            <Maximize2 className="w-3.5 h-3.5 text-white/50 group-hover:text-white transition-colors" />
+          </button>
+
+          <button
+            onClick={() => window.electron?.closeWindow()}
+            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-90 group hover:bg-red-500/20"
+            title="Close"
+          >
+            <X className="w-3.5 h-3.5 text-white/50 group-hover:text-red-400 transition-colors" />
+          </button>
+        </div>
       {/* Floating background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-float"></div>
