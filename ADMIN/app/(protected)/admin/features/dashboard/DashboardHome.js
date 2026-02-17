@@ -415,70 +415,270 @@ const UserGrowthChart = ({ data, loading, theme }) => {
 // ==================== LOGIN METHODS CHART ====================
 const LoginMethodsChart = ({ data, loading, theme }) => {
   const isDark = theme === "dark";
-  const cardBg = isDark
-    ? "bg-white/10 border-white/20"
-    : "bg-white border-gray-200";
-  const textPrimary = isDark ? "text-white" : "text-gray-900";
-  const textMuted = isDark ? "text-gray-400" : "text-gray-600";
 
-  const chartData =
-    data?.map((item, index) => ({
-      name: item.method,
-      value: item.count,
-      color: Object.values(COLORS)[index % Object.values(COLORS).length],
-    })) || [];
+  const s = {
+    card: isDark ? "bg-white/10 border-white/20" : "bg-white border-gray-200",
+    text1: isDark ? "text-white" : "text-gray-900",
+    text2: isDark ? "text-gray-400" : "text-gray-500",
+    item: isDark ? "bg-white/5" : "bg-gray-50",
+    tip: isDark ? "#0f172a" : "#ffffff",
+    tipBdr: isDark ? "#1e293b" : "#e2e8f0",
+  };
+
+  const colorValues = Object.values(COLORS);
+
+  const methodChartData =
+    data
+      ?.map((item, i) => ({
+        name: item.method,
+        value: Number(item.total) || 0,
+        color: colorValues[i % colorValues.length],
+      }))
+      .filter((d) => d.value > 0) || [];
+
+  const outcomeChartData = data
+    ? [
+        {
+          name: "Successful",
+          value: data.reduce((s, i) => s + (i.successful || 0), 0),
+          color: COLORS.emerald,
+        },
+        {
+          name: "Failed",
+          value: data.reduce((s, i) => s + (i.failed || 0), 0),
+          color: COLORS.red,
+        },
+      ].filter((d) => d.value > 0)
+    : [];
+
+  const totalMethods = methodChartData.reduce((s, d) => s + d.value, 0);
+  const totalOutcomes = outcomeChartData.reduce((s, d) => s + d.value, 0);
+  const successPct =
+    totalOutcomes > 0
+      ? (
+          ((outcomeChartData.find((d) => d.name === "Successful")?.value || 0) /
+            totalOutcomes) *
+          100
+        ).toFixed(0)
+      : null;
+
+  const renderLabel = ({
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    percent,
+  }) => {
+    if (percent < 0.08) return null;
+    const r = innerRadius + (outerRadius - innerRadius) * 0.55;
+    const x = cx + r * Math.cos((-midAngle * Math.PI) / 180);
+    const y = cy + r * Math.sin((-midAngle * Math.PI) / 180);
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="#fff"
+        textAnchor="middle"
+        dominantBaseline="central"
+        style={{ fontSize: 11, fontWeight: 700 }}
+      >
+        {`${(percent * 100).toFixed(0)}%`}
+      </text>
+    );
+  };
+
+  const DonutCenter = ({ total, label }) => (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        pointerEvents: "none",
+      }}
+    >
+      <span
+        style={{
+          fontSize: 20,
+          fontWeight: 800,
+          letterSpacing: "-0.5px",
+          lineHeight: 1,
+          color: isDark ? "#f0f4ff" : "#0f172a",
+        }}
+      >
+        {total.toLocaleString()}
+      </span>
+      <span
+        style={{
+          fontSize: 10,
+          textTransform: "uppercase",
+          letterSpacing: "0.08em",
+          color: isDark ? "#64748b" : "#94a3b8",
+          marginTop: 3,
+        }}
+      >
+        {label}
+      </span>
+    </div>
+  );
+
+  const DonutPanel = ({ title, badge, data: chartData, total, noDataMsg }) => (
+    <div className={`${s.item} rounded-xl p-4 flex flex-col gap-3`}>
+      <div className="flex items-center justify-between">
+        <span className={`text-sm font-semibold ${s.text1}`}>{title}</span>
+        {badge && (
+          <span
+            className="text-xs font-semibold px-2 py-0.5 rounded-full"
+            style={{ background: "rgba(16,185,129,0.12)", color: "#10b981" }}
+          >
+            {badge}
+          </span>
+        )}
+      </div>
+
+      {chartData.length > 0 ? (
+        <>
+          <div style={{ position: "relative", height: 180 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <RePieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={55}
+                  outerRadius={82}
+                  paddingAngle={3}
+                  dataKey="value"
+                  labelLine={false}
+                  label={renderLabel}
+                  strokeWidth={0}
+                >
+                  {chartData.map((entry, i) => (
+                    <Cell
+                      key={i}
+                      fill={entry.color}
+                      style={{
+                        filter: `drop-shadow(0 0 5px ${entry.color}55)`,
+                      }}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    background: s.tip,
+                    border: `1px solid ${s.tipBdr}`,
+                    borderRadius: 10,
+                    fontSize: 12,
+                  }}
+                  formatter={(val, name) => [val.toLocaleString(), name]}
+                />
+              </RePieChart>
+            </ResponsiveContainer>
+            <DonutCenter total={total} label="total" />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            {chartData.map((item) => (
+              <div
+                key={item.name}
+                className="flex items-center justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  <span
+                    style={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: 2,
+                      display: "inline-block",
+                      background: item.color,
+                      boxShadow: `0 0 5px ${item.color}88`,
+                    }}
+                  />
+                  <span className={`text-xs ${s.text2}`}>{item.name}</span>
+                </div>
+                <span className={`text-xs font-bold tabular-nums ${s.text1}`}>
+                  {item.value.toLocaleString()}
+                </span>
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <div
+          className={`h-[180px] flex items-center justify-center ${s.text2}`}
+        >
+          <p className="text-xs">{noDataMsg}</p>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div
-      className={`${cardBg} backdrop-blur-lg rounded-xl p-6 border transition-all shadow-sm h-full flex flex-col`}
+      className={`${s.card} backdrop-blur-lg rounded-xl p-5 border transition-all shadow-sm h-full flex flex-col gap-4`}
     >
-      <div className="flex items-center justify-between mb-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 bg-opacity-10">
-            <LogIn className="w-5 h-5 text-white" />
+          <div
+            className="p-2 rounded-lg"
+            style={{ background: "rgba(99,102,241,0.15)" }}
+          >
+            <LogIn className="w-4 h-4" style={{ color: "#6366f1" }} />
           </div>
           <div>
-            <h2 className={`text-xl font-bold ${textPrimary}`}>
-              Login Methods
-            </h2>
-            <p className={`text-xs ${textMuted} mt-0.5`}>
-              Authentication method distribution
+            <h2 className={`text-base font-bold ${s.text1}`}>Authentication</h2>
+            <p className={`text-xs mt-0.5 ${s.text2}`}>
+              Methods &amp; outcomes
             </p>
           </div>
         </div>
-      </div>
-
-      <div className="flex-1 min-h-0">
-        {chartData && chartData.length > 0 ? (
-          <ResponsiveContainer width="100%" height="100%">
-            <RePieChart>
-              <Pie
-                data={chartData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent }) =>
-                  `${name}: ${(percent * 100).toFixed(0)}%`
-                }
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </RePieChart>
-          </ResponsiveContainer>
-        ) : (
-          <div className="h-full flex items-center justify-center text-gray-400">
-            <div className="text-center">
-              <LogIn className="w-16 h-16 mx-auto mb-3 opacity-30" />
-              <p className="text-sm font-medium">No login data available</p>
-            </div>
+        {successPct && (
+          <div
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full"
+            style={{
+              background: "rgba(16,185,129,0.1)",
+              border: "1px solid rgba(16,185,129,0.2)",
+            }}
+          >
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                display: "inline-block",
+                background: "#10b981",
+                boxShadow: "0 0 6px #10b981",
+              }}
+            />
+            <span
+              className="text-xs font-semibold"
+              style={{ color: "#10b981" }}
+            >
+              {successPct}% success
+            </span>
           </div>
         )}
+      </div>
+
+      {/* Two donut panels */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 flex-1">
+        <DonutPanel
+          title="Login Methods"
+          data={methodChartData}
+          total={totalMethods}
+          noDataMsg="No method data"
+        />
+        <DonutPanel
+          title="Login Outcomes"
+          badge={successPct ? `${successPct}%` : null}
+          data={outcomeChartData}
+          total={totalOutcomes}
+          noDataMsg="No outcome data"
+        />
       </div>
     </div>
   );
@@ -681,6 +881,16 @@ const SecurityEventsTable = ({ events, loading, theme }) => {
     return colors[severity?.toLowerCase()] || "bg-gray-500";
   };
 
+  const unresolvedEvents =
+    events
+      ?.flatMap((group) =>
+        group.events.map((event) => ({
+          ...event,
+          severity: group._id,
+        })),
+      )
+      .filter((event) => event.resolved === false) || [];
+
   return (
     <div
       className={`${cardBg} backdrop-blur-lg rounded-xl p-6 border transition-all shadow-sm`}
@@ -730,15 +940,16 @@ const SecurityEventsTable = ({ events, loading, theme }) => {
             </tr>
           </thead>
           <tbody>
-            {events && events.length > 0 ? (
-              events.slice(0, 10).map((event) => (
+            {unresolvedEvents.length > 0 ? (
+              unresolvedEvents.slice(0, 10).map((event, index) => (
                 <tr
-                  key={event._id}
+                  key={`${event.eventType}-${event.timestamp}-${index}`}
                   className={`border-b ${rowBg} transition-colors`}
                 >
                   <td className={`py-3 px-4 text-sm ${textPrimary}`}>
                     {event.eventType}
                   </td>
+
                   <td className="py-3 px-4">
                     <span
                       className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium text-white ${getSeverityColor(event.severity)}`}
@@ -746,9 +957,11 @@ const SecurityEventsTable = ({ events, loading, theme }) => {
                       {event.severity}
                     </span>
                   </td>
+
                   <td className={`py-3 px-4 text-sm ${textMuted} font-mono`}>
-                    {event.ipAddress}
+                    {event.ipAddress ?? "—"}
                   </td>
+
                   <td className={`py-3 px-4 text-sm ${textMuted}`}>
                     {new Date(event.timestamp).toLocaleString()}
                   </td>
@@ -757,8 +970,9 @@ const SecurityEventsTable = ({ events, loading, theme }) => {
             ) : (
               <tr>
                 <td colSpan={4} className="py-8 text-center">
-                  <Shield className="w-12 h-12 mx-auto mb-2 opacity-30 text-gray-400" />
-                  <p className={`text-sm ${textMuted}`}>No security events</p>
+                  <p className={`text-sm ${textMuted}`}>
+                    No unresolved security events
+                  </p>
                 </td>
               </tr>
             )}
@@ -912,9 +1126,9 @@ const UserStatisticsCard = ({ stats, loading, theme }) => {
   const textMuted = isDark ? "text-gray-400" : "text-gray-600";
   const itemBg = isDark ? "bg-white/5" : "bg-gray-50";
 
-  const totalUsers = stats?.totalUsers || 0;
-  const activeUsers = stats?.activeUsers || 0;
-  const inactiveUsers = stats?.inactiveUsers || 0;
+  const totalUsers = stats?.total || 0;
+  const activeUsers = stats?.active || 0;
+  const inactiveUsers = stats?.inactive || 0;
   const activePercentage =
     totalUsers > 0 ? ((activeUsers / totalUsers) * 100).toFixed(1) : 0;
 
@@ -1120,8 +1334,6 @@ export default function EnhancedDashboard({ onFeatureSelect }) {
     analyticsData.dashboardMetrics?.logins?.total?.[0]?.count || 0;
   const unresolvedSecurityEvents =
     analyticsData.dashboardMetrics?.security?.unresolved?.[0]?.count || 0;
-
-    
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -1509,7 +1721,12 @@ export default function EnhancedDashboard({ onFeatureSelect }) {
               <StatCard
                 icon={Shield}
                 title="Security Events"
-                value={unresolvedSecurityEvents}
+                value={
+                  analyticsData.securityEvents?.reduce(
+                    (sum, group) => sum + Number(group.count),
+                    0,
+                  ) || 0
+                }
                 gradient="from-orange-500 to-red-500"
                 isLoading={analyticsLoading.dashboardMetrics}
                 error={analyticsErrors.dashboardMetrics}
@@ -1559,7 +1776,12 @@ export default function EnhancedDashboard({ onFeatureSelect }) {
               <StatCard
                 icon={Shield}
                 title="Security Events"
-                value={analyticsData.securityEvents?.length || 0}
+                value={
+                  analyticsData.securityEvents?.reduce(
+                    (sum, group) => sum + Number(group.count),
+                    0,
+                  ) || 0
+                }
                 gradient="from-red-500 to-orange-500"
                 isLoading={analyticsLoading.securityEvents}
                 error={analyticsErrors.securityEvents}
@@ -1607,7 +1829,7 @@ export default function EnhancedDashboard({ onFeatureSelect }) {
               <StatCard
                 icon={Users}
                 title="Total Users"
-                value={analyticsData.userStatistics?.totalUsers || 0}
+                value={analyticsData.userStatistics?.total || 0}
                 gradient="from-blue-500 to-purple-500"
                 isLoading={analyticsLoading.userStatistics}
                 error={analyticsErrors.userStatistics}
@@ -1616,7 +1838,7 @@ export default function EnhancedDashboard({ onFeatureSelect }) {
               <StatCard
                 icon={UserCheck}
                 title="Active Users"
-                value={analyticsData.userStatistics?.activeUsers || 0}
+                value={analyticsData.userStatistics?.active || 0}
                 gradient="from-emerald-500 to-teal-500"
                 isLoading={analyticsLoading.userStatistics}
                 error={analyticsErrors.userStatistics}
@@ -1625,7 +1847,7 @@ export default function EnhancedDashboard({ onFeatureSelect }) {
               <StatCard
                 icon={Users}
                 title="Inactive Users"
-                value={analyticsData.userStatistics?.inactiveUsers || 0}
+                value={analyticsData.userStatistics?.inactive || 0}
                 gradient="from-orange-500 to-red-500"
                 isLoading={analyticsLoading.userStatistics}
                 error={analyticsErrors.userStatistics}
