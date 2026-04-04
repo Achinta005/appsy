@@ -6,7 +6,7 @@ const path = require('path');
 const dev = false;
 const hostname = 'localhost';
 const port = 3000;
-
+   
 // Point to your ADMIN folder where Next.js app lives
 const app = next({ 
   dev, 
