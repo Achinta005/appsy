@@ -28,13 +28,11 @@ const pkg = require("./package.json");
 autoUpdater.autoDownload = false;
 autoUpdater.autoInstallOnAppQuit = true;
 
-// ✅ Correct way to pass token for private GitHub releases
 autoUpdater.setFeedURL({
   provider: "github",
-  owner: "Achinta005",
-  repo: "appsy",
-  private: true,
-  token: pkg.downloadToken,
+  owner: "Simpson-Funsaki",
+  repo: "Admin",
+  private: false
 });
 
 // 🎨 Window Configuration

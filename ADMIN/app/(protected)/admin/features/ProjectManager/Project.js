@@ -278,7 +278,6 @@ export default function ProjectManagerDashboard() {
         `${process.env.NEXT_PUBLIC_SERVER_API_URL}/portfolio/projects`,
       );
       const data = await res.json();
-      console.log("projects data:", data.data);
       setProjects(data.data || data || []);
     } catch {
       toast("Failed to fetch projects", "error");

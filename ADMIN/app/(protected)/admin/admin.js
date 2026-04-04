@@ -16,7 +16,12 @@ import { adminFeatures } from "./config/adminFeatures";
 const AdminPage = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeFeature, setActiveFeature] = useState(null);
+  const [activeFeature, setActiveFeature] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("lastActiveFeature") || null;
+    }
+    return null;
+  });
   const [ipAddress, setIpAddress] = useState("Loading...");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(256);
@@ -33,6 +38,11 @@ const AdminPage = () => {
   const { isLoading, isAuthenticated, logout } = useAuth();
 
   const apiFetch = useApi();
+
+  const handleFeatureSelect = useCallback((key) => {
+    localStorage.setItem("lastActiveFeature", key);
+    setActiveFeature(key);
+  }, []);
 
   // ── Resize handlers ──────────────────────────────────────────────────────────
   const handleResizeStart = useCallback(() => {
@@ -71,8 +81,13 @@ const AdminPage = () => {
   useEffect(() => {
     const initAdmin = async () => {
       setUser(userProfile);
-      const defaultFeature = getDefaultFeatureForRole(userProfile.roleSlug);
-      setActiveFeature(defaultFeature);
+      const saved = localStorage.getItem("lastActiveFeature");
+      const isValid =
+        saved && adminFeatures[saved]?.roles.includes(userProfile.roleSlug);
+      const defaultFeature = isValid
+        ? saved
+        : getDefaultFeatureForRole(userProfile.roleSlug);
+      handleFeatureSelect(defaultFeature);
 
       try {
         const data = await apiFetch(
@@ -81,13 +96,13 @@ const AdminPage = () => {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ user_id: userProfile.userId }),
-          }
+          },
         );
         const result = await data.json();
         setIpAddress(
           result && !result.error
             ? result.ip || "Not Available"
-            : "Not Available"
+            : "Not Available",
         );
       } catch {
         setIpAddress("Currently Not Available!");
@@ -103,7 +118,7 @@ const AdminPage = () => {
   const getDefaultFeatureForRole = (role) => {
     if (role === "admin") return "dashboard";
     const found = Object.entries(adminFeatures).find(([_, f]) =>
-      f.roles.includes(role)
+      f.roles.includes(role),
     );
     return found ? found[0] : null;
   };
@@ -181,8 +196,8 @@ const AdminPage = () => {
                 ? "bg-black/40"
                 : "bg-white/20"
               : isDark
-              ? "bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950"
-              : "bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50"
+                ? "bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950"
+                : "bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50"
           }`}
         />
       </div>
@@ -190,7 +205,7 @@ const AdminPage = () => {
       {/* Sidebar — transparent, blurs against fixed bg */}
       <AdminSidebar
         activeFeature={activeFeature}
-        onFeatureSelect={setActiveFeature}
+        onFeatureSelect={handleFeatureSelect}
         userRole={user.roleSlug}
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
@@ -201,13 +216,12 @@ const AdminPage = () => {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-
         {/* Header — transparent, blurs against fixed bg */}
         <AdminHeader
           user={user}
           ipAddress={ipAddress}
           onLogout={handleLogout}
-          onFeatureSelect={setActiveFeature}
+          onFeatureSelect={handleFeatureSelect}
           activities={activities}
           isConnected={isConnected}
           userProfile={userProfile}
@@ -219,7 +233,7 @@ const AdminPage = () => {
           <AdminFeatureRenderer
             featureKey={activeFeature}
             onBack={() =>
-              setActiveFeature(getDefaultFeatureForRole(user.roleSlug))
+              handleFeatureSelect(getDefaultFeatureForRole(user.roleSlug))
             }
             userRole={user.roleSlug}
             onFeatureSelect={setActiveFeature}
