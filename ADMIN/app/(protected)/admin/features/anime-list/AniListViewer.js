@@ -72,7 +72,7 @@ const { theme } = useBackgroundContext();
     setError("");
 
     try {
-      const res = await fetch(
+      const res = await apiFetch(
         `${process.env.NEXT_PUBLIC_SERVER_API_URL}/anime/fetch`,
         {
           method: "POST",
