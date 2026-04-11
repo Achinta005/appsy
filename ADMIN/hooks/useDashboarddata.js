@@ -28,7 +28,7 @@ const HEALTH_SERVICES = [
     healthUrl: process.env.NEXT_PUBLIC_SERVICE3_HEALTH,
     type: "FastAPI",
   },
-    {
+  {
     id: "service5",
     name: "Log Service",
     healthUrl: process.env.NEXT_PUBLIC_SERVICE5_HEALTH,
@@ -44,7 +44,6 @@ const DATA_SOURCES = {
     pollInterval: FIVE_MINUTES,
     transform: (res) => res?.data?.pagination?.total ?? 0,
   },
-
   projects: {
     endpoint: `${process.env.NEXT_PUBLIC_SERVER_API_URL}/project/count`,
     method: "fetch",
@@ -88,23 +87,25 @@ export function useDashboardData() {
   const [checkingServices, setCheckingServices] = useState({});
   const eventSourcesRef = useRef({});
   const pollIntervalsRef = useRef({});
-  const { accessToken } = useAuth();
   const { isAuthenticated } = useAuth();
   const apiFetch = useApi();
 
   // Check health of a single service (NO AUTH HEADER)
   const checkServiceHealth = useCallback(async (service) => {
     setCheckingServices((prev) => ({ ...prev, [service.id]: true }));
+
+    // ✅ start timer before fetch so duration is always accurate
+    const t0 = Date.now();
+
     try {
-      // Use regular fetch for health checks (no auth needed)
       const res = await fetch(service.healthUrl, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       });
 
-      if (!res.ok) throw new Error("Health check failed");
+      const duration = Date.now() - t0; // ✅ capture after fetch completes
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       setServiceHealth((prev) => ({
         ...prev,
@@ -112,18 +113,22 @@ export function useDashboardData() {
           status: "operational",
           name: service.name,
           type: service.type,
+          duration, // ✅ stored in state
           lastCheck: new Date().toISOString(),
         },
       }));
 
       return true;
     } catch (err) {
+      const duration = Date.now() - t0; // ✅ capture even on failure
+
       setServiceHealth((prev) => ({
         ...prev,
         [service.id]: {
           status: "down",
           name: service.name,
           type: service.type,
+          duration, // ✅ stored even on failure
           lastCheck: new Date().toISOString(),
           error: err.message,
         },
@@ -145,11 +150,9 @@ export function useDashboardData() {
   // Get overall service health status
   const getOverallHealth = useCallback(() => {
     const statuses = Object.values(serviceHealth).map((s) => s.status);
-
     if (statuses.length === 0) return "unknown";
     if (statuses.every((s) => s === "operational")) return "operational";
     if (statuses.some((s) => s === "down")) return "degraded";
-
     return "operational";
   }, [serviceHealth]);
 
@@ -161,23 +164,15 @@ export function useDashboardData() {
         setErrors((prev) => ({ ...prev, [key]: null }));
 
         const response = await apiFetch(config.endpoint, {
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         });
 
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch ${key}`);
-        }
+        if (!response.ok) throw new Error(`Failed to fetch ${key}`);
 
         const result = await response.json();
-
-
         const transformedData = config.transform
           ? config.transform(result)
           : result;
-
 
         setData((prev) => ({ ...prev, [key]: transformedData }));
       } catch (error) {
@@ -190,13 +185,12 @@ export function useDashboardData() {
     [apiFetch],
   );
 
-  // Setup SSE connection for real-time data (NO AUTH - SSE doesn't support headers well)
+  // Setup SSE connection for real-time data
   const setupSSE = useCallback((key, config) => {
     if (eventSourcesRef.current[key]) {
       eventSourcesRef.current[key].close();
     }
 
-    // Use endpoint directly without auth token
     const eventSource = new EventSource(config.endpoint);
 
     eventSource.onmessage = (event) => {
@@ -217,39 +211,27 @@ export function useDashboardData() {
       console.error(`SSE error for ${key}:`, error);
       setErrors((prev) => ({ ...prev, [key]: "Connection error" }));
       eventSource.close();
-
-      // Retry after 5 seconds
       setTimeout(() => setupSSE(key, config), 5000);
     };
 
     eventSourcesRef.current[key] = eventSource;
   }, []);
 
-  // Initialize all data sources and health checks
+  // Initialize health checks + polling
   useEffect(() => {
     checkAllServices();
-
-    // Setup health check polling (every 2 minutes)
-    const healthCheckInterval = setInterval(() => {
-      checkAllServices();
-    }, 120000);
-
-    return () => {
-      clearInterval(healthCheckInterval);
-    };
+    const healthCheckInterval = setInterval(checkAllServices, 120000);
+    return () => clearInterval(healthCheckInterval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Separate effect for authenticated data fetching
+  // Authenticated data fetching
   useEffect(() => {
-    // Don't fetch data if no accessToken
     if (!isAuthenticated) return;
 
-    // Fetch all data sources in parallel
     const fetchPromises = Object.entries(DATA_SOURCES).map(([key, config]) => {
-      if (config.method === "fetch") {
-        return fetchData(key, config);
-      } else if (config.method === "sse") {
+      if (config.method === "fetch") return fetchData(key, config);
+      if (config.method === "sse") {
         setupSSE(key, config);
         return Promise.resolve();
       }
@@ -259,45 +241,35 @@ export function useDashboardData() {
       console.log("Initial data fetch completed");
     });
 
-    // Setup polling for fetch-based sources
     Object.entries(DATA_SOURCES).forEach(([key, config]) => {
       if (config.method === "fetch" && config.pollInterval) {
-        pollIntervalsRef.current[key] = setInterval(() => {
-          fetchData(key, config);
-        }, config.pollInterval);
+        pollIntervalsRef.current[key] = setInterval(
+          () => fetchData(key, config),
+          config.pollInterval,
+        );
       }
     });
 
-    // Cleanup function
     return () => {
-      Object.values(pollIntervalsRef.current).forEach((interval) => {
-        clearInterval(interval);
-      });
-
-      Object.values(eventSourcesRef.current).forEach((eventSource) => {
-        eventSource.close();
-      });
+      Object.values(pollIntervalsRef.current).forEach(clearInterval);
+      Object.values(eventSourcesRef.current).forEach((es) => es.close());
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
-  // Manual refresh function
+  // Manual refresh for a single key
   const refresh = useCallback(
     (key) => {
       const config = DATA_SOURCES[key];
-      if (config && config.method === "fetch") {
-        fetchData(key, config);
-      }
+      if (config?.method === "fetch") fetchData(key, config);
     },
     [fetchData],
   );
 
-  // Refresh all fetch-based sources
+  // Refresh all fetch-based sources + health
   const refreshAll = useCallback(() => {
     Object.entries(DATA_SOURCES).forEach(([key, config]) => {
-      if (config.method === "fetch") {
-        fetchData(key, config);
-      }
+      if (config.method === "fetch") fetchData(key, config);
     });
     checkAllServices();
   }, [fetchData, checkAllServices]);
@@ -305,14 +277,14 @@ export function useDashboardData() {
   return {
     data: {
       ...data,
-      serviceHealth: getOverallHealth(),
+      overallHealth: getOverallHealth(), // ✅ renamed from serviceHealth to avoid confusion
     },
     loading: {
       ...loading,
       serviceHealth: Object.values(checkingServices).some(Boolean),
     },
     errors,
-    serviceHealth,
+    serviceHealth, // per-service map { id: { status, name, type, duration, lastCheck } }
     checkingServices,
     refresh,
     refreshAll,

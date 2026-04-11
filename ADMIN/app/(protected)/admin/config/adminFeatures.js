@@ -17,11 +17,11 @@ import {
 } from "lucide-react";
 import dynamic from "next/dynamic";
 
-// Import your feature components
-const EnhancedDashboard = dynamic(
-  () => import("../features/dashboard/DashboardHome"),
+const NewDashboard = dynamic(
+  () => import("../features/dashboard/newDashboard"),
   { ssr: false },
 );
+
 const ProjectManagerDashboard = dynamic(
   () => import("../features/ProjectManager/Project"),
   { ssr: false },
@@ -39,10 +39,6 @@ const ContactResponse = dynamic(
 );
 const WeeklyVisitsDashboard = dynamic(
   () => import("../features/VisitTracker/WeeklyVisitsDashboard"),
-  { ssr: false },
-);
-const RenderServiceDashboard = dynamic(
-  () => import("../features/Server/backendHealthCheck"),
   { ssr: false },
 );
 const Ipaddress = dynamic(() => import("../features/IpDatabase/Ipaddress"), {
@@ -63,9 +59,6 @@ const DriveVideoPlayer = dynamic(
 const RBACManagement = dynamic(() => import("../features/RBAC/page"), {
   ssr: false,
 });
-const ActivitiesPage = dynamic(() => import("../features/Activity/activity"), {
-  ssr: false,
-});
 const CombinedDashboard = dynamic(
   () => import("../features/routeDashboard/page"),
   { ssr: false },
@@ -78,162 +71,140 @@ const OllamaPage = dynamic(() => import("../features/LLM/page"), {
 });
 
 export const adminFeatures = {
-  dashboard: {
+  // ── System ────────────────────────────────────────────────────────────────
+  newDashboard: {
     title: "Dashboard",
     icon: LayoutDashboard,
-    gradient: "from-purple-500 to-pink-500",
-    component: EnhancedDashboard,
+    group: "system",
+    component: NewDashboard,
     roles: ["admin"],
     description: "Overview and analytics",
   },
-  render: {
-    title: "Server Status",
-    icon: Server,
-    gradient: "from-blue-500 to-purple-500",
-    image:
-      "https://res.cloudinary.com/dc1fkirb4/image/upload/v1763994657/render-dashboard_qyvptu.png",
-    component: RenderServiceDashboard,
-    roles: ["admin"],
-    description: "Monitor backend services",
-  },
+
+  // ── Access control ────────────────────────────────────────────────────────
   RBAC: {
     title: "RBAC",
     icon: UserLock,
-    gradient: "from-pink-500 to-teal-500",
+    group: "access",
     component: RBACManagement,
     roles: ["admin"],
-    description: "Role Based Access Control",
+    description: "Role based access control",
   },
-  OLLAMA: {
-    title: "OLLAMA",
-    icon: Brain,
-    gradient: "from-cyan-500 to-blue-500",
-    component: OllamaPage,
+  api: {
+    title: "API Keys",
+    icon: CloudCog,
+    group: "access",
+    component: ApiKeyManagement,
     roles: ["admin"],
-    description: "Chat With Local LLM",
+    description: "API keys for microservices",
   },
-  activity: {
-    title: "Recent Activities",
-    icon: Activity,
-    gradient: "from-indigo-500 to-blue-500",
-    component: ActivitiesPage,
+  routes: {
+    title: "Routes",
+    icon: Route,
+    group: "access",
+    component: CombinedDashboard,
     roles: ["admin"],
-    description: "Check Recent Activities",
+    description: "Route discovery",
   },
+
+  // ── Content ───────────────────────────────────────────────────────────────
   projects: {
-    title: "Manage Projects",
+    title: "Projects",
     icon: Folder,
-    gradient: "from-blue-500 to-purple-500",
-    image:
-      "https://res.cloudinary.com/dc1fkirb4/image/upload/v1755754879/a1_cqsx8x.jpg",
+    group: "content",
     component: ProjectManagerDashboard,
     roles: ["admin"],
     description: "Upload and manage projects",
   },
-
   blog: {
     title: "Blog Upload",
     icon: BookOpen,
-    gradient: "from-cyan-500 to-blue-500",
-    image:
-      "https://res.cloudinary.com/dc1fkirb4/image/upload/v1756037563/write-a-great-blog-post_ivsbz9.jpg",
+    group: "content",
     component: BlogUpload,
     roles: ["admin"],
     description: "Create and manage blog posts",
   },
-
   messages: {
-    title: "View Messages",
+    title: "Messages",
     icon: MessageSquare,
-    gradient: "from-indigo-500 to-blue-500",
-    image:
-      "https://res.cloudinary.com/dc1fkirb4/image/upload/v1755754879/a2_jjgzr3.png",
+    group: "content",
     component: ContactResponse,
     roles: ["admin"],
     description: "View contact form responses",
   },
 
+  // ── Analytics ─────────────────────────────────────────────────────────────
   visitTracker: {
-    title: "Track Portfolio Visits",
+    title: "Visit Tracker",
     icon: ChartColumn,
-    gradient: "from-pink-500 to-teal-500",
-    image:
-      "https://res.cloudinary.com/dc1fkirb4/image/upload/v1765812000/17-what_cc424d55614b9ae928b5_vzjkj1.png",
+    group: "analytics",
     component: WeeklyVisitsDashboard,
     roles: ["admin"],
     description: "Analytics and visitor tracking",
   },
-  routes: {
-    title: "Routes",
-    icon: Route,
-    gradient: "from-purple-500 to-pink-500",
-    component: CombinedDashboard,
-    roles: ["admin"],
-    description: "Routes Discovery",
-  },
-
   ip: {
     title: "IP Addresses",
     icon: Globe,
-    gradient: "from-green-500 to-teal-500",
-    image:
-      "https://res.cloudinary.com/dc1fkirb4/image/upload/v1761317160/ip-address-lookup_czcb34.jpg",
+    group: "analytics",
     component: Ipaddress,
     roles: ["admin"],
     description: "Track IP addresses",
   },
 
+  // ── Tools ─────────────────────────────────────────────────────────────────
+  OLLAMA: {
+    title: "Ollama LLM",
+    icon: Brain,
+    group: "tools",
+    component: OllamaPage,
+    roles: ["admin"],
+    description: "Chat with local LLM",
+  },
   converter: {
     title: "Binary Converter",
     icon: Binary,
-    gradient: "from-pink-500 to-teal-500",
-    image:
-      "https://www.wikihow.com/images/thumb/9/96/Convert-from-Binary-to-Decimal-Step-4-Version-6.jpg/v4-460px-Convert-from-Binary-to-Decimal-Step-4-Version-6.jpg",
+    group: "tools",
     component: ConversionPage,
     roles: ["admin", "viewer"],
     description: "Number system converter",
   },
-  api: {
-    title: "API Documentation",
-    icon: CloudCog,
-    gradient: "from-blue-500 to-purple-500",
-    component: ApiKeyManagement,
-    roles: ["admin"],
-    description: "Api Keys for MicroServices",
-  },
   alist: {
     title: "Anime List",
     icon: ListCheck,
-    gradient: "from-cyan-500 to-blue-500",
-    image: "",
+    group: "tools",
     component: AniListViewer,
     roles: ["admin"],
-    description: "Anime List from AniList",
+    description: "Anime list from AniList",
   },
   dvideo: {
     title: "Drive Videos",
     icon: FilePlay,
-    gradient: "from-indigo-500 to-blue-500",
-    image: "",
+    group: "tools",
     component: DriveVideoPlayer,
     roles: ["admin"],
-    description: "Drive Playable Videos",
+    description: "Drive playable videos",
   },
-
-  // notepad: {
-  //   title: "Notepad",
-  //   icon: FileText,
-  //   gradient: "from-purple-500 to-pink-500",
-  //   image: "https://res.cloudinary.com/dc1fkirb4/image/upload/v1755754879/a3_uutdd3.avif",
-  //   component: Notepad,
-  //   roles: ["admin", "editor"],
-  //   description: "Personal note-taking",
-  // },
 };
 
-// Helper to get features by role
-export const getFeaturesByRole = (role) => {
-  return Object.entries(adminFeatures)
-    .filter(([_, feature]) => feature.roles.includes(role))
+export const getFeaturesByRole = (role) =>
+  Object.entries(adminFeatures)
+    .filter(([, feature]) => feature.roles.includes(role))
     .reduce((acc, [key, feature]) => ({ ...acc, [key]: feature }), {});
+
+// Controls the display order of groups in the sidebar
+export const GROUP_ORDER = [
+  "system",
+  "access",
+  "content",
+  "analytics",
+  "tools",
+];
+
+// Human-readable group labels shown in sidebar
+export const GROUP_LABELS = {
+  system: "System",
+  access: "Access & API",
+  content: "Content",
+  analytics: "Analytics",
+  tools: "Tools",
 };

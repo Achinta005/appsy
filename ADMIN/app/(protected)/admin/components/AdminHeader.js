@@ -5,6 +5,7 @@ import {
   LogOut,
   Wifi,
   Bell,
+  BellOff,
   Mail,
   Eye,
   UserCog,
@@ -17,10 +18,13 @@ import {
   Maximize2,
   Minimize2,
   X,
+  ChevronRight,
+  Monitor,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import useUserProfile from "@/hooks/useUserdata";
 import { useBackgroundContext } from "../../context/BackgroundContext";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 export default function AdminHeader({
   user,
@@ -34,38 +38,81 @@ export default function AdminHeader({
 }) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showThemePicker, setShowThemePicker] = useState(false);
   const [lastViewedActivityId, setLastViewedActivityId] = useState(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
+  const [isCapacitor, setIsCapacitor] = useState(false);
+  const [themeMode, setThemeMode] = useState("system");
+  const [systemIsDark, setSystemIsDark] = useState(false);
 
   const notifRef = useRef(null);
   const profileRef = useRef(null);
+  const themeRef = useRef(null);
   const router = useRouter();
   const { updateUserProfile } = useUserProfile();
+  const { setTheme } = useBackgroundContext();
+  const { isSupported, isSubscribed, permission, subscribe, unsubscribe } =
+    usePushNotifications();
 
+  // ── Capacitor detection ──────────────────────────────────────────────────
+  useEffect(() => {
+    setIsCapacitor(
+      typeof window !== "undefined" &&
+        !!window.Capacitor &&
+        window.Capacitor.isNativePlatform(),
+    );
+  }, []);
+
+  // ── System theme detection ───────────────────────────────────────────────
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    setSystemIsDark(mq.matches);
+    const handler = (e) => {
+      setSystemIsDark(e.matches);
+      if (themeMode === "system") {
+        const resolved = e.matches ? "dark" : "light";
+        setTheme(resolved);
+        updateUserProfile({ NewTheme: resolved });
+      }
+    };
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, [themeMode]);
+
+  // ── Apply theme when themeMode changes ──────────────────────────────────
+  useEffect(() => {
+    const resolved =
+      themeMode === "system" ? (systemIsDark ? "dark" : "light") : themeMode;
+    setTheme(resolved);
+  }, [themeMode, systemIsDark]);
+
+  // ── Electron window state ────────────────────────────────────────────────
   useEffect(() => {
     if (typeof window !== "undefined" && window.electron?.onWindowState) {
-      window.electron.onWindowState((state) => {
-        setIsMaximized(state.isMaximized);
-      });
+      window.electron.onWindowState((state) =>
+        setIsMaximized(state.isMaximized),
+      );
     }
   }, []);
 
+  // ── Notification auto-mark ───────────────────────────────────────────────
   useEffect(() => {
     if (showNotifications && activities.length > 0 && !lastViewedActivityId) {
-      const latestActivityId = activities[0]._id || activities[0].id;
-      setLastViewedActivityId(latestActivityId);
+      setLastViewedActivityId(activities[0]._id || activities[0].id);
     }
   }, [showNotifications, activities, lastViewedActivityId]);
 
+  // ── Click outside ────────────────────────────────────────────────────────
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (notifRef.current && !notifRef.current.contains(event.target)) {
+      if (notifRef.current && !notifRef.current.contains(event.target))
         setShowNotifications(false);
-      }
-      if (profileRef.current && !profileRef.current.contains(event.target)) {
+      if (profileRef.current && !profileRef.current.contains(event.target))
         setShowProfile(false);
-      }
+      if (themeRef.current && !themeRef.current.contains(event.target))
+        setShowThemePicker(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -85,46 +132,44 @@ export default function AdminHeader({
 
   const excludedTypes = ["ANIME_ADDED", "ANIME_UPDATED", "ANIME_REMOVED"];
   const filteredActivities = activities.filter(
-    (activity) => !excludedTypes.includes(activity.type),
+    (a) => !excludedTypes.includes(a.type),
   );
   const recentActivities = filteredActivities.slice(0, 5);
 
   const handleNotificationClick = () => {
     setShowNotifications(!showNotifications);
     if (!showNotifications && activities.length > 0) {
-      const latestActivityId = activities[0]._id || activities[0].id;
-      setLastViewedActivityId(latestActivityId);
+      setLastViewedActivityId(activities[0]._id || activities[0].id);
     }
   };
 
-const { setTheme } = useBackgroundContext();
+  const handleThemeSelect = async (mode) => {
+    setThemeMode(mode);
+    setShowThemePicker(false);
+    setIsSyncing(true);
+    try {
+      const resolved =
+        mode === "system" ? (systemIsDark ? "dark" : "light") : mode;
+      await updateUserProfile({ NewTheme: resolved, ThemeMode: mode });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
-const toggleTheme = async () => {
-  const newTheme = theme === "dark" ? "light" : "dark";
-  setIsSyncing(true);
-  setTheme(newTheme);
-  try {
-    await updateUserProfile({ NewTheme: newTheme });
-  } finally {
-    setIsSyncing(false);
-  }
-};
-
-  const getActivityColor = (type) => {
-    const colors = {
-      create: "bg-green-400",
-      update: "bg-blue-400",
-      delete: "bg-red-400",
-      login: "bg-purple-400",
-      warning: "bg-yellow-400",
+  const getActivityMeta = (type) => {
+    const map = {
+      create: { color: "bg-emerald-400", label: "Created" },
+      update: { color: "bg-blue-400", label: "Updated" },
+      delete: { color: "bg-red-400", label: "Deleted" },
+      login: { color: "bg-violet-400", label: "Login" },
+      warning: { color: "bg-amber-400", label: "Warning" },
     };
-    return colors[type] || "bg-gray-400";
+    return map[type] || { color: "bg-slate-400", label: "Event" };
   };
 
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
-    const now = new Date();
-    const diff = now - date;
+    const diff = Date.now() - date;
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
     if (minutes < 1) return "Just now";
@@ -134,61 +179,180 @@ const toggleTheme = async () => {
   };
 
   const isDark = theme === "dark";
-  const headerStyles = isDark
-  ? "border-white/10 bg-white/5"
-  : "border-white/10 bg-white/5";
-  const textColor = isDark ? "text-white" : "text-gray-900";
-  const textMuted = isDark ? "text-gray-300" : "text-gray-600";
-  const iconColor = isDark ? "text-gray-300" : "text-gray-600";
-  const bgHover = isDark ? "hover:bg-white/10" : "hover:bg-purple-100/50";
-  const inputBg = isDark
-    ? "bg-white/10 border-white/20"
-    : "bg-white border-purple-200";
-  const dropdownBg = isDark
-    ? "bg-slate-900/98 border-white/20"
-    : "bg-white border-purple-200";
-  const divider = isDark ? "border-white/10" : "border-purple-200";
+
+  // ── Theme toggle icon ────────────────────────────────────────────────────
+  const ThemeIcon = () => {
+    if (isSyncing)
+      return (
+        <span className="w-[18px] h-[18px] border-2 border-current border-t-transparent rounded-full animate-spin opacity-60" />
+      );
+    if (themeMode === "system")
+      return <Monitor className="w-[18px] h-[18px]" />;
+    if (themeMode === "dark")
+      return <Moon className="w-[18px] h-[18px] text-amber-400" />;
+    return <Sun className="w-[18px] h-[18px] text-amber-400" />;
+  };
+
+  // ── Token maps ───────────────────────────────────────────────────────────
+  const tk = {
+    header: isDark
+      ? "bg-[#0d0d18]/80 border-white/[0.06]"
+      : "bg-white/80 border-black/[0.07]",
+    chip: isDark
+      ? "bg-white/[0.04] border-white/[0.08] text-slate-400"
+      : "bg-slate-50 border-slate-200 text-slate-500",
+    chipIp: isDark ? "text-emerald-400" : "text-emerald-600",
+    iconBtn: isDark
+      ? "text-slate-400 hover:text-slate-100 hover:bg-white/[0.07]"
+      : "text-slate-500 hover:text-slate-800 hover:bg-slate-100",
+    text: isDark ? "text-slate-100" : "text-slate-800",
+    muted: isDark ? "text-slate-400" : "text-slate-500",
+    accent: isDark ? "text-violet-400" : "text-violet-600",
+    dropdown: isDark
+      ? "bg-[#13131f] border-white/[0.08] shadow-[0_24px_64px_rgba(0,0,0,0.6)]"
+      : "bg-white border-black/[0.07] shadow-[0_16px_48px_rgba(0,0,0,0.12)]",
+    dropdownHead: isDark
+      ? "bg-white/[0.03] border-white/[0.06]"
+      : "bg-slate-50 border-slate-100",
+    dropdownFoot: isDark
+      ? "bg-white/[0.02] border-white/[0.06]"
+      : "bg-slate-50/80 border-slate-100",
+    row: isDark
+      ? "hover:bg-white/[0.04] border-white/[0.04]"
+      : "hover:bg-slate-50 border-slate-100",
+    divider: isDark ? "bg-white/[0.06]" : "bg-slate-100",
+    logoutBtn: isDark
+      ? "bg-red-500/[0.08] hover:bg-red-500/[0.15] border-red-500/20 text-red-400"
+      : "bg-red-50 hover:bg-red-100 border-red-100 text-red-500",
+    winBtn: isDark
+      ? "text-slate-500 hover:text-slate-200 hover:bg-white/[0.07]"
+      : "text-slate-400 hover:text-slate-700 hover:bg-slate-100",
+    userBtn: isDark
+      ? "bg-white/[0.04] border-white/[0.08] hover:bg-white/[0.07]"
+      : "bg-slate-50 border-slate-200 hover:bg-slate-100",
+  };
+
+  const themeOptions = [
+    {
+      mode: "system",
+      icon: Monitor,
+      label: "System",
+      desc: systemIsDark ? "Currently dark" : "Currently light",
+    },
+    {
+      mode: "light",
+      icon: Sun,
+      label: "Light",
+      desc: "Always light",
+      iconClass: "text-amber-400",
+    },
+    {
+      mode: "dark",
+      icon: Moon,
+      label: "Dark",
+      desc: "Always dark",
+      iconClass: "text-slate-300",
+    },
+  ];
 
   return (
     <header
-      className={`sticky top-0 z-30 ${headerStyles} backdrop-blur-xl border-b transition-all duration-300`}
+      className={`sticky top-0 z-30 ${tk.header} backdrop-blur-2xl border-b transition-all duration-300`}
       style={{ WebkitAppRegion: "drag" }}
     >
-      {/* ADD HERE ↓ */}
+      {/* Mobile drag-exclusion zone for sidebar toggle */}
       <div
         className="absolute top-0 left-0 w-16 h-full lg:hidden"
         style={{ WebkitAppRegion: "no-drag" }}
       />
-      {/* ADD HERE ↑ */}
 
-      <div className="px-4 sm:px-6 py-1">
-        <div className="flex items-center justify-between gap-4">
-          <div
-            className="flex items-center gap-2 sm:gap-3 ml-auto"
-            style={{ WebkitAppRegion: "no-drag" }}
-          >
-            {/* IP Address */}
+      <div className="px-3 sm:px-5 py-2">
+        <div
+          className="flex items-center justify-between"
+          style={{ WebkitAppRegion: "no-drag" }}
+        >
+          {/* ── LEFT: IP Badge ─────────────────────────────────────────────── */}
+          <div className="flex items-center gap-2">
             <div
-              className={`hidden sm:flex items-center gap-2 ${inputBg} rounded-lg px-3 py-1.5 border transition-colors`}
+              className={`hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-mono transition-colors ${tk.chip}`}
             >
-              <Wifi className="w-4 h-4 text-green-500 flex-shrink-0" />
-              <span className={`text-xs ${textMuted}`}>IP:</span>
-              <span className="text-xs text-green-500 font-mono">
-                {ipAddress}
-              </span>
+              <span
+                className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                  isConnected
+                    ? isDark
+                      ? "bg-emerald-400"
+                      : "bg-emerald-500"
+                    : isDark
+                      ? "bg-slate-500"
+                      : "bg-slate-400"
+                }`}
+              />
+              <span className={tk.muted}>IP</span>
+              <span className={`font-semibold ${tk.chipIp}`}>{ipAddress}</span>
             </div>
 
-            {/* Notifications */}
+            {/* Mobile IP */}
+            <div
+              className={`sm:hidden inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-mono ${tk.chip}`}
+            >
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  isDark ? "bg-emerald-400" : "bg-emerald-500"
+                }`}
+              />
+              <span className={tk.muted}>IP</span>
+              <span className={`font-semibold ${tk.chipIp}`}>{ipAddress}</span>
+            </div>
+          </div>
+
+          {/* ── RIGHT: Action buttons ─────────────────────────────────────── */}
+          <div className="flex items-center gap-1">
+            {/* 1. Push notification toggle (desktop only) */}
+            {isSupported && (
+              <button
+                onClick={isSubscribed ? unsubscribe : subscribe}
+                title={
+                  permission === "denied"
+                    ? "Notifications blocked by browser"
+                    : isSubscribed
+                      ? "Disable push notifications"
+                      : "Enable push notifications"
+                }
+                disabled={permission === "denied"}
+                className={`hidden sm:flex w-9 h-9 items-center justify-center rounded-xl transition-all duration-150 ${tk.iconBtn} ${
+                  isSubscribed
+                    ? isDark
+                      ? "text-emerald-400"
+                      : "text-emerald-600"
+                    : ""
+                } ${permission === "denied" ? "opacity-40 cursor-not-allowed" : ""}`}
+              >
+                {isSubscribed ? (
+                  <Bell className="w-[18px] h-[18px]" />
+                ) : (
+                  <BellOff className="w-[18px] h-[18px]" />
+                )}
+              </button>
+            )}
+
+            {/* 2. Activity / notifications bell */}
             <div className="relative" ref={notifRef}>
               <button
                 onClick={handleNotificationClick}
-                className={`relative p-2 ${bgHover} rounded-lg transition-colors`}
+                title="Activity"
+                className={`relative w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-150 ${tk.iconBtn} ${
+                  showNotifications
+                    ? isDark
+                      ? "bg-white/[0.07] text-slate-100"
+                      : "bg-slate-100 text-slate-800"
+                    : ""
+                }`}
               >
-                <Bell className={`w-5 h-5 ${iconColor}`} />
+                <Activity className="w-[18px] h-[18px]" />
                 {unreadCount > 0 && (
                   <>
-                    <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                    <span className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-red-500 rounded-full text-white text-xs flex items-center justify-center font-bold shadow-lg px-1">
+                    <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full animate-ping opacity-75 pointer-events-none" />
+                    <span className="absolute top-0.5 right-0.5 min-w-[18px] h-[18px] bg-red-500 rounded-full text-white text-[10px] font-bold flex items-center justify-center px-1 shadow-md pointer-events-none">
                       {unreadCount > 99 ? "99+" : unreadCount}
                     </span>
                   </>
@@ -197,270 +361,380 @@ const toggleTheme = async () => {
 
               {showNotifications && (
                 <div
-                  className={`absolute right-0 mt-2 w-80 ${dropdownBg} rounded-xl shadow-2xl backdrop-blur-xl overflow-hidden animate-slideDown border`}
+                  className={`absolute right-0 mt-2.5 w-[340px] rounded-2xl overflow-hidden border animate-slideDown ${tk.dropdown}`}
                 >
                   <div
-                    className={`p-4 border-b ${isDark ? "border-white/10 bg-purple-900/20" : "border-purple-200 bg-purple-50"} flex items-center justify-between`}
+                    className={`flex items-center justify-between px-4 py-3 border-b ${tk.dropdownHead}`}
                   >
-                    <div className="flex items-center gap-2">
-                      <Activity className="w-5 h-5 text-purple-500" />
-                      <h3 className={`${textColor} font-semibold`}>
-                        Recent Activity
-                      </h3>
+                    <div className="flex items-center gap-2.5">
+                      <Activity className={`w-4 h-4 ${tk.accent}`} />
+                      <span className={`text-sm font-semibold ${tk.text}`}>
+                        Activity
+                      </span>
                     </div>
                     {isConnected && (
-                      <span className="flex items-center gap-1.5 text-xs text-green-500">
-                        <span className="relative flex h-2 w-2">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                      <span className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-500">
+                        <span className="relative flex h-1.5 w-1.5">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
                         </span>
                         Live
                       </span>
                     )}
                   </div>
-                  <div className="max-h-96 overflow-y-auto">
+
+                  <div className="py-1">
                     {recentActivities.length === 0 ? (
-                      <div className="p-8 text-center text-gray-400">
-                        <Bell className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                        <p className="text-sm">No recent activity</p>
+                      <div className="py-10 text-center">
+                        <Activity
+                          className={`w-8 h-8 mx-auto mb-2 opacity-20 ${tk.muted}`}
+                        />
+                        <p className={`text-xs ${tk.muted}`}>
+                          No recent activity
+                        </p>
                       </div>
                     ) : (
-                      <div className="p-2 space-y-1">
-                        {recentActivities.map((activity, index) => (
+                      recentActivities.map((activity, index) => {
+                        const meta = getActivityMeta(activity.type);
+                        return (
                           <div
                             key={`${activity.id || activity._id}-${index}`}
-                            className={`flex items-center gap-3 p-2.5 ${isDark ? "bg-white/5 hover:bg-white/10" : "bg-purple-50 hover:bg-purple-100"} rounded-lg transition-all cursor-pointer`}
+                            className={`flex items-center gap-3 px-4 py-2.5 border-b last:border-b-0 cursor-pointer transition-colors ${tk.row}`}
                           >
-                            <div
-                              className={`w-1.5 h-1.5 rounded-full ${getActivityColor(activity.type)} flex-shrink-0`}
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${meta.color} flex-shrink-0 mt-0.5`}
                             />
                             <div className="flex-1 min-w-0">
-                              <p className={`${textColor} text-sm truncate`}>
+                              <p
+                                className={`text-xs font-medium truncate ${tk.text}`}
+                              >
                                 {activity.action}
                               </p>
-                              <p className={`${textMuted} text-xs`}>
+                              <p className={`text-[11px] mt-0.5 ${tk.muted}`}>
                                 {formatTimestamp(activity.timestamp)}
                               </p>
                             </div>
+                            <span
+                              className={`text-[10px] px-1.5 py-0.5 rounded-md font-mono ${
+                                isDark
+                                  ? "bg-white/[0.05] text-slate-500"
+                                  : "bg-slate-100 text-slate-400"
+                              }`}
+                            >
+                              {meta.label}
+                            </span>
                           </div>
-                        ))}
-                      </div>
+                        );
+                      })
                     )}
                   </div>
-                  <div
-                    className={`p-3 border-t ${isDark ? "border-white/10 bg-white/5" : "border-purple-200 bg-purple-50"}`}
-                  >
+
+                  <div className={`border-t ${tk.dropdownFoot}`}>
                     <button
-                      className="w-full text-center text-sm text-purple-500 hover:text-purple-600 font-medium transition-colors"
+                      className={`w-full flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-colors ${tk.accent} hover:opacity-80`}
                       onClick={() => {
                         onFeatureSelect("activity");
                         setShowNotifications(false);
                       }}
                     >
                       View all activity
+                      <ChevronRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className={`hidden sm:flex p-2 ${bgHover} rounded-lg transition-colors`}
-              title={
-                theme === "dark"
-                  ? "Switch to light mode"
-                  : "Switch to dark mode"
-              }
-            >
-              {theme === "dark" ? (
-                <Sun className="w-5 h-5 text-yellow-400" />
-              ) : (
-                <Moon className="w-5 h-5 text-purple-600" />
-              )}
-            </button>
+            {/* 3. Theme picker (desktop only) */}
+            <div className="relative hidden sm:block" ref={themeRef}>
+              <button
+                onClick={() => setShowThemePicker(!showThemePicker)}
+                title="Appearance"
+                className={`w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-150 ${tk.iconBtn} ${
+                  isSyncing ? "opacity-50 pointer-events-none" : ""
+                } ${
+                  showThemePicker
+                    ? isDark
+                      ? "bg-white/[0.07] text-slate-100"
+                      : "bg-slate-100 text-slate-800"
+                    : ""
+                }`}
+              >
+                <ThemeIcon />
+              </button>
 
-            {/* User Profile */}
+              {showThemePicker && (
+                <div
+                  className={`absolute right-0 mt-2.5 w-[200px] rounded-2xl overflow-hidden border animate-slideDown ${tk.dropdown}`}
+                >
+                  <div className={`px-3 py-2.5 border-b ${tk.dropdownHead}`}>
+                    <p
+                      className={`text-[11px] font-semibold uppercase tracking-widest ${tk.muted}`}
+                    >
+                      Appearance
+                    </p>
+                  </div>
+
+                  <div className="p-1.5 space-y-0.5">
+                    {themeOptions.map(
+                      ({ mode, icon: Icon, label, desc, iconClass }) => {
+                        const isActive = themeMode === mode;
+                        return (
+                          <button
+                            key={mode}
+                            onClick={() => handleThemeSelect(mode)}
+                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${
+                              isActive
+                                ? isDark
+                                  ? "bg-violet-500/15 border border-violet-500/25"
+                                  : "bg-violet-50 border border-violet-100"
+                                : `border border-transparent ${
+                                    isDark
+                                      ? "hover:bg-white/[0.05]"
+                                      : "hover:bg-slate-50"
+                                  }`
+                            }`}
+                          >
+                            <Icon
+                              className={`w-4 h-4 flex-shrink-0 ${
+                                isActive
+                                  ? isDark
+                                    ? "text-violet-400"
+                                    : "text-violet-600"
+                                  : iconClass || tk.muted
+                              }`}
+                            />
+                            <div className="min-w-0">
+                              <p
+                                className={`text-xs font-semibold ${
+                                  isActive
+                                    ? isDark
+                                      ? "text-violet-300"
+                                      : "text-violet-700"
+                                    : tk.text
+                                }`}
+                              >
+                                {label}
+                              </p>
+                              <p className={`text-[10px] ${tk.muted}`}>
+                                {desc}
+                              </p>
+                            </div>
+                            {isActive && (
+                              <span
+                                className={`ml-auto w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                                  isDark ? "bg-violet-400" : "bg-violet-500"
+                                }`}
+                              />
+                            )}
+                          </button>
+                        );
+                      },
+                    )}
+                  </div>
+
+                  <div className={`px-3 py-2 border-t ${tk.dropdownFoot}`}>
+                    <p
+                      className={`text-[10px] ${tk.muted} flex items-center gap-1.5`}
+                    >
+                      <Monitor className="w-3 h-3" />
+                      System is {systemIsDark ? "dark" : "light"} right now
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Divider */}
+            <div className={`hidden sm:block w-px h-5 mx-0.5 ${tk.divider}`} />
+
+            {/* 4. User profile */}
             <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setShowProfile(!showProfile)}
-                className={`flex items-center gap-2 sm:gap-3 ${inputBg} rounded-lg pl-2 sm:pl-3 pr-1 py-1 border ${bgHover} transition-colors`}
+                className={`flex items-center gap-2.5 px-2 py-1.5 rounded-xl border transition-all duration-150 ${tk.userBtn}`}
               >
-                <div className="hidden sm:block text-right">
-                  <p className={`text-xs sm:text-sm font-medium ${textColor}`}>
-                    {user.username}
-                  </p>
-                  <p className="text-xs text-purple-500">{user.role}</p>
-                </div>
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0 shadow-lg overflow-hidden">
-                  {!userProfile?.avatar ? (
-                    <User className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                  ) : (
+                <div className="relative w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden">
+                  {userProfile?.avatar ? (
                     <img
                       src={userProfile.avatar}
-                      alt="User avatar"
+                      alt="avatar"
                       className="w-full h-full object-cover"
                     />
+                  ) : (
+                    <User className="w-3.5 h-3.5 text-white" />
                   )}
+                  {/* Online indicator */}
+                  {isConnected && (
+                    <span className="absolute bottom-0 right-0 w-2 h-2 bg-emerald-400 border border-white rounded-full" />
+                  )}
+                </div>
+                <div className="hidden sm:block text-left">
+                  <p
+                    className={`text-[13px] font-semibold leading-tight ${tk.text}`}
+                  >
+                    {user.username}
+                  </p>
+                  <p className={`text-[11px] leading-tight ${tk.accent}`}>
+                    {user.role}
+                  </p>
                 </div>
               </button>
 
               {showProfile && userProfile && (
                 <div
-                  className={`absolute right-0 mt-2 w-80 ${dropdownBg} rounded-xl shadow-2xl backdrop-blur-xl overflow-hidden animate-slideDown border`}
+                  className={`absolute right-0 mt-2.5 w-[300px] rounded-2xl overflow-hidden border animate-slideDown ${tk.dropdown}`}
                 >
-                  <div
-                    className={`p-4 ${isDark ? "bg-gradient-to-br from-purple-600/20 to-pink-600/20 border-b border-white/10" : "bg-gradient-to-br from-purple-100 to-pink-100 border-b border-purple-200"}`}
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg overflow-hidden">
-                        {!userProfile.avatar ? (
-                          <User className="w-8 h-8 text-white" />
-                        ) : (
+                  <div className={`px-4 py-4 border-b ${tk.dropdownHead}`}>
+                    <div className="flex items-center gap-3">
+                      <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden">
+                        {userProfile.avatar ? (
                           <img
                             src={userProfile.avatar}
-                            alt="User avatar"
+                            alt="avatar"
                             className="w-full h-full object-cover"
                           />
+                        ) : (
+                          <User className="w-6 h-6 text-white" />
                         )}
                       </div>
-                      <div className="flex-1">
-                        <h3 className={`${textColor} font-semibold text-lg`}>
+                      <div className="min-w-0">
+                        <p
+                          className={`text-[15px] font-semibold truncate ${tk.text}`}
+                        >
                           {userProfile.fullName || user.username}
-                        </h3>
-                        <p className="text-purple-500 text-sm">{user.role}</p>
+                        </p>
+                        <p className={`text-xs mt-0.5 ${tk.accent}`}>
+                          {user.role}
+                        </p>
+                        {isConnected && (
+                          <p className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-500 mt-0.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+                            Online
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-4 space-y-3">
-                    {userProfile.email && (
-                      <div className="flex items-center gap-3 text-sm">
-                        <Mail className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                        <span className={textMuted}>{userProfile.email}</span>
-                      </div>
-                    )}
-                    {userProfile.phone && (
-                      <div className="flex items-center gap-3 text-sm">
-                        <Wifi className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                        <span className={textMuted}>{userProfile.phone}</span>
-                      </div>
-                    )}
-                    {userProfile.joinedDate && (
-                      <div className="flex items-center gap-3 text-sm">
-                        <Clock className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                        <span className={textMuted}>
-                          Joined {userProfile.joinedDate}
-                        </span>
-                      </div>
-                    )}
-                    {userProfile.lastLogin && (
-                      <div className="flex items-center gap-3 text-sm">
-                        <Eye className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                        <span className={textMuted}>
-                          Last login {userProfile.lastLogin}
-                        </span>
-                      </div>
-                    )}
+                  <div className="px-4 py-3 space-y-2">
+                    {[
+                      { icon: Mail, value: userProfile.email },
+                      { icon: Wifi, value: userProfile.phone },
+                      {
+                        icon: Clock,
+                        value: userProfile.joinedDate
+                          ? `Joined ${userProfile.joinedDate}`
+                          : null,
+                      },
+                      {
+                        icon: Eye,
+                        value: userProfile.lastLogin
+                          ? `Last login ${userProfile.lastLogin}`
+                          : null,
+                      },
+                    ]
+                      .filter((row) => row.value)
+                      .map(({ icon: Icon, value }, i) => (
+                        <div key={i} className="flex items-center gap-2.5">
+                          <Icon
+                            className={`w-3.5 h-3.5 flex-shrink-0 ${tk.muted}`}
+                          />
+                          <span className={`text-xs truncate ${tk.muted}`}>
+                            {value}
+                          </span>
+                        </div>
+                      ))}
                     {userProfile.bio && (
-                      <div className={`pt-3 border-t ${divider}`}>
-                        <p className="text-sm text-gray-400 italic">
-                          &quot;{userProfile.bio}&quot;
-                        </p>
-                      </div>
+                      <p
+                        className={`text-xs italic pt-1 border-t ${
+                          isDark ? "border-white/[0.06]" : "border-slate-100"
+                        } ${tk.muted}`}
+                      >
+                        &ldquo;{userProfile.bio}&rdquo;
+                      </p>
                     )}
+                  </div>
 
-                    <div
-                      className={`pt-3 border-t ${divider} grid grid-cols-2 gap-2`}
-                    >
+                  <div
+                    className={`px-4 pb-4 pt-2 border-t space-y-2 ${
+                      isDark ? "border-white/[0.06]" : "border-slate-100"
+                    }`}
+                  >
+                    <div className="grid grid-cols-2 gap-2">
                       <button
                         onClick={() => router.push("/admin/user/profile")}
-                        className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm transition-colors flex items-center justify-center gap-2"
+                        className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
+                          isDark
+                            ? "bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 border border-violet-500/20"
+                            : "bg-violet-50 hover:bg-violet-100 text-violet-600 border border-violet-100"
+                        }`}
                       >
-                        <UserCog className="w-4 h-4" />
+                        <UserCog className="w-3.5 h-3.5" />
                         Edit Profile
                       </button>
                       <button
                         onClick={() => router.push("/admin/user/settings")}
-                        className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm transition-colors flex items-center justify-center gap-2"
+                        className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
+                          isDark
+                            ? "bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 border border-white/[0.08]"
+                            : "bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200"
+                        }`}
                       >
-                        <Settings className="w-4 h-4" />
+                        <Settings className="w-3.5 h-3.5" />
                         Settings
                       </button>
                     </div>
-
-                    {/* Logout inside profile */}
                     <button
                       onClick={() => {
                         setShowProfile(false);
                         onLogout();
                       }}
-                      className={`w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 border
-                        ${
-                          isDark
-                            ? "bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-400 hover:text-red-300"
-                            : "bg-red-50 hover:bg-red-100 border-red-200 text-red-600 hover:text-red-700"
-                        }`}
+                      className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl border text-xs font-medium transition-colors ${tk.logoutBtn}`}
                     >
-                      <LogOut className="w-4 h-4" />
-                      Sign Out
+                      <LogOut className="w-3.5 h-3.5" />
+                      Sign out
                     </button>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Window Controls */}
-            <div
-              className={`hidden sm:flex items-center gap-0.5 ml-1 pl-3 border-l ${divider}`}
-            >
-              <button
-                onClick={() => window.electron?.minimizeWindow()}
-                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-90 group ${bgHover}`}
-                title="Minimize"
+            {/* 5. Window controls — Capacitor native only */}
+            {isCapacitor && (
+              <div
+                className={`hidden sm:flex items-center gap-0.5 ml-1 pl-2 border-l ${
+                  isDark ? "border-white/[0.06]" : "border-slate-200"
+                }`}
               >
-                <Minus
-                  className={`w-3.5 h-3.5 ${iconColor} group-hover:text-purple-500 transition-colors`}
-                />
-              </button>
-
-              <button
-                onClick={() => window.electron?.maximizeWindow()}
-                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-90 group ${bgHover}`}
-                title={isMaximized ? "Restore" : "Maximize"}
-              >
-                {isMaximized ? (
-                  <Minimize2
-                    className={`w-3.5 h-3.5 ${iconColor} group-hover:text-purple-500 transition-colors`}
-                  />
-                ) : (
-                  <Maximize2
-                    className={`w-3.5 h-3.5 ${iconColor} group-hover:text-purple-500 transition-colors`}
-                  />
-                )}
-              </button>
-
-              <button
-                onClick={() => window.electron?.closeWindow()}
-                className="w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-90 group hover:bg-red-500/15"
-                title="Close"
-              >
-                <X
-                  className={`w-3.5 h-3.5 ${iconColor} group-hover:text-red-500 transition-colors`}
-                />
-              </button>
-            </div>
+                <button
+                  onClick={() => window.electron?.minimizeWindow()}
+                  title="Minimize"
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-90 ${tk.winBtn}`}
+                >
+                  <Minus className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => window.electron?.maximizeWindow()}
+                  title={isMaximized ? "Restore" : "Maximize"}
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-90 ${tk.winBtn}`}
+                >
+                  {isMaximized ? (
+                    <Minimize2 className="w-3.5 h-3.5" />
+                  ) : (
+                    <Maximize2 className="w-3.5 h-3.5" />
+                  )}
+                </button>
+                <button
+                  onClick={() => window.electron?.closeWindow()}
+                  title="Close"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-90 text-slate-400 hover:text-red-500 hover:bg-red-500/10"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
           </div>
-        </div>
-
-        {/* Mobile IP Address */}
-        <div
-          className={`sm:hidden mt-3 flex items-center gap-2 ${inputBg} rounded-lg px-3 py-2 border transition-colors`}
-        >
-          <Wifi className="w-3 h-3 text-green-500 flex-shrink-0" />
-          <span className={`text-xs ${textMuted}`}>IP:</span>
-          <span className="text-xs text-green-500 font-mono">{ipAddress}</span>
         </div>
       </div>
 
@@ -468,15 +742,15 @@ const toggleTheme = async () => {
         @keyframes slideDown {
           from {
             opacity: 0;
-            transform: translateY(-10px);
+            transform: translateY(-8px) scale(0.98);
           }
           to {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
           }
         }
         .animate-slideDown {
-          animation: slideDown 0.2s ease-out;
+          animation: slideDown 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
       `}</style>
     </header>

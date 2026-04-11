@@ -207,6 +207,7 @@ const AdminPage = () => {
         activeFeature={activeFeature}
         onFeatureSelect={handleFeatureSelect}
         userRole={user.roleSlug}
+        userProfile={userProfile}
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
         theme={theme}

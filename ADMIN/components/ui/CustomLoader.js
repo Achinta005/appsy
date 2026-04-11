@@ -1,5 +1,14 @@
 "use client";
-import { Shield, Lock, Database, Activity, Minus, Maximize2, X } from "lucide-react";
+import {
+  Shield,
+  Lock,
+  Database,
+  Activity,
+  Minus,
+  Maximize2,
+  Minimize2,
+  X,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/(protected)/context/authContext";
@@ -19,6 +28,16 @@ export default function CustomLoader({
   const [loaderVariant, setLoaderVariant] = useState(0);
   const { isAuthenticated } = useAuth();
   const router = useRouter();
+  const [isCapacitor, setIsCapacitor] = useState(false);
+
+  useEffect(() => {
+    // Capacitor injects window.Capacitor when running as a native app
+    setIsCapacitor(
+      typeof window !== "undefined" &&
+        !!window.Capacitor &&
+        window.Capacitor.isNativePlatform(),
+    );
+  }, []);
 
   // Randomly select a loader variant on mount
   useEffect(() => {
@@ -48,42 +67,44 @@ export default function CustomLoader({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 flex items-center justify-center relative overflow-hidden">
-
       {/* ── Draggable title-bar strip (empty area only) ── */}
       <div
         className="fixed top-0 left-0 right-32 h-10 z-40"
         style={{ WebkitAppRegion: "drag" }}
       />
 
-      {/* ── Window Controls (top-right) — identical to home page ── */}
-      <div
-        className="fixed top-0 right-0 z-50 flex items-center gap-0.5 p-1"
-        style={{ WebkitAppRegion: "no-drag" }}
-      >
-        <button
-          onClick={() => window.electron?.minimizeWindow()}
-          className="w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-90 group hover:bg-white/10"
-          title="Minimize"
+      {/* ── Window Controls ── only in Capacitor native app ── */}
+      {isCapacitor && (
+        <div
+          className={`hidden sm:flex items-center gap-0.5 ml-1 pl-2 border-l ${isDark ? "border-white/[0.06]" : "border-slate-200"}`}
         >
-          <Minus className="w-3.5 h-3.5 text-white/50 group-hover:text-white transition-colors" />
-        </button>
-
-        <button
-          onClick={() => window.electron?.maximizeWindow()}
-          className="w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-90 group hover:bg-white/10"
-          title="Maximize"
-        >
-          <Maximize2 className="w-3.5 h-3.5 text-white/50 group-hover:text-white transition-colors" />
-        </button>
-
-        <button
-          onClick={() => window.electron?.closeWindow()}
-          className="w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-90 group hover:bg-red-500/20"
-          title="Close"
-        >
-          <X className="w-3.5 h-3.5 text-white/50 group-hover:text-red-400 transition-colors" />
-        </button>
-      </div>
+          <button
+            onClick={() => window.electron?.minimizeWindow()}
+            title="Minimize"
+            className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-90 ${tk.winBtn}`}
+          >
+            <Minus className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={() => window.electron?.maximizeWindow()}
+            title={isMaximized ? "Restore" : "Maximize"}
+            className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-90 ${tk.winBtn}`}
+          >
+            {isMaximized ? (
+              <Minimize2 className="w-3.5 h-3.5" />
+            ) : (
+              <Maximize2 className="w-3.5 h-3.5" />
+            )}
+          </button>
+          <button
+            onClick={() => window.electron?.closeWindow()}
+            title="Close"
+            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-90 text-slate-400 hover:text-red-500 hover:bg-red-500/10"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* ── Animated background elements ── */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -149,106 +170,264 @@ export default function CustomLoader({
         ${loaderStyles}
 
         @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
         }
         @keyframes spin-reverse {
-          from { transform: rotate(360deg); }
-          to   { transform: rotate(0deg); }
+          from {
+            transform: rotate(360deg);
+          }
+          to {
+            transform: rotate(0deg);
+          }
         }
         @keyframes spin-fast {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(720deg); }
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(720deg);
+          }
         }
         @keyframes progress-wave {
-          0%   { transform: translateX(-100%); }
-          50%  { transform: translateX(0%); }
-          100% { transform: translateX(100%); }
+          0% {
+            transform: translateX(-100%);
+          }
+          50% {
+            transform: translateX(0%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
         }
         @keyframes pulse-glow {
-          0%, 100% { opacity: 0.3; transform: scale(1); }
-          50%       { opacity: 0.5; transform: scale(1.1); }
+          0%,
+          100% {
+            opacity: 0.3;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.5;
+            transform: scale(1.1);
+          }
         }
         @keyframes pulse-scale {
-          0%, 100% { transform: scale(1);   opacity: 0.3; }
-          50%       { transform: scale(1.2); opacity: 0.5; }
+          0%,
+          100% {
+            transform: scale(1);
+            opacity: 0.3;
+          }
+          50% {
+            transform: scale(1.2);
+            opacity: 0.5;
+          }
         }
         @keyframes icon-float {
-          0%, 100% { transform: translateY(0px); }
-          50%       { transform: translateY(-8px); }
+          0%,
+          100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-8px);
+          }
         }
         @keyframes icon-pulse {
-          0%, 100% { opacity: 1;   transform: scale(1); }
-          50%       { opacity: 0.7; transform: scale(1.1); }
+          0%,
+          100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.7;
+            transform: scale(1.1);
+          }
         }
         @keyframes text-shimmer {
-          0%   { background-position: 0% center; }
-          100% { background-position: 200% center; }
+          0% {
+            background-position: 0% center;
+          }
+          100% {
+            background-position: 200% center;
+          }
         }
         @keyframes float {
-          0%, 100% { transform: translate(0, 0) scale(1);      opacity: 0.3; }
-          33%       { transform: translate(30px, -30px) scale(1.1); opacity: 0.4; }
-          66%       { transform: translate(-20px, 20px) scale(0.9); opacity: 0.35; }
+          0%,
+          100% {
+            transform: translate(0, 0) scale(1);
+            opacity: 0.3;
+          }
+          33% {
+            transform: translate(30px, -30px) scale(1.1);
+            opacity: 0.4;
+          }
+          66% {
+            transform: translate(-20px, 20px) scale(0.9);
+            opacity: 0.35;
+          }
         }
         @keyframes float-delayed {
-          0%, 100% { transform: translate(0, 0) scale(1);       opacity: 0.3; }
-          33%       { transform: translate(-30px, 30px) scale(1.1); opacity: 0.4; }
-          66%       { transform: translate(20px, -20px) scale(0.9); opacity: 0.35; }
+          0%,
+          100% {
+            transform: translate(0, 0) scale(1);
+            opacity: 0.3;
+          }
+          33% {
+            transform: translate(-30px, 30px) scale(1.1);
+            opacity: 0.4;
+          }
+          66% {
+            transform: translate(20px, -20px) scale(0.9);
+            opacity: 0.35;
+          }
         }
         @keyframes float-slow {
-          0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1);       opacity: 0.2; }
-          50%       { transform: translate(40px, 40px) rotate(180deg) scale(1.15); opacity: 0.3; }
+          0%,
+          100% {
+            transform: translate(0, 0) rotate(0deg) scale(1);
+            opacity: 0.2;
+          }
+          50% {
+            transform: translate(40px, 40px) rotate(180deg) scale(1.15);
+            opacity: 0.3;
+          }
         }
         @keyframes bounce-slow {
-          0%, 100% { transform: translateY(0);    opacity: 1; }
-          50%       { transform: translateY(-12px); opacity: 0.7; }
+          0%,
+          100% {
+            transform: translateY(0);
+            opacity: 1;
+          }
+          50% {
+            transform: translateY(-12px);
+            opacity: 0.7;
+          }
         }
         @keyframes shimmer {
-          0%   { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
         }
         @keyframes scan {
-          0%   { top: 0%;   opacity: 0; }
-          10%  { opacity: 0.3; }
-          90%  { opacity: 0.3; }
-          100% { top: 100%; opacity: 0; }
+          0% {
+            top: 0%;
+            opacity: 0;
+          }
+          10% {
+            opacity: 0.3;
+          }
+          90% {
+            opacity: 0.3;
+          }
+          100% {
+            top: 100%;
+            opacity: 0;
+          }
         }
         @keyframes grid-flow {
-          0%   { transform: translateY(0); }
-          100% { transform: translateY(20px); }
+          0% {
+            transform: translateY(0);
+          }
+          100% {
+            transform: translateY(20px);
+          }
         }
         @keyframes float-icon {
-          0%, 100% { transform: translateY(0) rotate(0deg);   opacity: 0.2; }
-          50%       { transform: translateY(-20px) rotate(10deg); opacity: 0.4; }
+          0%,
+          100% {
+            transform: translateY(0) rotate(0deg);
+            opacity: 0.2;
+          }
+          50% {
+            transform: translateY(-20px) rotate(10deg);
+            opacity: 0.4;
+          }
         }
         @keyframes float-icon-delayed {
-          0%, 100% { transform: translateY(0) rotate(0deg);    opacity: 0.3; }
-          50%       { transform: translateY(-15px) rotate(-10deg); opacity: 0.5; }
+          0%,
+          100% {
+            transform: translateY(0) rotate(0deg);
+            opacity: 0.3;
+          }
+          50% {
+            transform: translateY(-15px) rotate(-10deg);
+            opacity: 0.5;
+          }
         }
 
-        .animate-spin-slow          { animation: spin-slow 3s linear infinite; }
-        .animate-spin-reverse       { animation: spin-reverse 2.5s linear infinite; }
-        .animate-spin-fast          { animation: spin-fast 2s linear infinite; }
-        .animate-progress-wave      { animation: progress-wave 2.5s ease-in-out infinite; }
-        .animate-pulse-glow         { animation: pulse-glow 3s ease-in-out infinite; }
-        .animate-pulse-scale        { animation: pulse-scale 2s ease-in-out infinite; }
-        .animate-icon-float         { animation: icon-float 3s ease-in-out infinite; }
-        .animate-icon-pulse         { animation: icon-pulse 2s ease-in-out infinite; }
-        .animate-text-shimmer       { animation: text-shimmer 3s linear infinite; }
-        .animate-float              { animation: float 8s ease-in-out infinite; }
-        .animate-float-delayed      { animation: float-delayed 10s ease-in-out infinite; }
-        .animate-float-slow         { animation: float-slow 12s ease-in-out infinite; }
-        .animate-bounce-slow        { animation: bounce-slow 1.5s ease-in-out infinite; }
-        .animate-shimmer            { animation: shimmer 3s ease-in-out infinite; }
-        .animate-scan               { animation: scan 4s linear infinite; }
-        .animate-grid-flow          { animation: grid-flow 2s linear infinite; }
-        .animate-float-icon         { animation: float-icon 4s ease-in-out infinite; }
-        .animate-float-icon-delayed { animation: float-icon-delayed 5s ease-in-out infinite; }
+        .animate-spin-slow {
+          animation: spin-slow 3s linear infinite;
+        }
+        .animate-spin-reverse {
+          animation: spin-reverse 2.5s linear infinite;
+        }
+        .animate-spin-fast {
+          animation: spin-fast 2s linear infinite;
+        }
+        .animate-progress-wave {
+          animation: progress-wave 2.5s ease-in-out infinite;
+        }
+        .animate-pulse-glow {
+          animation: pulse-glow 3s ease-in-out infinite;
+        }
+        .animate-pulse-scale {
+          animation: pulse-scale 2s ease-in-out infinite;
+        }
+        .animate-icon-float {
+          animation: icon-float 3s ease-in-out infinite;
+        }
+        .animate-icon-pulse {
+          animation: icon-pulse 2s ease-in-out infinite;
+        }
+        .animate-text-shimmer {
+          animation: text-shimmer 3s linear infinite;
+        }
+        .animate-float {
+          animation: float 8s ease-in-out infinite;
+        }
+        .animate-float-delayed {
+          animation: float-delayed 10s ease-in-out infinite;
+        }
+        .animate-float-slow {
+          animation: float-slow 12s ease-in-out infinite;
+        }
+        .animate-bounce-slow {
+          animation: bounce-slow 1.5s ease-in-out infinite;
+        }
+        .animate-shimmer {
+          animation: shimmer 3s ease-in-out infinite;
+        }
+        .animate-scan {
+          animation: scan 4s linear infinite;
+        }
+        .animate-grid-flow {
+          animation: grid-flow 2s linear infinite;
+        }
+        .animate-float-icon {
+          animation: float-icon 4s ease-in-out infinite;
+        }
+        .animate-float-icon-delayed {
+          animation: float-icon-delayed 5s ease-in-out infinite;
+        }
 
         .bg-grid-pattern {
           background-image:
-            linear-gradient(to right,  rgba(255,255,255,0.1) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px);
+            linear-gradient(
+              to right,
+              rgba(255, 255, 255, 0.1) 1px,
+              transparent 1px
+            ),
+            linear-gradient(
+              to bottom,
+              rgba(255, 255, 255, 0.1) 1px,
+              transparent 1px
+            );
           background-size: 40px 40px;
         }
       `}</style>
