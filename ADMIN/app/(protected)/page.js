@@ -102,7 +102,7 @@ export default function HomePage() {
             </div>
 
             <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-cyan-200 to-indigo-200 bg-clip-text text-transparent">
-              Admin Dashboard
+              Admin Dashboard(test)
               <br />
               <span className="text-4xl md:text-6xl">Centralized Control</span>
             </h1>
