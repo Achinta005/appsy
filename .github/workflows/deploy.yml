@@ -22,7 +22,7 @@ jobs:
           cd ADMIN
           npm install
 
-- name: Build ADMIN
+        - name: Build ADMIN
         run: |
           cd ADMIN
           npm run build
