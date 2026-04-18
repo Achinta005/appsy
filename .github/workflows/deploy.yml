@@ -22,7 +22,7 @@ jobs:
           cd ADMIN
           npm install
 
-        - name: Build ADMIN
+      - name: Build ADMIN
         run: |
           cd ADMIN
           npm run build
@@ -35,7 +35,7 @@ jobs:
           NEXT_PUBLIC_SERVICE5_HEALTH: https://log-service-q7jb.onrender.com/health
           NEXT_PUBLIC_VAPID_PUBLIC_KEY: BMRqSYBeSZWP7kQMWW9SCri1z_NktCCJypKWlr8Hc7koSjWrOKu6cUnE1YvjpNz0N4e3hT2zyvDLtiBMD3I40gs
 
-     - name: Upload build to VM
+      - name: Upload build to VM
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.VM_HOST }}
