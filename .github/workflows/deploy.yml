@@ -27,8 +27,8 @@ jobs:
           cd ADMIN
           npm run build
         env:
-          NEXT_PUBLIC_SERVER_API_URL: https://ficxus.onrender.com/api/admin
-          NEXT_PUBLIC_SERVICE1_HEALTH: https://main-server-69mo.onrender.com/api/health
+          NEXT_PUBLIC_SERVER_API_URL: https://server.achintahazra.shop/api/admin
+          NEXT_PUBLIC_SERVICE1_HEALTH: https://server.achintahazra.shop/api/health
           NEXT_PUBLIC_SERVICE2_HEALTH: https://auth-micro-service-eudw.onrender.com/health
           NEXT_PUBLIC_SERVICE3_HEALTH: https://fast-ml-server.onrender.com/health
           NEXT_PUBLIC_SERVICE4_HEALTH: https://url-shortener-rc3e.onrender.com/health
